@@ -1,0 +1,106 @@
+{
+  "name": "beesoft",
+  "version": "1.0.0",
+  "description": "🐝 Beesoft — Smart WhatsApp Automation & Dashboard",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-packager . \"Beesoft 🐝\" --platform=win32 --arch=x64 --out=dist --overwrite --icon=public/Bee.ico",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:portable": "electron-builder --win portable",
+    "build:installer": "electron-builder --win nsis",
+    "build:all": "electron-builder --win nsis portable",
+    "dist": "npm run build:all",
+    "prebuild": "echo Building Beesoft application...",
+    "postbuild": "echo Build completed! Check the dist folder."
+  },
+  "keywords": [
+    "beesoft",
+    "whatsapp automation",
+    "dashboard",
+    "ekthar"
+  ],
+  "author": "Ekthar",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "fs-extra": "^11.2.0",
+    "puppeteer-core": "^24.14.0",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.31.0",
+    "ws": "^8.18.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "electron": "^32.2.5",
+    "electron-builder": "^25.1.8",
+    "electron-packager": "^17.1.2"
+  },
+  "build": {
+    "appId": "com.ekthar.beesoft",
+    "productName": "Beesoft",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "public/**/*",
+      "node_modules/**/*",
+      "!node_modules/.cache",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/Bee.ico",
+      "requestedExecutionLevel": "asInvoker",
+      "signtoolOptions": {
+        "publisherName": "Ekthar"
+      }
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "public/Bee.ico",
+      "uninstallerIcon": "public/Bee.ico",
+      "installerHeaderIcon": "public/Bee.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Beesoft",
+      "include": "installer.nsh"
+    },
+    "portable": {
+      "artifactName": "Beesoft-Portable-${version}.${ext}"
+    },
+    "compression": "maximum",
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/puppeteer-core/.local-chromium/**/*",
+      "**/node_modules/puppeteer/.local-chromium/**/*",
+      "**/node_modules/whatsapp-web.js/node_modules/puppeteer-core/.local-chromium/**/*"
+    ]
+  }
+}
