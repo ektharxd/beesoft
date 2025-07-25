@@ -307,12 +307,34 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   if (supportForm) {
-    supportForm.addEventListener('submit', function(e) {
+    supportForm.addEventListener('submit', async function(e) {
       e.preventDefault();
-      supportFormSuccess.style.display = 'block';
+      supportFormSuccess.style.display = 'none';
       supportFormError.style.display = 'none';
-      // Optionally, close modal after a delay
-      setTimeout(closeSupportModal, 1800);
+      const email = document.getElementById('support-email').value.trim();
+      const message = document.getElementById('support-message').value.trim();
+      try {
+        const response = await fetch('https://formspree.io/f/xblkoyno', {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, message })
+        });
+        if (response.ok) {
+          supportFormSuccess.style.display = 'block';
+          supportFormError.style.display = 'none';
+          supportForm.reset();
+          setTimeout(() => {
+            // Optionally close modal here
+          }, 1800);
+        } else {
+          const data = await response.json();
+          supportFormError.textContent = (data && data.errors && data.errors[0] && data.errors[0].message) || 'Failed to send. Please try again.';
+          supportFormError.style.display = 'block';
+        }
+      } catch (err) {
+        supportFormError.textContent = 'Network error. Please try again.';
+        supportFormError.style.display = 'block';
+      }
     });
   }
 });
