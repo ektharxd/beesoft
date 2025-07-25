@@ -1,0 +1,523 @@
+/* ==========================================================================
+   BEESOFT DIALOG & BUTTON FIXES
+   Fixing Clear Local Data button and dialog positioning issues
+   ========================================================================== */
+
+/* ==========================================================================
+   1. FIXED WELCOME FOOTER & CLEAR DATA BUTTON
+   ========================================================================== */
+
+.welcome-footer {
+  text-align: center;
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border-primary);
+  /* FIXED: Better spacing and alignment */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.welcome-footer p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+/* FIXED: Clear Local Data button styling */
+.welcome-footer .btn-ghost,
+#clear-data-btn {
+  /* Remove default button styles that conflict */
+  background: transparent !important;
+  border: 1px solid var(--border-secondary) !important;
+  color: var(--text-secondary) !important;
+  padding: var(--space-xs) var(--space-sm) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 0.75rem !important;
+  font-weight: var(--font-weight-medium) !important;
+  font-family: var(--font-primary) !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  transition: all var(--transition-fast) !important;
+  /* FIXED: Proper sizing and alignment */
+  min-height: 2rem !important; /* 32px */
+  min-width: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  /* FIXED: Remove margin issues */
+  margin: 0 !important;
+}
+
+.welcome-footer .btn-ghost:hover,
+#clear-data-btn:hover {
+  background: var(--color-error-light) !important;
+  border-color: var(--color-error) !important;
+  color: var(--color-error) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.welcome-footer .btn-ghost:focus-visible,
+#clear-data-btn:focus-visible {
+  outline: 2px solid var(--color-error) !important;
+  outline-offset: 2px !important;
+}
+
+.welcome-footer .btn-ghost:active,
+#clear-data-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: none !important;
+}
+
+/* FIXED: Welcome footer links */
+.welcome-footer a {
+  color: var(--text-accent) !important;
+  text-decoration: none !important;
+  font-size: 0.75rem !important;
+  font-weight: var(--font-weight-medium) !important;
+  transition: color var(--transition-fast) !important;
+}
+
+.welcome-footer a:hover {
+  color: var(--color-primary-hover) !important;
+  text-decoration: underline !important;
+}
+
+/* ==========================================================================
+   2. FIXED MODAL SYSTEM - Better positioning and alignment
+   ========================================================================== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  /* FIXED: Better centering */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  animation: fadeIn var(--transition-normal);
+  /* FIXED: Prevent body scroll and ensure proper layering */
+  overflow: hidden;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-2xl);
+  /* FIXED: Better responsive sizing */
+  width: min(90vw, 500px);
+  max-height: min(90vh, 600px);
+  /* FIXED: Prevent content overflow */
+  overflow: hidden;
+  animation: scaleIn var(--transition-normal);
+  /* FIXED: Better positioning */
+  position: relative;
+  margin: var(--space-md);
+  /* FIXED: Ensure proper stacking */
+  z-index: 1;
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to { 
+    opacity: 1; 
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.9) translateY(-2rem); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1) translateY(0); 
+  }
+}
+
+/* FIXED: Modal header with proper close button */
+.modal-header {
+  /* FIXED: Better header layout */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-xl) var(--space-xl) var(--space-lg);
+  border-bottom: 1px solid var(--border-primary);
+  /* FIXED: Prevent content overflow */
+  min-height: 4rem; /* 64px */
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  /* FIXED: Prevent text overflow */
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* FIXED: Add proper close button */
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: var(--space-xs);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  /* FIXED: Proper sizing */
+  min-width: 2.5rem; /* 40px */
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  /* FIXED: Better positioning */
+  margin-left: var(--space-md);
+}
+
+.modal-close:hover {
+  background: var(--surface-tertiary);
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.modal-close:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.modal-body {
+  padding: var(--space-xl);
+  /* FIXED: Better scrolling */
+  overflow-y: auto;
+  max-height: calc(90vh - 200px);
+  /* FIXED: Better text formatting */
+  line-height: 1.6;
+}
+
+.modal-body p {
+  margin-bottom: var(--space-md);
+  color: var(--text-secondary);
+}
+
+.modal-body p:last-child {
+  margin-bottom: 0;
+}
+
+.modal-footer {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-xl);
+  background: var(--surface-secondary);
+  border-top: 1px solid var(--border-primary);
+  /* FIXED: Better button alignment */
+  justify-content: flex-end;
+  align-items: center;
+  /* FIXED: Prevent footer overflow */
+  flex-shrink: 0;
+}
+
+.modal-footer .btn {
+  /* FIXED: Better button sizing in modals */
+  min-width: 5rem; /* 80px */
+  flex: none;
+}
+
+/* FIXED: Primary action should be more prominent */
+.modal-footer .btn-primary {
+  order: 2;
+}
+
+.modal-footer .btn-ghost {
+  order: 1;
+}
+
+/* ==========================================================================
+   3. FIXED CONFIRMATION DIALOGS - Better styling
+   ========================================================================== */
+
+/* FIXED: Confirmation dialog specific styles */
+.modal-content.confirmation-dialog {
+  max-width: 400px;
+}
+
+.modal-content.confirmation-dialog .modal-body {
+  text-align: center;
+  padding: var(--space-xl) var(--space-xl) var(--space-lg);
+}
+
+.modal-content.confirmation-dialog .modal-body p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* FIXED: Warning/danger dialogs */
+.modal-content.warning-dialog .modal-header {
+  background: var(--color-warning-light);
+  border-bottom-color: var(--color-warning);
+}
+
+.modal-content.warning-dialog .modal-title {
+  color: var(--color-warning);
+}
+
+.modal-content.danger-dialog .modal-header {
+  background: var(--color-error-light);
+  border-bottom-color: var(--color-error);
+}
+
+.modal-content.danger-dialog .modal-title {
+  color: var(--color-error);
+}
+
+/* ==========================================================================
+   4. FIXED BACK TO WELCOME BUTTON
+   ========================================================================== */
+
+#back-to-welcome-btn {
+  /* FIXED: Better styling for back button */
+  background: transparent !important;
+  border: 1px solid var(--border-secondary) !important;
+  color: var(--text-secondary) !important;
+  padding: var(--space-sm) var(--space-md) !important;
+  border-radius: var(--radius-md) !important;
+  font-size: 0.875rem !important;
+  font-weight: var(--font-weight-medium) !important;
+  transition: all var(--transition-fast) !important;
+  /* FIXED: Proper alignment */
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: var(--space-xs) !important;
+  min-height: 2.5rem !important; /* 40px */
+}
+
+#back-to-welcome-btn:hover {
+  background: var(--surface-tertiary) !important;
+  border-color: var(--border-primary) !important;
+  color: var(--text-primary) !important;
+  transform: translateX(-2px) !important;
+}
+
+#back-to-welcome-btn:focus-visible {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: 2px !important;
+}
+
+#back-to-welcome-btn .material-symbols-outlined {
+  font-size: 1.125rem !important;
+  transition: transform var(--transition-fast) !important;
+}
+
+#back-to-welcome-btn:hover .material-symbols-outlined {
+  transform: translateX(-2px) !important;
+}
+
+/* ==========================================================================
+   5. FIXED RESPONSIVE DIALOG BEHAVIOR
+   ========================================================================== */
+
+/* FIXED: Mobile dialog adjustments */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95vw;
+    margin: var(--space-sm);
+    max-height: 95vh;
+  }
+  
+  .modal-header {
+    padding: var(--space-lg) var(--space-lg) var(--space-md);
+  }
+  
+  .modal-body {
+    padding: var(--space-lg);
+    max-height: calc(95vh - 160px);
+  }
+  
+  .modal-footer {
+    padding: var(--space-md) var(--space-lg);
+    flex-direction: column-reverse;
+    gap: var(--space-sm);
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .modal-title {
+    font-size: 1.125rem;
+  }
+  
+  /* FIXED: Welcome footer on mobile */
+  .welcome-footer {
+    padding: var(--space-md);
+  }
+  
+  .welcome-footer p {
+    flex-direction: column;
+    gap: var(--space-xs);
+    text-align: center;
+  }
+  
+  #clear-data-btn {
+    margin-top: var(--space-xs) !important;
+  }
+}
+
+/* FIXED: Small mobile adjustments */
+@media (max-width: 480px) {
+  .modal-content {
+    width: 98vw;
+    margin: var(--space-xs);
+    border-radius: var(--radius-lg);
+  }
+  
+  .modal-header {
+    padding: var(--space-md);
+    min-height: 3rem;
+  }
+  
+  .modal-title {
+    font-size: 1rem;
+  }
+  
+  .modal-close {
+    min-width: 2rem;
+    min-height: 2rem;
+    font-size: 1.25rem;
+  }
+  
+  .modal-body {
+    padding: var(--space-md);
+  }
+  
+  .modal-footer {
+    padding: var(--space-sm) var(--space-md);
+  }
+}
+
+/* ==========================================================================
+   6. FIXED FOCUS MANAGEMENT FOR DIALOGS
+   ========================================================================== */
+
+/* FIXED: Focus trap for modals */
+.modal-overlay[aria-hidden="false"] {
+  /* When modal is open, trap focus */
+}
+
+.modal-overlay[aria-hidden="true"] {
+  /* When modal is closed, hide from screen readers */
+  display: none !important;
+}
+
+/* FIXED: Focus styles for modal elements */
+.modal-content *:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* ==========================================================================
+   7. FIXED ANIMATION PERFORMANCE
+   ========================================================================== */
+
+/* FIXED: Use transform and opacity for better performance */
+.modal-overlay {
+  will-change: opacity, backdrop-filter;
+}
+
+.modal-content {
+  will-change: transform, opacity;
+}
+
+/* FIXED: Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-content {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .modal-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  #back-to-welcome-btn:hover {
+    transform: none !important;
+  }
+  
+  #back-to-welcome-btn:hover .material-symbols-outlined {
+    transform: none !important;
+  }
+  
+  #clear-data-btn:hover {
+    transform: none !important;
+  }
+}
+
+/* ==========================================================================
+   8. FIXED HIGH CONTRAST MODE SUPPORT
+   ========================================================================== */
+
+@media (prefers-contrast: high) {
+  .modal-overlay {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  
+  .modal-content {
+    border: 2px solid var(--text-primary);
+  }
+  
+  #clear-data-btn,
+  #back-to-welcome-btn {
+    border: 2px solid currentColor !important;
+  }
+  
+  .welcome-footer a {
+    text-decoration: underline !important;
+  }
+}
+
+/* ==========================================================================
+   9. FIXED PRINT STYLES
+   ========================================================================== */
+
+@media print {
+  .modal-overlay,
+  #clear-data-btn,
+  #back-to-welcome-btn {
+    display: none !important;
+  }
+}

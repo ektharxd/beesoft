@@ -14,16 +14,16 @@
 <body>
   <div class="app-container">
     <!-- Theme Toggle -->
-    <button id="theme-toggle" style="position: fixed !important; top: 15px !important; right: 15px !important; z-index: 999999 !important; background: #4f46e5 !important; color: white !important; border: none !important; padding: 12px 18px !important; border-radius: 30px !important; cursor: pointer !important; font-size: 14px !important; font-weight: 600 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important; display: block !important; transition: all 0.3s ease !important;">
+    <button id="theme-toggle" aria-label="Toggle theme" style="position: fixed !important; top: 15px !important; right: 15px !important; z-index: 999999 !important; background: #4f46e5 !important; color: white !important; border: none !important; padding: 12px 18px !important; border-radius: 30px !important; cursor: pointer !important; font-size: 14px !important; font-weight: 600 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important; display: block !important; transition: all 0.3s ease !important;">
       🌙 Dark
     </button>
 
     <!-- Welcome Page -->
-    <section id="welcome-page" class="page-wrapper" style="display:none;">
+    <section id="welcome-page" class="page-wrapper" style="display:none;" aria-hidden="true">
       <div class="welcome-container">
         <div class="card welcome-card">
           <div class="card-header">
-            <div id="status-alert" class="notification" style="display:none;"></div>
+            <div id="status-alert" class="notification" style="display:none;" aria-hidden="true"></div>
             <img src="Bee.ico" alt="Beesoft Logo" class="welcome-logo" />
             <h1 class="text-display welcome-title">Welcome to Beesoft 🐝</h1>
             <p class="text-body welcome-description">
@@ -45,7 +45,7 @@
         
         <div class="welcome-footer">
           <p class="text-caption">
-            &copy; 2025 Beesoft &bull; 
+            &copy; 2024 Beesoft &bull; 
             <a href="mailto:ekthar.xd@gmail.com">Contact Support</a> &bull;
             <button id="clear-data-btn" class="btn-ghost">Clear Local Data</button>
           </p>
@@ -54,7 +54,7 @@
     </section>
 
     <!-- Main Application -->
-    <section id="main-app-page" class="page-wrapper" style="display:none;">
+    <section id="main-app-page" class="page-wrapper" style="display:none;" aria-hidden="true">
       <div class="main-container">
         <!-- Header -->
         <header class="main-header">
@@ -62,11 +62,9 @@
             <span class="material-symbols-outlined">arrow_back</span>
             Back
           </button>
-          <div class="main-title" style="flex:1; display:flex; justify-content:center; align-items:center;">
-            <h1 class="main-title-huge" style="font-size:2.1rem;font-weight:700;letter-spacing:-0.5px;line-height:1.1;display:flex;align-items:center;gap:0.4em;margin:0;">
-              <span style="font-size:2.1rem;font-weight:700;">Beesoft</span>
-              <span style="font-size:1.5rem;">🐝</span>
-            </h1>
+          <img src="Bee.ico" alt="Beesoft Logo" class="main-logo" />
+          <div class="main-title">
+            <h1 class="text-title">Beesoft 🐝</h1>
           </div>
           <div class="main-status">
             <div id="connection-status" class="status-indicator offline">
@@ -94,7 +92,7 @@
                 </div>
               </div>
               <div class="workflow-body">
-                <div id="qr-container" style="display:none;">
+                <div id="qr-container" style="display:none;" aria-hidden="true">
                   <div class="text-center">
                     <p class="text-body" style="margin-bottom: var(--space-md);">
                       Scan this QR code with your WhatsApp mobile app
@@ -120,10 +118,6 @@
                       Use Fallback Connection
                     </button>
                   </div>
-                  <button id="reset-session-btn" class="btn btn-outline btn-sm" style="margin-top: 18px;">
-                    <span class="material-symbols-outlined">restart_alt</span>
-                    Reset Session
-                  </button>
                 </div>
               </div>
             </section>
@@ -148,7 +142,7 @@
                       <span class="file-upload-hint">Supports .xlsx and .xls files</span>
                     </label>
                   </div>
-                  <div id="file-info" class="form-help" style="display:none;"></div>
+                  <div id="file-info" class="form-help" style="display:none;" aria-hidden="true"></div>
                   <div class="form-help">
                     <strong>File format:</strong> Excel file with phone numbers in any column. 
                     Numbers should include country code (e.g., +1234567890).
@@ -186,7 +180,7 @@
                     <span class="material-symbols-outlined">image</span>
                     Choose Image
                   </button>
-                  <div id="image-preview" style="display:none;" class="form-help">
+                  <div id="image-preview" style="display:none;" aria-hidden="true" class="form-help">
                     <strong>Selected:</strong> <span id="imageFileName">No image selected</span>
                   </div>
                 </div>
@@ -282,7 +276,7 @@
     </section>
 
     <!-- Trial Lock Page -->
-    <section id="trial-lock-page" class="page-wrapper" style="display:none;">
+    <section id="trial-lock-page" class="page-wrapper" style="display:none;" aria-hidden="true">
       <div class="welcome-container">
         <div class="card">
           <div class="card-header" style="position: relative;">
@@ -298,7 +292,7 @@
           </div>
           <div class="card-body">
             <div id="trial-info" class="text-caption text-center"></div>
-            <div id="admin-login-form" style="display:none;">
+            <div id="admin-login-form" style="display:none;" aria-hidden="true">
               <div class="form-group">
                 <label class="form-label" for="admin-username">Username</label>
                 <input id="admin-username" type="text" class="form-input" placeholder="Enter admin username" />
@@ -319,7 +313,7 @@
     </section>
 
     <!-- Modal System -->
-    <div id="modal" class="modal-overlay" style="display:none;">
+    <div id="modal" role="dialog" aria-modal="true" class="modal-overlay" style="display:none;" aria-hidden="true">
       <div class="modal-content">
         <div class="modal-header">
           <h3 id="modal-title" class="modal-title"></h3>

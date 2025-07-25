@@ -1,0 +1,369 @@
+/* ==========================================================================
+   BEE SPINNER ANIMATIONS
+   Modern bee-themed loading animations
+   ========================================================================== */
+
+/* Bee Spinner */
+.bee-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  animation: bee-fly 2s ease-in-out infinite;
+}
+
+.bee-spinner::before {
+  content: '🐝';
+  font-size: 16px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: bee-buzz 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes bee-fly {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-3px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-2px) rotate(-5deg);
+  }
+}
+
+@keyframes bee-buzz {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/* Large Bee Spinner for Campaign */
+.bee-spinner-large {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  position: relative;
+  animation: bee-fly-large 2.5s ease-in-out infinite;
+}
+
+.bee-spinner-large::before {
+  content: '🐝';
+  font-size: 24px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: bee-buzz-large 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes bee-fly-large {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  20% {
+    transform: translateY(-5px) rotate(8deg);
+  }
+  40% {
+    transform: translateY(-2px) rotate(-3deg);
+  }
+  60% {
+    transform: translateY(-4px) rotate(5deg);
+  }
+  80% {
+    transform: translateY(-1px) rotate(-2deg);
+  }
+}
+
+@keyframes bee-buzz-large {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+}
+
+/* Bee Trail Spinner */
+.bee-trail-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  position: relative;
+}
+
+.bee-trail-spinner::before {
+  content: '🐝';
+  font-size: 16px;
+  position: absolute;
+  animation: bee-trail 3s linear infinite;
+}
+
+.bee-trail-spinner::after {
+  content: '• • •';
+  font-size: 8px;
+  color: #fbbf24;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  animation: bee-trail-dots 3s linear infinite;
+  opacity: 0.6;
+}
+
+@keyframes bee-trail {
+  0% {
+    left: 0;
+    transform: translateY(0);
+  }
+  25% {
+    left: 50%;
+    transform: translateY(-3px);
+  }
+  50% {
+    left: 100%;
+    transform: translateY(0);
+  }
+  75% {
+    left: 50%;
+    transform: translateY(-2px);
+  }
+  100% {
+    left: 0;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bee-trail-dots {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Bee Hive Spinner */
+.bee-hive-spinner {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  position: relative;
+}
+
+.bee-hive-spinner::before {
+  content: '🍯';
+  font-size: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: hive-pulse 1.5s ease-in-out infinite;
+}
+
+.bee-hive-spinner::after {
+  content: '🐝';
+  font-size: 12px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: bee-orbit 2s linear infinite;
+}
+
+@keyframes hive-pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes bee-orbit {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) translateX(15px) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg) translateX(15px) rotate(-360deg);
+  }
+}
+
+/* Bee Working Spinner */
+.bee-working-spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+}
+
+.bee-working-spinner::before {
+  content: '🐝';
+  font-size: 16px;
+  animation: bee-work 1s ease-in-out infinite;
+}
+
+@keyframes bee-work {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  50% {
+    transform: scale(1) rotate(0deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+}
+
+/* Bee Loading Text */
+.bee-loading-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+  font-weight: 500;
+}
+
+.bee-loading-text::before {
+  content: '🐝';
+  animation: bee-buzz 0.5s ease-in-out infinite alternate;
+}
+
+/* Campaign Status with Bee */
+.campaign-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--color-primary-light, #e0e7ff);
+  color: var(--color-primary, #4f46e5);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.campaign-status.running::before {
+  content: '🐝';
+  animation: bee-fly 2s ease-in-out infinite;
+}
+
+.campaign-status.paused::before {
+  content: '🐝';
+  animation: none;
+  opacity: 0.6;
+}
+
+.campaign-status.completed::before {
+  content: '🍯';
+  animation: hive-pulse 1s ease-in-out 3;
+}
+
+.campaign-status.error::before {
+  content: '🐝';
+  animation: bee-buzz 0.2s ease-in-out infinite;
+  filter: grayscale(1);
+}
+
+/* Button Loading States */
+.btn.loading {
+  position: relative;
+  color: transparent !important;
+}
+
+.btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text y="18" font-size="20">🐝</text></svg>') no-repeat center;
+  background-size: contain;
+  animation: bee-fly 2s ease-in-out infinite;
+}
+
+/* Progress Bar with Bee */
+.progress-bar-bee {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: var(--surface-tertiary, #f1f5f9);
+  border-radius: 4px;
+  overflow: visible;
+}
+
+.progress-bar-bee-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.progress-bar-bee-fill::after {
+  content: '🐝';
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  animation: bee-buzz 0.3s ease-in-out infinite alternate;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .bee-spinner-large {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .bee-spinner-large::before {
+    font-size: 18px;
+  }
+  
+  .bee-trail-spinner {
+    width: 30px;
+    height: 16px;
+  }
+  
+  .bee-hive-spinner {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .bee-spinner,
+  .bee-spinner-large,
+  .bee-trail-spinner,
+  .bee-hive-spinner,
+  .bee-working-spinner,
+  .bee-loading-text,
+  .campaign-status,
+  .btn.loading::after,
+  .progress-bar-bee-fill::after {
+    animation: none;
+  }
+  
+  .bee-spinner::before,
+  .bee-spinner-large::before {
+    animation: bee-buzz 2s ease-in-out infinite;
+  }
+}

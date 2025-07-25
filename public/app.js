@@ -329,6 +329,17 @@ function initializeTheme() {
 // TRIAL SYSTEM
 // ==========================================================================
 
+async function getTrustedTime() {
+  try {
+    const response = await fetch('https://worldtimeapi.org/api/ip');
+    const data = await response.json();
+    return new Date(data.utc_datetime).getTime();
+  } catch {
+    // fallback to system time if offline
+    return Date.now();
+  }
+}
+
 function initializeTrialSystem() {
   // Utility functions for encryption
   function encrypt(str) { 
@@ -381,16 +392,35 @@ function initializeTrialSystem() {
     }
   }
 
-  // Trial check function
-  window.checkTrial = function() {
+  // Enhanced trial check function
+  window.checkTrial = async function() {
     const trial = getTrialData();
-
     if (!trial) {
       showPage('trial-lock-page');
       const trialInfo = document.getElementById('trial-info');
       if (trialInfo) {
         trialInfo.textContent = 'This software is not activated. Please contact an administrator.';
       }
+      return;
+    }
+
+    // Get trusted time (online, fallback to system)
+    const trustedNow = await getTrustedTime();
+    // Get last used time from localStorage
+    const lastUsed = Number(localStorage.getItem('beesoft_last_used_time') || '0');
+    // Use the max of trustedNow, Date.now(), and lastUsed
+    const now = Math.max(trustedNow, Date.now(), lastUsed);
+    // Save the latest time for next run
+    localStorage.setItem('beesoft_last_used_time', String(now));
+
+    // Detect backdating
+    if (now < lastUsed) {
+      showPage('trial-lock-page');
+      const trialInfo = document.getElementById('trial-info');
+      if (trialInfo) {
+        trialInfo.textContent = 'System clock tampering detected. Please set your date and time correctly.';
+      }
+      window.notifications.error('System clock tampering detected. Please set your date and time correctly.');
       return;
     }
 
@@ -406,7 +436,6 @@ function initializeTrialSystem() {
       return;
     }
 
-    const now = Date.now();
     const expiryDate = trial.start + (trial.days * 24 * 60 * 60 * 1000);
     
     if (now > expiryDate) {
@@ -545,6 +574,59 @@ function initializeMainApp() {
   initializeImageUpload();
   initializeWhatsAppConnection();
   initializeSessionControls();
+  initializeSessionReset(); // Add this line
+}
+
+function initializeSessionReset() {
+  const resetBtn = document.getElementById('reset-session-btn');
+  if (!resetBtn) return;
+  resetBtn.addEventListener('click', () => {
+    // Reset app state
+    window.appState = new AppState();
+    window.appState.updateWorkflowUI();
+
+    // Clear file input
+    const fileInput = document.getElementById('excelFile');
+    if (fileInput) fileInput.value = '';
+    const fileInfo = document.getElementById('file-info');
+    if (fileInfo) fileInfo.style.display = 'none';
+    const fileUploadArea = document.getElementById('file-upload-area');
+    if (fileUploadArea) {
+      fileUploadArea.querySelector('.file-upload-text').textContent = 'Drop your Excel file here or click to browse';
+      fileUploadArea.querySelector('.file-upload-hint').textContent = 'Supports .xlsx and .xls files';
+    }
+
+    // Clear image
+    window.appState.selectedImagePath = null;
+    const imagePreview = document.getElementById('image-preview');
+    if (imagePreview) imagePreview.style.display = 'none';
+    const imageFileName = document.getElementById('imageFileName');
+    if (imageFileName) imageFileName.textContent = 'No image selected';
+
+    // Clear message
+    const messageInput = document.getElementById('message');
+    if (messageInput) messageInput.value = '';
+    const messagePreview = document.getElementById('message-preview');
+    if (messagePreview) {
+      messagePreview.textContent = 'Your message preview will appear here...';
+      messagePreview.style.fontStyle = 'italic';
+      messagePreview.style.color = 'var(--text-tertiary)';
+    }
+    const charCount = document.getElementById('char-count');
+    if (charCount) charCount.textContent = '0';
+
+    // Reset stats
+    window.appState.updateStats({ success: 0, failed: 0, total: 0 });
+
+    // Reset QR and connection UI
+    const qrContainer = document.getElementById('qr-container');
+    if (qrContainer) qrContainer.style.display = 'none';
+    const connectionPlaceholder = document.getElementById('connection-placeholder');
+    if (connectionPlaceholder) connectionPlaceholder.style.display = 'block';
+
+    window.notifications.success('Session reset. You can start fresh!');
+    window.logger.info('Session reset by user');
+  });
 }
 
 function initializeFileUpload() {

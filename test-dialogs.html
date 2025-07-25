@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beesoft Dialog & Button Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link rel="stylesheet" href="public/style.css">
+    <style>
+        body {
+            padding: 2rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        .test-section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: var(--surface-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+        }
+        .test-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-primary);
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .test-item {
+            padding: 1rem;
+            background: var(--surface-secondary);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="text-display" style="text-align: center; margin-bottom: 2rem;">
+        🔧 Beesoft Dialog & Button Test Suite
+    </h1>
+
+    <!-- Clear Local Data Button Test -->
+    <div class="test-section">
+        <h2 class="test-title">🔘 Clear Local Data Button Test</h2>
+        <p class="text-body">Testing the styling and behavior of the Clear Local Data button in welcome footer context.</p>
+        
+        <div class="welcome-footer" style="margin-top: 2rem;">
+            <p class="text-caption">
+                &copy; 2024 Beesoft &bull; 
+                <a href="mailto:ekthar.xd@gmail.com">Contact Support</a> &bull;
+                <button id="test-clear-data-btn" class="btn-ghost" aria-label="Clear all local data and settings">Clear Local Data</button>
+            </p>
+        </div>
+
+        <div class="test-grid">
+            <div class="test-item">
+                <h4>✅ Styling</h4>
+                <p class="text-caption">Button should have proper border, padding, and hover effects</p>
+            </div>
+            <div class="test-item">
+                <h4>✅ Positioning</h4>
+                <p class="text-caption">Button should align properly with other footer elements</p>
+            </div>
+            <div class="test-item">
+                <h4>✅ Accessibility</h4>
+                <p class="text-caption">Button should have proper ARIA labels and focus states</p>
+            </div>
+            <div class="test-item">
+                <h4>✅ Responsiveness</h4>
+                <p class="text-caption">Button should work well on mobile devices</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Welcome Button Test -->
+    <div class="test-section">
+        <h2 class="test-title">🔄 Back to Welcome Button Test</h2>
+        <p class="text-body">Testing the styling and behavior of the Back to Welcome button.</p>
+        
+        <div style="margin-top: 2rem;">
+            <button id="test-back-btn" class="btn btn-ghost btn-sm" title="Return to welcome screen" aria-label="Return to welcome screen">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Back
+            </button>
+        </div>
+
+        <div class="test-grid">
+            <div class="test-item">
+                <h4>✅ Icon Animation</h4>
+                <p class="text-caption">Arrow should move left on hover</p>
+            </div>
+            <div class="test-item">
+                <h4>✅ Button Styling</h4>
+                <p class="text-caption">Consistent with design system</p>
+            </div>
+            <div class="test-item">
+                <h4>✅ Focus States</h4>
+                <p class="text-caption">Proper keyboard navigation</p>
+            </div>
+            <div class="test-item">
+                <h4>✅ Touch Targets</h4>
+                <p class="text-caption">Minimum 40px for accessibility</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Dialog Test -->
+    <div class="test-section">
+        <h2 class="test-title">📱 Modal Dialog Test</h2>
+        <p class="text-body">Testing modal positioning, alignment, and accessibility.</p>
+        
+        <div class="test-grid">
+            <button id="test-info-modal" class="btn btn-primary">
+                <span class="material-symbols-outlined">info</span>
+                Info Dialog
+            </button>
+            <button id="test-warning-modal" class="btn btn-outline">
+                <span class="material-symbols-outlined">warning</span>
+                Warning Dialog
+            </button>
+            <button id="test-danger-modal" class="btn btn-danger">
+                <span class="material-symbols-outlined">error</span>
+                Danger Dialog
+            </button>
+            <button id="test-confirmation-modal" class="btn btn-secondary">
+                <span class="material-symbols-outlined">help</span>
+                Confirmation Dialog
+            </button>
+        </div>
+
+        <div class="test-grid" style="margin-top: 2rem;">
+            <div class="test-item">
+                <h4>✅ Centering</h4>
+                <p class="text-caption">Modals should be perfectly centered</p>
+            </div>
+            <div class="test-item">
+                <h4>✅ Backdrop</h4>
+                <p class="text-caption">Blur effect and proper overlay</p>
+            </div>
+            <div class="test-item">
+                <h4>✅ Animations</h4>
+                <p class="text-caption">Smooth fade and scale animations</p>
+            </div>
+            <div class="test-item">
+                <h4>✅ Responsive</h4>
+                <p class="text-caption">Proper sizing on all devices</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Toggle Test -->
+    <div class="test-section">
+        <h2 class="test-title">🌙 Theme Toggle Test</h2>
+        <p class="text-body">Testing theme toggle positioning and functionality.</p>
+        
+        <button id="test-theme-toggle" class="theme-toggle" style="position: relative; top: auto; right: auto; margin: 1rem auto; display: block;">
+            <div class="theme-switch">
+                <input type="checkbox" id="test-theme-input">
+                <span class="theme-slider"></span>
+            </div>
+        </button>
+
+        <div class="test-grid">
+            <div class="test-item">
+                <h4>✅ Positioning</h4>
+                <p class="text-caption">Fixed position without conflicts</p>
+            </div>
+            <div class="test-item">
+                <h4>✅ Animation</h4>
+                <p class="text-caption">Smooth toggle animation</p>
+            </div>
+            <div class="test-item">
+                <h4>✅ Accessibility</h4>
+                <p class="text-caption">Keyboard accessible</p>
+            </div>
+            <div class="test-item">
+                <h4>✅ Visual Feedback</h4>
+                <p class="text-caption">Clear state indication</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal System -->
+    <div id="test-modal" role="dialog" aria-modal="true" aria-labelledby="test-modal-title" class="modal-overlay" style="display:none;" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="test-modal-title" class="modal-title">Test Dialog</h3>
+                <button class="modal-close" aria-label="Close dialog">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="test-modal-body">
+                    <p>This is a test dialog to verify positioning, styling, and accessibility.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="test-modal-cancel" class="btn btn-ghost">Cancel</button>
+                <button id="test-modal-ok" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test modal functionality
+        function showTestModal(title, content, type = '') {
+            const modal = document.getElementById('test-modal');
+            const modalTitle = document.getElementById('test-modal-title');
+            const modalBody = document.getElementById('test-modal-body');
+            const modalContent = modal.querySelector('.modal-content');
+            
+            modalTitle.textContent = title;
+            modalBody.innerHTML = content;
+            
+            // Apply dialog type styling
+            modalContent.className = 'modal-content';
+            if (type) {
+                modalContent.classList.add(type + '-dialog');
+            }
+            
+            modal.style.display = 'flex';
+            modal.setAttribute('aria-hidden', 'false');
+            
+            // Focus management
+            modalTitle.focus();
+        }
+
+        function hideTestModal() {
+            const modal = document.getElementById('test-modal');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        // Event listeners
+        document.getElementById('test-info-modal').addEventListener('click', () => {
+            showTestModal('Information Dialog', '<p>This is an information dialog with proper centering and styling.</p><p>The modal should be perfectly centered with a backdrop blur effect.</p>');
+        });
+
+        document.getElementById('test-warning-modal').addEventListener('click', () => {
+            showTestModal('Warning Dialog', '<p>This is a warning dialog with special styling.</p><p>Notice the warning colors in the header.</p>', 'warning');
+        });
+
+        document.getElementById('test-danger-modal').addEventListener('click', () => {
+            showTestModal('Danger Dialog', '<p>This is a danger dialog for destructive actions.</p><p>The header should have error colors.</p>', 'danger');
+        });
+
+        document.getElementById('test-confirmation-modal').addEventListener('click', () => {
+            showTestModal('Confirmation Required', '<p>Are you sure you want to perform this action?</p><p>This action cannot be undone.</p>', 'confirmation');
+        });
+
+        document.getElementById('test-clear-data-btn').addEventListener('click', () => {
+            showTestModal('Clear Local Data', '<p>Are you sure you want to clear all local data?</p><p>This will remove all settings, authentication data, and preferences.</p><p><strong>This action cannot be undone.</strong></p>', 'danger');
+        });
+
+        document.getElementById('test-back-btn').addEventListener('click', () => {
+            showTestModal('Return to Welcome', '<p>Are you sure you want to return to the welcome screen?</p><p>Any unsaved progress will be lost.</p>', 'warning');
+        });
+
+        // Modal close handlers
+        document.getElementById('test-modal-cancel').addEventListener('click', hideTestModal);
+        document.getElementById('test-modal-ok').addEventListener('click', hideTestModal);
+        document.querySelector('.modal-close').addEventListener('click', hideTestModal);
+
+        // Close on backdrop click
+        document.getElementById('test-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                hideTestModal();
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                hideTestModal();
+            }
+        });
+
+        // Theme toggle test
+        document.getElementById('test-theme-input').addEventListener('change', (e) => {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        });
+
+        // Initialize theme
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        if (currentTheme === 'dark') {
+            document.getElementById('test-theme-input').checked = true;
+        }
+    </script>
+</body>
+</html>
