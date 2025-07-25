@@ -176,6 +176,209 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 32px;
+  overflow: hidden;
+}
+
+.redesigned-header {
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  padding: 0 0 0 0;
+  border-radius: 32px 32px 0 0;
+}
+.header-content {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 24px 16px 24px;
+  border-radius: 32px;
+}
+.header-logo {
+  width: 48px;
+  height: 48px;
+  margin-right: 18px;
+  border-radius: 24px;
+}
+.redesigned-title {
+  font-size: 2.1rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  margin: 0;
+  border-radius: 24px;
+}
+.brand-name {
+  font-size: 2.1rem;
+  font-weight: 700;
+  border-radius: 24px;
+}
+.brand-bee {
+  font-size: 1.5rem;
+  border-radius: 24px;
+}
+.redesigned-theme-toggle {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 32px;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.redesigned-theme-toggle:hover {
+  background: #1d4ed8;
+}
+
+.redesigned-main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: #f8fafc;
+  border-radius: 0 0 32px 32px;
+}
+.redesigned-main-container {
+  max-width: 900px;
+  width: 100%;
+  margin: 32px auto 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  border-radius: 32px;
+}
+.redesigned-card {
+  background: #fff;
+  border-radius: 32px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  padding: 32px 24px;
+  margin: 0 auto;
+}
+.redesigned-workflow-header {
+  margin-bottom: 18px;
+  border-radius: 24px;
+}
+.redesigned-workflow-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  border-radius: 24px;
+}
+.redesigned-workflow-desc {
+  color: #64748b;
+  font-size: 1rem;
+  margin: 0;
+  border-radius: 24px;
+}
+.redesigned-btn, .redesigned-btn-outline {
+  font-family: 'Google Sans', Arial, sans-serif;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  padding: 12px 32px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  margin-bottom: 12px;
+  margin-right: 8px;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.redesigned-btn:hover {
+  background: #1d4ed8;
+}
+.redesigned-btn-outline {
+  background: #fff;
+  color: #2563eb;
+  border: 2px solid #2563eb;
+}
+.redesigned-btn-outline:hover {
+  background: #e0e7ff;
+}
+.redesigned-form-group {
+  margin-bottom: 24px;
+  border-radius: 24px;
+}
+.redesigned-form-textarea, .redesigned-form-input {
+  width: 100%;
+  border-radius: 24px;
+  border: 1.5px solid #e5e7eb;
+  padding: 14px 16px;
+  font-size: 1.1rem;
+  font-family: 'Google Sans', Arial, sans-serif;
+  margin-top: 6px;
+  background: #f9fafb;
+  transition: border 0.2s;
+}
+.redesigned-form-textarea:focus, .redesigned-form-input:focus {
+  border: 1.5px solid #2563eb;
+  outline: none;
+}
+.redesigned-qr-code-display {
+  background: #fff;
+  padding: 20px;
+  border-radius: 32px;
+  display: inline-block;
+  margin: 20px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.redesigned-connection-help {
+  color: #64748b;
+  font-size: 0.98rem;
+  margin: 12px 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  border-radius: 24px;
+}
+.redesigned-stats-grid {
+  display: flex;
+  gap: 32px;
+  margin-top: 18px;
+  border-radius: 24px;
+}
+.redesigned-stat-card {
+  background: #f1f5f9;
+  border-radius: 32px;
+  padding: 18px 24px;
+  text-align: center;
+  flex: 1;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+.redesigned-activity-log {
+  margin-top: 12px;
+  border-radius: 24px;
+}
+.redesigned-activity-header {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-bottom: 10px;
+  border-radius: 24px;
+}
+.redesigned-status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+  font-size: 1rem;
+  color: #334155;
+  border-radius: 24px;
+}
+
 /* ==========================================================================
    3. LAYOUT SYSTEM
    ========================================================================== */

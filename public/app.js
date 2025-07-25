@@ -277,6 +277,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Start with trial check
   checkTrial();
+
+  // Support modal logic
+  const supportModal = document.getElementById('support-modal');
+  const openSupportBtn = document.getElementById('open-support-modal-btn');
+  const openSupportBtnFooter = document.getElementById('open-support-modal-btn-footer');
+  const closeSupportBtn = document.getElementById('close-support-modal-btn');
+  const supportForm = document.getElementById('support-form');
+  const supportFormSuccess = document.getElementById('support-form-success');
+  const supportFormError = document.getElementById('support-form-error');
+
+  function openSupportModal() {
+    if (supportModal) supportModal.style.display = 'flex';
+    if (supportForm) {
+      supportForm.reset();
+      supportFormSuccess.style.display = 'none';
+      supportFormError.style.display = 'none';
+    }
+  }
+  function closeSupportModal() {
+    if (supportModal) supportModal.style.display = 'none';
+  }
+  if (openSupportBtn) openSupportBtn.addEventListener('click', openSupportModal);
+  if (openSupportBtnFooter) openSupportBtnFooter.addEventListener('click', openSupportModal);
+  if (closeSupportBtn) closeSupportBtn.addEventListener('click', closeSupportModal);
+  if (supportModal) {
+    supportModal.addEventListener('click', function(e) {
+      if (e.target === supportModal) closeSupportModal();
+    });
+  }
+  if (supportForm) {
+    supportForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      supportFormSuccess.style.display = 'block';
+      supportFormError.style.display = 'none';
+      // Optionally, close modal after a delay
+      setTimeout(closeSupportModal, 1800);
+    });
+  }
 });
 
 // ==========================================================================
