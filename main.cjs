@@ -13,6 +13,7 @@ const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const https = require('https');
 const { v4: uuidv4 } = require('crypto').randomUUID ? require('crypto') : { randomUUID: () => require('os').hostname() + '-' + Date.now() };
+const UpdateManager = require('./update-manager');
 
 let mainWindow;
 let whatsappWindow;
@@ -1473,4 +1474,71 @@ ipcMain.handle('get-antiban-status', async () => {
             dailyRemaining: ANTI_BAN_CONFIG.dailyLimit - messageTracker.daily.length
         }
     };
+});
+
+// GitHub-based Update Manager
+const updateManager = new UpdateManager();
+
+// IPC handlers for update management
+ipcMain.handle('check-for-updates', async () => {
+    try {
+        const result = await updateManager.checkForUpdates();
+        return result;
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle('download-update', async (event, asset) => {
+    try {
+        const result = await updateManager.downloadUpdate(asset);
+        return result;
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle('open-release-page', async () => {
+    try {
+        const result = await updateManager.openReleasePage();
+        return result;
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle('get-app-version', async () => {
+    try {
+        const version = updateManager.getCurrentVersion();
+        return { success: true, version };
+    } catch (error) {
+        return { success: false, version: '1.0.0', error: error.message };
+    }
+});
+
+ipcMain.handle('format-release-notes', async (event, body) => {
+    try {
+        const formatted = updateManager.formatReleaseNotes(body);
+        return { success: true, notes: formatted };
+    } catch (error) {
+        return { success: false, notes: ['Error formatting release notes'], error: error.message };
+    }
+});
+
+ipcMain.handle('format-file-size', async (event, bytes) => {
+    try {
+        const formatted = updateManager.formatFileSize(bytes);
+        return { success: true, size: formatted };
+    } catch (error) {
+        return { success: false, size: '0 Bytes', error: error.message };
+    }
+});
+
+ipcMain.handle('get-platform-asset', async (event, assets) => {
+    try {
+        const asset = updateManager.getAssetForPlatform(assets);
+        return { success: true, asset };
+    } catch (error) {
+        return { success: false, asset: null, error: error.message };
+    }
 });

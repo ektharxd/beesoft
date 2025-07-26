@@ -20,6 +20,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // File selection
     selectImage: () => ipcRenderer.invoke('select-image'),
     
+    // Updates management
+    checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+    downloadUpdate: (asset) => ipcRenderer.invoke('download-update', asset),
+    openReleasePage: () => ipcRenderer.invoke('open-release-page'),
+    getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+    formatReleaseNotes: (body) => ipcRenderer.invoke('format-release-notes', body),
+    formatFileSize: (bytes) => ipcRenderer.invoke('format-file-size', bytes),
+    getPlatformAsset: (assets) => ipcRenderer.invoke('get-platform-asset', assets),
+    
     // Event listeners
     onUpdate: (callback) => {
         ipcRenderer.on('update', (event, data) => callback(data));

@@ -1,7 +1,7 @@
 
 # 🐝 Beesoft - Smart WhatsApp Automation
 
-[![Version](https://img.shields.io/badge/version-1.0.0--beta.1-blue.svg)](https://github.com/ektharxd/beesoft)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/ektharxd/beesoft)
 [![License](https://img.shields.io/badge/license-ISC-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)](https://github.com/ektharxd/beesoft)
 [![Electron](https://img.shields.io/badge/electron-32.2.5-brightgreen.svg)](https://electronjs.org/)

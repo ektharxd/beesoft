@@ -728,9 +728,9 @@
     }
 
     function updateStats(data) {
-      const totalDevices = data.clients ? data.clients.length : 0;
+      const totalDevices = data.totalDevices || 0;
       const activeDevices = data.activeClientCount || 0;
-      const offlineDevices = Math.max(0, totalDevices - activeDevices);
+      const offlineDevices = data.offlineClientCount || 0;
 
       document.getElementById('totalDevices').textContent = totalDevices;
       document.getElementById('activeDevices').textContent = activeDevices;
@@ -758,6 +758,7 @@
               <th>Device</th>
               <th>Status</th>
               <th>Platform</th>
+              <th>IP Address</th>
               <th>Version</th>
               <th>Last Seen</th>
             </tr>
@@ -777,8 +778,8 @@
                   </div>
                 </td>
                 <td>
-                  <div class="status-indicator ${getDeviceStatus(device.lastSeen)}">
-                    ${getDeviceStatus(device.lastSeen)}
+                  <div class="status-indicator ${device.isOnline ? 'online' : 'offline'}">
+                    ${device.isOnline ? 'online' : 'offline'}
                   </div>
                 </td>
                 <td>
@@ -786,6 +787,11 @@
                     <i class="fab fa-${getPlatformIcon(device.platform)}"></i>
                     ${formatPlatform(device.platform)}
                   </div>
+                </td>
+                <td>
+                  <span style="font-family: monospace; color: var(--text-secondary); font-size: 0.875rem;">
+                    ${device.ip || 'unknown'}
+                  </span>
                 </td>
                 <td>
                   <span style="font-family: monospace; background: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px;">

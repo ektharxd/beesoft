@@ -1,4 +1,4 @@
-  {
+{
   "name": "beesoft",
   "version": "1.0.0",
   "description": "🐝 Beesoft — Smart WhatsApp Automation & Dashboard",
@@ -47,8 +47,9 @@
       "buildResources": "assets"
     },
     "files": [
-      "main.js",
+      "main.cjs",
       "preload.js",
+      "update-manager.js",
       "public/**/*",
       "node_modules/**/*",
       "!node_modules/.cache",
