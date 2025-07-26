@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Active Devices Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 0; }
+    .container { max-width: 800px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+    h1 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+    th, td { padding: 10px 8px; border: 1px solid #ddd; text-align: left; }
+    th { background: #f0f0f0; }
+    #error { color: #c00; text-align: center; margin-top: 16px; }
+    #apiKeyInput { width: 300px; padding: 6px; }
+    #loadBtn { padding: 6px 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Active Devices Dashboard</h1>
+    <div style="text-align:center; margin-bottom:20px;">
+      <input type="password" id="apiKeyInput" placeholder="Enter Admin API Key" />
+      <button id="loadBtn">Load Active Devices</button>
+    </div>
+    <div id="error"></div>
+    <table id="devicesTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Machine ID</th>
+          <th>Last Seen</th>
+          <th>Version</th>
+          <th>Platform</th>
+          <th>IP Address</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <script>
+    document.getElementById('loadBtn').onclick = async function() {
+      const apiKey = document.getElementById('apiKeyInput').value.trim();
+      const errorDiv = document.getElementById('error');
+      const table = document.getElementById('devicesTable');
+      errorDiv.textContent = '';
+      table.style.display = 'none';
+      if (!apiKey) {
+        errorDiv.textContent = 'Please enter your admin API key.';
+        return;
+      }
+      try {
+        const res = await fetch('/api/status', {
+          headers: { 'x-api-key': apiKey }
+        });
+        if (!res.ok) {
+          throw new Error('Invalid API key or server error.');
+        }
+        const data = await res.json();
+        const tbody = table.querySelector('tbody');
+        tbody.innerHTML = '';
+        if (data.clients && data.clients.length > 0) {
+          data.clients.forEach(client => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${client.machineId}</td>
+              <td>${new Date(client.lastSeen).toLocaleString()}</td>
+              <td>${client.version}</td>
+              <td>${client.platform}</td>
+              <td>${client.ip}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          const tr = document.createElement('tr');
+          tr.innerHTML = '<td colspan="5" style="text-align:center;">No active devices</td>';
+          tbody.appendChild(tr);
+        }
+        table.style.display = '';
+      } catch (err) {
+        errorDiv.textContent = err.message;
+      }
+    };
+  </script>
+</body>
+</html>
