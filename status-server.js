@@ -6,7 +6,7 @@ app.use(express.json());
 
 // In-memory store for simplicity. For a real production app, consider a database like SQLite or a free cloud database.
 const clients = new Map();
-const ADMIN_API_KEY = 'your-super-secret-admin-key'; // IMPORTANT: Change this and keep it secret!
+const ADMIN_API_KEY = 'Ekthar@8302'; // IMPORTANT: Change this and keep it secret!
 
 // Middleware to protect the admin status route
 const requireAdminKey = (req, res, next) => {
