@@ -11,6 +11,8 @@ const fs = require('fs');
 const os = require('os');
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const https = require('https');
+const { v4: uuidv4 } = require('crypto').randomUUID ? require('crypto') : { randomUUID: () => require('os').hostname() + '-' + Date.now() };
 
 let mainWindow;
 let whatsappWindow;
@@ -164,11 +166,15 @@ app.whenReady().then(() => {
     sendToUI('log', { level: 'info', message: `📁 App data path: ${appDataPath}` });
     
     createWindow();
+    
+    // Initialize heartbeat system
+    initializeHeartbeat();
 });
 
 app.on('window-all-closed', () => { 
     if (process.platform !== 'darwin') {
         cleanupWhatsAppClient();
+        stopHeartbeat();
         app.quit(); 
     }
 });
@@ -616,6 +622,118 @@ async function simulateTyping(chatId, message) {
         await waClient.sendPresenceAvailable();
     } catch (error) {
         console.log('Typing simulation error:', error.message);
+    }
+}
+
+// Heartbeat system for live device monitoring
+let deviceId = null;
+let heartbeatInterval = null;
+const HEARTBEAT_URL = 'https://beesoft-one.vercel.app/api/heartbeat';
+const HEARTBEAT_INTERVAL = 2 * 60 * 1000; // 2 minutes
+
+function generateDeviceId() {
+    try {
+        // Try to use crypto.randomUUID if available
+        if (typeof require('crypto').randomUUID === 'function') {
+            return require('crypto').randomUUID();
+        }
+    } catch (e) {
+        // Fallback to hostname + timestamp
+    }
+    return `${os.hostname()}-${Date.now()}`;
+}
+
+function getDeviceId() {
+    if (!deviceId) {
+        const deviceIdPath = path.join(getAppDataPath(), 'device-id.txt');
+        try {
+            if (fs.existsSync(deviceIdPath)) {
+                deviceId = fs.readFileSync(deviceIdPath, 'utf8').trim();
+            } else {
+                deviceId = generateDeviceId();
+                fs.writeFileSync(deviceIdPath, deviceId);
+            }
+        } catch (error) {
+            console.error('Error managing device ID:', error);
+            deviceId = generateDeviceId();
+        }
+    }
+    return deviceId;
+}
+
+async function sendHeartbeat() {
+    try {
+        const heartbeatData = {
+            machineId: getDeviceId(),
+            version: require('./package.json').version || '1.0.0',
+            platform: os.platform(),
+            hostname: os.hostname(),
+            whatsappConnected: isReady,
+            sessionActive: sessionControl.isRunning
+        };
+
+        const data = JSON.stringify(heartbeatData);
+        const url = new URL(HEARTBEAT_URL);
+        
+        const options = {
+            hostname: url.hostname,
+            port: url.port || 443,
+            path: url.pathname,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(data),
+                'User-Agent': 'Beesoft-Desktop/1.0.0'
+            }
+        };
+
+        const req = https.request(options, (res) => {
+            let responseData = '';
+            res.on('data', (chunk) => {
+                responseData += chunk;
+            });
+            res.on('end', () => {
+                if (res.statusCode === 200) {
+                    console.log(`[Heartbeat] Sent successfully to ${HEARTBEAT_URL}`);
+                } else {
+                    console.error(`[Heartbeat] Failed with status ${res.statusCode}: ${responseData}`);
+                }
+            });
+        });
+
+        req.on('error', (error) => {
+            console.error('[Heartbeat] Error:', error.message);
+        });
+
+        req.write(data);
+        req.end();
+
+    } catch (error) {
+        console.error('[Heartbeat] Exception:', error.message);
+    }
+}
+
+function initializeHeartbeat() {
+    console.log(`[Heartbeat] Initializing with device ID: ${getDeviceId()}`);
+    
+    // Send initial heartbeat
+    sendHeartbeat();
+    
+    // Set up periodic heartbeats
+    if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+    }
+    
+    heartbeatInterval = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
+    
+    console.log(`[Heartbeat] Scheduled every ${HEARTBEAT_INTERVAL / 1000} seconds`);
+}
+
+function stopHeartbeat() {
+    if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = null;
+        console.log('[Heartbeat] Stopped');
     }
 }
 
