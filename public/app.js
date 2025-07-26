@@ -1384,12 +1384,14 @@ function showConfirmationModal(title, message, onConfirm) {
 
 function showAdminModal(setTrialData) {
   const bodyHTML = `
-    <div class="form-group">
-      <label class="form-label" for="trial-days-input">Trial Days</label>
+    <div class="form-group"<label class="form-label" for="trial-days-input">Trial Days</label>
       <input id="trial-days-input" type="number" class="form-input" min="1" max="365" placeholder="Enter number of days" />
     </div>
     <div class="form-group">
       <button id="test-expiry-btn" class="btn btn-outline btn-full">Test Trial Expiry</button>
+    </div>
+    <div class="form-group">
+      <button id="change-admin-password-btn" class="btn btn-outline btn-full">Change Admin Password</button>
     </div>
   `;
 
