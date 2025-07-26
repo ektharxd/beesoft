@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "pack": "electron-packager . \"Beesoft 🐝\" --platform=win32 --arch=x64 --out=dist --overwrite --icon=public/Bee.ico",
-    "build": "electron-builder",
+    "build": "echo 'No build needed for API deployment on Vercel'",
     "build:win": "electron-builder --win",
     "build:portable": "electron-builder --win portable",
     "build:installer": "electron-builder --win nsis",
