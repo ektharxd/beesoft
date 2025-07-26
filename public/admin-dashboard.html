@@ -679,7 +679,7 @@
         this.innerHTML = '<div class="spinner"></div> Authenticating...';
         this.disabled = true;
 
-        const response = await fetch('/api/status', {
+        const response = await fetch('/api/devices', {
           headers: { 'x-api-key': apiKey }
         });
 
@@ -709,7 +709,7 @@
 
     async function loadDevices() {
       try {
-        const response = await fetch('/api/status', {
+        const response = await fetch('/api/devices', {
           headers: { 'x-api-key': currentApiKey }
         });
 

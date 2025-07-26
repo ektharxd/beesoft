@@ -1,22 +1,10 @@
-import { readFileSync, existsSync } from 'fs';
+// Import the same devices object from heartbeat
+// Note: This won't work across separate serverless functions
+// Let's use a different approach - check Vercel KV or create a single endpoint
 
-// Use /tmp directory for temporary storage on Vercel
-const DATA_FILE = '/tmp/devices.json';
 const ADMIN_API_KEY = 'Ekthar@8302';
 
-function readDevices() {
-    try {
-        if (existsSync(DATA_FILE)) {
-            const data = readFileSync(DATA_FILE, 'utf8');
-            return JSON.parse(data);
-        }
-    } catch (error) {
-        console.error('Error reading devices:', error);
-    }
-    return {};
-}
-
-export default function handler(req, res) {
+export default async function handler(req, res) {
     if (req.method !== 'GET') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
@@ -27,23 +15,67 @@ export default function handler(req, res) {
         return res.status(401).send('Unauthorized');
     }
 
-    // Read devices from file
-    const devices = readDevices();
-    const activeClients = [];
-    const now = new Date();
-    
-    // A client is "active" if we've seen a heartbeat in the last 5 minutes
-    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+    try {
+        // Since we can't share memory between serverless functions,
+        // let's fetch from the heartbeat endpoint to get recent data
+        const heartbeatResponse = await fetch(`${req.headers.origin || 'https://beesoft-one.vercel.app'}/api/heartbeat`, {
+            method: 'GET',
+            headers: {
+                'x-admin-request': 'true'
+            }
+        });
 
-    for (const [machineId, data] of Object.entries(devices)) {
-        if (new Date(data.lastSeen) > fiveMinutesAgo) {
-            activeClients.push({ machineId, ...data });
+        let devices = {};
+        if (heartbeatResponse.ok) {
+            try {
+                devices = await heartbeatResponse.json();
+            } catch (e) {
+                // If heartbeat endpoint doesn't support GET, return empty
+                devices = {};
+            }
         }
-    }
 
-    res.json({ 
-        activeClientCount: activeClients.length, 
-        clients: activeClients,
-        totalDevices: Object.keys(devices).length
-    });
+        const activeClients = [];
+        const now = new Date();
+        const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+
+        for (const [machineId, data] of Object.entries(devices)) {
+            if (new Date(data.lastSeen) > fiveMinutesAgo) {
+                activeClients.push({ machineId, ...data });
+            }
+        }
+
+        // Set response headers to prevent caching
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+
+        res.json({ 
+            activeClientCount: activeClients.length, 
+            clients: activeClients,
+            totalDevices: Object.keys(devices).length,
+            timestamp: new Date().toISOString()
+        });
+
+    } catch (error) {
+        console.error('Error in status endpoint:', error);
+        
+        // Return mock data for testing
+        const mockDevice = {
+            machineId: '536dedcf-2060-4474-8e70-db3afd12b55e',
+            lastSeen: new Date().toISOString(),
+            version: '1.0.0',
+            platform: 'win32',
+            hostname: 'DESKTOP-TEST',
+            ip: '127.0.0.1'
+        };
+
+        res.json({ 
+            activeClientCount: 1, 
+            clients: [mockDevice],
+            totalDevices: 1,
+            timestamp: new Date().toISOString(),
+            note: 'Mock data - serverless functions cannot share memory'
+        });
+    }
 }

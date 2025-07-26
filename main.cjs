@@ -628,7 +628,7 @@ async function simulateTyping(chatId, message) {
 // Heartbeat system for live device monitoring
 let deviceId = null;
 let heartbeatInterval = null;
-const HEARTBEAT_URL = 'https://beesoft-one.vercel.app/api/heartbeat';
+const HEARTBEAT_URL = 'https://beesoft-one.vercel.app/api/devices';
 const HEARTBEAT_INTERVAL = 2 * 60 * 1000; // 2 minutes
 
 function generateDeviceId() {
