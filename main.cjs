@@ -1,3 +1,10 @@
+// @ts-nocheck
+const Sentry = require("@sentry/electron/main");
+Sentry.init({
+  dsn: "https://2d868c4a667e70f6b07da800f0923a76@o4509730213265408.ingest.us.sentry.io/4509730219229184",
+  debug: false, // Disable debug logging in production
+});
+
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');

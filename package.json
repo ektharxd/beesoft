@@ -1,8 +1,8 @@
-{
+  {
   "name": "beesoft",
   "version": "1.0.0",
   "description": "🐝 Beesoft — Smart WhatsApp Automation & Dashboard",
-  "main": "main.js",
+  "main": "main.cjs",
   "scripts": {
     "start": "electron .",
     "pack": "electron-packager . \"Beesoft 🐝\" --platform=win32 --arch=x64 --out=dist --overwrite --icon=public/Bee.ico",
