@@ -3,83 +3,874 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Active Devices Dashboard</title>
+  <title>Beesoft Live Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 0; }
-    .container { max-width: 800px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px; }
-    h1 { text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin-top: 24px; }
-    th, td { padding: 10px 8px; border: 1px solid #ddd; text-align: left; }
-    th { background: #f0f0f0; }
-    #error { color: #c00; text-align: center; margin-top: 16px; }
-    #apiKeyInput { width: 300px; padding: 6px; }
-    #loadBtn { padding: 6px 16px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1a1a1a;
+      --bg-tertiary: #2a2a2a;
+      --text-primary: #ffffff;
+      --text-secondary: #b3b3b3;
+      --text-muted: #666666;
+      --accent-primary: #1877f2;
+      --accent-secondary: #42a5f5;
+      --success: #00d084;
+      --warning: #ff9500;
+      --error: #ff3040;
+      --border: #333333;
+      --shadow: rgba(0, 0, 0, 0.3);
+      --gradient-primary: linear-gradient(135deg, #1877f2 0%, #42a5f5 100%);
+      --gradient-success: linear-gradient(135deg, #00d084 0%, #00b894 100%);
+      --gradient-warning: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%);
+      --gradient-error: linear-gradient(135deg, #ff3040 0%, #e74c3c 100%);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .container {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+      position: relative;
+    }
+
+    .background-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.03;
+      background-image: 
+        radial-gradient(circle at 25% 25%, #1877f2 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, #42a5f5 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(26, 26, 26, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 0;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo i {
+      font-size: 2rem;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg-tertiary);
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px var(--shadow);
+    }
+
+    .auth-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .auth-form {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      position: relative;
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      background: var(--bg-tertiary);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 4px rgba(24, 119, 242, 0.1);
+    }
+
+    .input-field::placeholder {
+      color: var(--text-muted);
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      outline: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(24, 119, 242, 0.3);
+    }
+
+    .error-message {
+      color: var(--error);
+      font-size: 0.875rem;
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 48, 64, 0.1);
+      border: 1px solid rgba(255, 48, 64, 0.2);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-primary);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px var(--shadow);
+    }
+
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .stat-title {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .stat-icon.devices {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .stat-icon.active {
+      background: var(--gradient-success);
+      color: white;
+    }
+
+    .stat-icon.offline {
+      background: var(--gradient-warning);
+      color: white;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .stat-change {
+      font-size: 0.875rem;
+      color: var(--success);
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .devices-section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px var(--shadow);
+    }
+
+    .section-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .refresh-btn {
+      padding: 0.5rem 1rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.875rem;
+    }
+
+    .refresh-btn:hover {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    .devices-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .devices-table th {
+      background: var(--bg-tertiary);
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .devices-table td {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .devices-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .device-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .device-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .device-details h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .device-details p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-indicator.online {
+      background: rgba(0, 208, 132, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(0, 208, 132, 0.2);
+    }
+
+    .status-indicator.offline {
+      background: rgba(255, 149, 0, 0.1);
+      color: var(--warning);
+      border: 1px solid rgba(255, 149, 0, 0.2);
+    }
+
+    .status-indicator::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .time-ago {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-secondary);
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .empty-state h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      gap: 0.5rem;
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top: 2px solid var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-up {
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 1rem;
+      }
+
+      .header-content {
+        padding: 0 1rem;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .auth-form {
+        flex-direction: column;
+      }
+
+      .input-group {
+        min-width: auto;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .devices-table {
+        font-size: 0.875rem;
+      }
+
+      .devices-table th,
+      .devices-table td {
+        padding: 0.75rem 1rem;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Active Devices Dashboard</h1>
-    <div style="text-align:center; margin-bottom:20px;">
-      <input type="password" id="apiKeyInput" placeholder="Enter Admin API Key" />
-      <button id="loadBtn">Load Active Devices</button>
-    </div>
-    <div id="error"></div>
-    <table id="devicesTable" style="display:none;">
-      <thead>
-        <tr>
-          <th>Machine ID</th>
-          <th>Last Seen</th>
-          <th>Version</th>
-          <th>Platform</th>
-          <th>IP Address</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div class="background-pattern"></div>
+    
+    <header class="header">
+      <div class="header-content">
+        <div class="logo">
+          <i class="fas fa-bee"></i>
+          <span>Beesoft Live Dashboard</span>
+        </div>
+        <div class="status-badge">
+          <div class="status-dot"></div>
+          <span>Live Monitoring</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="auth-section fade-in">
+        <div class="auth-title">
+          <i class="fas fa-key"></i>
+          Admin Authentication
+        </div>
+        <div class="auth-form">
+          <div class="input-group">
+            <input type="password" id="apiKeyInput" class="input-field" placeholder="Enter your admin API key" />
+          </div>
+          <button id="loadBtn" class="btn btn-primary">
+            <i class="fas fa-unlock"></i>
+            Access Dashboard
+          </button>
+        </div>
+        <div id="error" class="error-message"></div>
+      </div>
+
+      <div id="dashboard" style="display: none;">
+        <div class="stats-grid">
+          <div class="stat-card slide-up">
+            <div class="stat-header">
+              <div class="stat-title">Total Devices</div>
+              <div class="stat-icon devices">
+                <i class="fas fa-desktop"></i>
+              </div>
+            </div>
+            <div class="stat-value" id="totalDevices">0</div>
+            <div class="stat-change">
+              <i class="fas fa-arrow-up"></i>
+              <span>All registered devices</span>
+            </div>
+          </div>
+
+          <div class="stat-card slide-up" style="animation-delay: 0.1s;">
+            <div class="stat-header">
+              <div class="stat-title">Active Now</div>
+              <div class="stat-icon active">
+                <i class="fas fa-circle"></i>
+              </div>
+            </div>
+            <div class="stat-value" id="activeDevices">0</div>
+            <div class="stat-change">
+              <i class="fas fa-arrow-up"></i>
+              <span>Online in last 5 minutes</span>
+            </div>
+          </div>
+
+          <div class="stat-card slide-up" style="animation-delay: 0.2s;">
+            <div class="stat-header">
+              <div class="stat-title">Offline</div>
+              <div class="stat-icon offline">
+                <i class="fas fa-circle-pause"></i>
+              </div>
+            </div>
+            <div class="stat-value" id="offlineDevices">0</div>
+            <div class="stat-change">
+              <i class="fas fa-arrow-down"></i>
+              <span>Inactive devices</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="devices-section slide-up" style="animation-delay: 0.3s;">
+          <div class="section-header">
+            <div class="section-title">
+              <i class="fas fa-list"></i>
+              Device Status
+            </div>
+            <button class="refresh-btn" onclick="loadDevices()">
+              <i class="fas fa-refresh"></i>
+              Refresh
+            </button>
+          </div>
+          
+          <div id="devicesContent">
+            <div class="loading">
+              <div class="spinner"></div>
+              <span>Loading devices...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
+
   <script>
+    let currentApiKey = '';
+    let refreshInterval;
+
     document.getElementById('loadBtn').onclick = async function() {
       const apiKey = document.getElementById('apiKeyInput').value.trim();
       const errorDiv = document.getElementById('error');
-      const table = document.getElementById('devicesTable');
-      errorDiv.textContent = '';
-      table.style.display = 'none';
+      const dashboard = document.getElementById('dashboard');
+      const authSection = document.querySelector('.auth-section');
+      
+      errorDiv.style.display = 'none';
+      
       if (!apiKey) {
-        errorDiv.textContent = 'Please enter your admin API key.';
+        showError('Please enter your admin API key.');
         return;
       }
+
       try {
-        const res = await fetch('/api/status', {
+        // Show loading state
+        this.innerHTML = '<div class="spinner"></div> Authenticating...';
+        this.disabled = true;
+
+        const response = await fetch('/api/status', {
           headers: { 'x-api-key': apiKey }
         });
-        if (!res.ok) {
+
+        if (!response.ok) {
           throw new Error('Invalid API key or server error.');
         }
-        const data = await res.json();
-        const tbody = table.querySelector('tbody');
-        tbody.innerHTML = '';
-        if (data.clients && data.clients.length > 0) {
-          data.clients.forEach(client => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${client.machineId}</td>
-              <td>${new Date(client.lastSeen).toLocaleString()}</td>
-              <td>${client.version}</td>
-              <td>${client.platform}</td>
-              <td>${client.ip}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-        } else {
-          const tr = document.createElement('tr');
-          tr.innerHTML = '<td colspan="5" style="text-align:center;">No active devices</td>';
-          tbody.appendChild(tr);
-        }
-        table.style.display = '';
+
+        currentApiKey = apiKey;
+        
+        // Hide auth section and show dashboard
+        authSection.style.display = 'none';
+        dashboard.style.display = 'block';
+        
+        // Load initial data
+        await loadDevices();
+        
+        // Set up auto-refresh
+        refreshInterval = setInterval(loadDevices, 30000); // Refresh every 30 seconds
+        
       } catch (err) {
-        errorDiv.textContent = err.message;
+        showError(err.message);
+      } finally {
+        this.innerHTML = '<i class="fas fa-unlock"></i> Access Dashboard';
+        this.disabled = false;
       }
     };
+
+    async function loadDevices() {
+      try {
+        const response = await fetch('/api/status', {
+          headers: { 'x-api-key': currentApiKey }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch device data');
+        }
+
+        const data = await response.json();
+        updateStats(data);
+        renderDevices(data.clients || []);
+        
+      } catch (error) {
+        console.error('Error loading devices:', error);
+        showError('Failed to load device data: ' + error.message);
+      }
+    }
+
+    function updateStats(data) {
+      const totalDevices = data.clients ? data.clients.length : 0;
+      const activeDevices = data.activeClientCount || 0;
+      const offlineDevices = Math.max(0, totalDevices - activeDevices);
+
+      document.getElementById('totalDevices').textContent = totalDevices;
+      document.getElementById('activeDevices').textContent = activeDevices;
+      document.getElementById('offlineDevices').textContent = offlineDevices;
+    }
+
+    function renderDevices(devices) {
+      const container = document.getElementById('devicesContent');
+      
+      if (!devices || devices.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-desktop"></i>
+            <h3>No Active Devices</h3>
+            <p>No devices have connected recently. Devices will appear here when they send heartbeats.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const tableHTML = `
+        <table class="devices-table">
+          <thead>
+            <tr>
+              <th>Device</th>
+              <th>Status</th>
+              <th>Platform</th>
+              <th>Version</th>
+              <th>Last Seen</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${devices.map(device => `
+              <tr>
+                <td>
+                  <div class="device-info">
+                    <div class="device-avatar">
+                      ${getDeviceInitials(device.machineId)}
+                    </div>
+                    <div class="device-details">
+                      <h4>${device.hostname || device.machineId}</h4>
+                      <p>${device.machineId}</p>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="status-indicator ${getDeviceStatus(device.lastSeen)}">
+                    ${getDeviceStatus(device.lastSeen)}
+                  </div>
+                </td>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fab fa-${getPlatformIcon(device.platform)}"></i>
+                    ${formatPlatform(device.platform)}
+                  </div>
+                </td>
+                <td>
+                  <span style="font-family: monospace; background: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px;">
+                    v${device.version}
+                  </span>
+                </td>
+                <td>
+                  <div class="time-ago">${formatTimeAgo(device.lastSeen)}</div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      
+      container.innerHTML = tableHTML;
+    }
+
+    function getDeviceInitials(machineId) {
+      return machineId.substring(0, 2).toUpperCase();
+    }
+
+    function getDeviceStatus(lastSeen) {
+      const now = new Date();
+      const lastSeenDate = new Date(lastSeen);
+      const diffMinutes = (now - lastSeenDate) / (1000 * 60);
+      
+      return diffMinutes <= 5 ? 'online' : 'offline';
+    }
+
+    function getPlatformIcon(platform) {
+      const icons = {
+        'win32': 'windows',
+        'darwin': 'apple',
+        'linux': 'linux',
+        'android': 'android',
+        'ios': 'apple'
+      };
+      return icons[platform] || 'desktop';
+    }
+
+    function formatPlatform(platform) {
+      const platforms = {
+        'win32': 'Windows',
+        'darwin': 'macOS',
+        'linux': 'Linux',
+        'android': 'Android',
+        'ios': 'iOS'
+      };
+      return platforms[platform] || platform;
+    }
+
+    function formatTimeAgo(dateString) {
+      const now = new Date();
+      const date = new Date(dateString);
+      const diffMs = now - date;
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMinutes / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffMinutes < 1) return 'Just now';
+      if (diffMinutes < 60) return `${diffMinutes}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      return `${diffDays}d ago`;
+    }
+
+    function showError(message) {
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
+
+    // Handle Enter key in API key input
+    document.getElementById('apiKeyInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('loadBtn').click();
+      }
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    });
   </script>
 </body>
 </html>
