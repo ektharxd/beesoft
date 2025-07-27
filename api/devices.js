@@ -121,51 +121,76 @@ export default async function handler(req, res) {
 
     // Handle device activation (PATCH)
     if (req.method === 'PATCH') {
-        // Require admin credentials
-        const { machineId, adminEmail, adminPassword, verifyOnly, isPermanent, trialDays } = req.body;
-        if (!machineId || !adminEmail || !adminPassword) {
-            return res.status(400).send('machineId, adminEmail, and adminPassword are required');
+        try {
+            // Require admin credentials
+            const { machineId, adminEmail, adminPassword, verifyOnly, isPermanent, trialDays } = req.body;
+            if (!machineId || !adminEmail || !adminPassword) {
+                return res.status(400).send('machineId, adminEmail, and adminPassword are required');
+            }
+
+            // Check admin in DB
+            const admin = await admins.findOne({ email: adminEmail, password: adminPassword });
+            if (!admin) {
+                return res.status(401).send('Invalid admin credentials');
+            }
+
+            // If verifyOnly is true, just return success (admin credentials are valid)
+            if (verifyOnly) {
+                return res.status(200).send('Admin verified');
+            }
+
+            const now = new Date();
+            const deviceIP = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
+
+            let updateData = {
+                activated: isPermanent ? true : false,
+                activationDate: now,
+                activatedBy: adminEmail,
+                lastSeen: now,
+                ip: deviceIP
+            };
+
+            // If not permanent activation, set trial period
+            if (!isPermanent && trialDays) {
+                updateData.trialStart = now;
+                updateData.trialEnd = new Date(now.getTime() + (trialDays * 24 * 60 * 60 * 1000));
+            }
+
+            // If permanent activation, remove from blacklist
+            if (isPermanent) {
+                await trialBlacklist.deleteOne({ machineId });
+            }
+
+            // Create or update the device
+            const result = await devices.updateOne(
+                { machineId },
+                { 
+                    $set: updateData,
+                    $setOnInsert: {
+                        version: 'unknown',
+                        platform: 'unknown',
+                        hostname: machineId,
+                        whatsappConnected: false,
+                        sessionActive: false,
+                        logs: [{
+                            timestamp: now,
+                            type: 'activation',
+                            ip: deviceIP,
+                            activationType: isPermanent ? 'permanent' : 'trial'
+                        }]
+                    }
+                },
+                { upsert: true }
+            );
+
+            return res.status(200).send(isPermanent ? 'Device permanently activated' : `Trial set for ${trialDays} days`);
+        } catch (error) {
+            console.error('Error in PATCH handler:', error);
+            return res.status(500).json({ 
+                error: 'Internal server error', 
+                message: error.message 
+            });
         }
-
-        // Check admin in DB
-        const admin = await admins.findOne({ email: adminEmail, password: adminPassword });
-        if (!admin) {
-            return res.status(401).send('Invalid admin credentials');
-        }
-
-        // If verifyOnly is true, just return success (admin credentials are valid)
-        if (verifyOnly) {
-            return res.status(200).send('Admin verified');
-        }
-
-        const now = new Date();
-        let updateData = {
-            activated: isPermanent ? true : false,
-            activationDate: now,
-            activatedBy: adminEmail
-        };
-
-        // If not permanent activation, set trial period
-        if (!isPermanent && trialDays) {
-            updateData.trialStart = now;
-            updateData.trialEnd = new Date(now.getTime() + (trialDays * 24 * 60 * 60 * 1000));
-        }
-
-        // If permanent activation, remove from blacklist
-        if (isPermanent) {
-            await trialBlacklist.deleteOne({ machineId });
-        }
-
-        const result = await devices.updateOne(
-            { machineId },
-            { $set: updateData }
-        );
-
-        if (result.matchedCount === 0) {
-            return res.status(404).send('Device not found');
-        }
-
-        return res.status(200).send(isPermanent ? 'Device permanently activated' : `Trial set for ${trialDays} days`);
     }
 
     // Handle status check (GET)
