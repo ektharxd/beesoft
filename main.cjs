@@ -533,6 +533,9 @@ function restartWhatsAppClient() {
 }
 
 function cleanupWhatsAppClient() {
+    // Stop connection monitoring
+    stopConnectionMonitoring();
+    
     if (waClient) {
         try {
             sendToUI('log', { level: 'info', message: '🧹 Cleaning up WhatsApp client...' });
@@ -556,7 +559,104 @@ function initializeAntiBanFeatures() {
     cleanMessageTracker();
     setInterval(cleanMessageTracker, 3600000);
     
+    // Initialize connection monitoring
+    initializeConnectionMonitoring();
+    
     sendToUI('log', { level: 'success', message: '✅ Anti-ban features activated' });
+}
+
+// Connection monitoring system
+let connectionMonitorInterval = null;
+
+function initializeConnectionMonitoring() {
+    sendToUI('log', { level: 'info', message: '🔍 Starting WhatsApp connection monitoring (every 2 seconds)...' });
+    
+    // Clear any existing interval
+    if (connectionMonitorInterval) {
+        clearInterval(connectionMonitorInterval);
+    }
+    
+    // Monitor connection every 2 seconds
+    connectionMonitorInterval = setInterval(async () => {
+        await checkWhatsAppClientConnection();
+    }, 2000);
+}
+
+function stopConnectionMonitoring() {
+    if (connectionMonitorInterval) {
+        clearInterval(connectionMonitorInterval);
+        connectionMonitorInterval = null;
+        sendToUI('log', { level: 'info', message: '🔍 Connection monitoring stopped' });
+    }
+}
+
+async function checkWhatsAppClientConnection() {
+    try {
+        // If no client exists, mark as disconnected
+        if (!waClient) {
+            if (isReady) {
+                isReady = false;
+                sendToUI('log', { level: 'warning', message: '📱 WhatsApp client is null - Status changed to disconnected' });
+                sendToUI('whatsapp-disconnected', { reason: 'client_null', message: 'WhatsApp client is not available' });
+            }
+            return;
+        }
+
+        // Try to get client state
+        let clientState = null;
+        try {
+            clientState = await waClient.getState();
+        } catch (error) {
+            // If we can't get state, client is likely disconnected
+            if (isReady) {
+                isReady = false;
+                sendToUI('log', { level: 'warning', message: `📱 Cannot get WhatsApp client state: ${error.message} - Status changed to disconnected` });
+                sendToUI('whatsapp-disconnected', { reason: 'state_check_failed', message: 'Cannot get client state' });
+            }
+            return;
+        }
+
+        // Check if client state indicates disconnection
+        if (clientState === 'UNPAIRED' || clientState === 'UNPAIRED_IDLE') {
+            if (isReady) {
+                isReady = false;
+                sendToUI('log', { level: 'warning', message: `📱 WhatsApp client unpaired (${clientState}) - Status changed to disconnected` });
+                sendToUI('whatsapp-disconnected', { reason: 'unpaired', message: `Client state: ${clientState}` });
+            }
+            return;
+        }
+
+        // Try to ping the client with a simple operation
+        try {
+            await waClient.getContacts();
+        } catch (error) {
+            // If basic operations fail, client is likely disconnected
+            if (isReady && (error.message.includes('Session closed') || 
+                           error.message.includes('Protocol error') || 
+                           error.message.includes('Target closed') ||
+                           error.message.includes('Connection closed'))) {
+                isReady = false;
+                sendToUI('log', { level: 'warning', message: `📱 WhatsApp client connection lost: ${error.message} - Status changed to disconnected` });
+                sendToUI('whatsapp-disconnected', { reason: 'connection_lost', message: 'Client connection lost' });
+            }
+            return;
+        }
+
+        // If we reach here and client state is good, ensure we're marked as connected
+        if (clientState === 'CONNECTED' && !isReady) {
+            isReady = true;
+            sendToUI('log', { level: 'success', message: '📱 WhatsApp client connection restored - Status changed to connected' });
+            sendToUI('whatsapp-ready', { connected: true });
+        }
+
+    } catch (error) {
+        // General error in monitoring
+        if (isReady) {
+            isReady = false;
+            sendToUI('log', { level: 'warning', message: `📱 Connection monitoring error: ${error.message} - Status changed to disconnected` });
+            sendToUI('whatsapp-disconnected', { reason: 'monitoring_error', message: 'Connection monitoring failed' });
+        }
+    }
 }
 
 function cleanMessageTracker() {
@@ -817,7 +917,7 @@ function createWhatsAppWindow() {
     whatsappWindow.on('closed', () => {
         whatsappWindow = null;
         isReady = false;
-        sendToUI('log', { level: 'info', message: '🌐 WhatsApp Web window closed' });
+        sendToUI('log', { level: 'info', message: '🌐 WhatsApp Web window closed - Status changed to disconnected' });
         sendToUI('whatsapp-disconnected', { reason: 'window_closed', message: 'WhatsApp Web window was closed' });
     });
 
@@ -847,9 +947,14 @@ function createWhatsAppWindow() {
         }
     });
 
-    // FIXED status checking function - removed invalid CSS selector
+    // Enhanced status checking function with connection monitoring
     function checkWhatsAppStatus() {
         if (!whatsappWindow || whatsappWindow.isDestroyed()) {
+            if (isReady) {
+                isReady = false;
+                sendToUI('log', { level: 'warning', message: '🌐 WhatsApp window destroyed - Status changed to disconnected' });
+                sendToUI('whatsapp-disconnected', { reason: 'window_destroyed', message: 'WhatsApp window was destroyed' });
+            }
             return;
         }
 
@@ -865,6 +970,19 @@ function createWhatsAppWindow() {
                     
                     if (chromeError) {
                         return { status: 'chrome_error', message: 'Chrome compatibility issue detected' };
+                    }
+
+                    // Check for disconnection indicators
+                    const isDisconnected = bodyText.includes('Phone not connected') ||
+                                          bodyText.includes('Make sure your computer has an active internet connection') ||
+                                          bodyText.includes('Trying to reach phone') ||
+                                          bodyText.includes('Computer not connected') ||
+                                          bodyText.includes('Reconnecting') ||
+                                          document.querySelector('[data-testid="alert-phone-connection"]') !== null ||
+                                          document.querySelector('.landing-header') !== null;
+                    
+                    if (isDisconnected) {
+                        return { status: 'disconnected', message: 'WhatsApp Web is disconnected from phone' };
                     }
 
                     const isLoggedIn = document.querySelector('[data-testid="chat-list"]') !== null ||
@@ -917,7 +1035,12 @@ function createWhatsAppWindow() {
         `).then((result) => {
             handleWhatsAppStatus(result);
         }).catch((error) => {
-            sendToUI('log', { level: 'error', message: `❌ Error checking WhatsApp status: ${error.message}` });
+            // If we can't execute JavaScript, assume disconnected
+            if (isReady) {
+                isReady = false;
+                sendToUI('log', { level: 'error', message: `❌ WhatsApp status check failed - assuming disconnected: ${error.message}` });
+                sendToUI('whatsapp-disconnected', { reason: 'status_check_failed', message: 'Cannot communicate with WhatsApp Web' });
+            }
         });
     }
 
@@ -940,6 +1063,14 @@ function createWhatsAppWindow() {
                 `).catch(() => {
                     sendToUI('log', { level: 'error', message: '❌ Failed to fix Chrome compatibility' });
                 });
+                break;
+
+            case 'disconnected':
+                if (isReady) {
+                    isReady = false;
+                    sendToUI('log', { level: 'warning', message: '📱 WhatsApp Web disconnected from phone - Status changed to disconnected' });
+                    sendToUI('whatsapp-disconnected', { reason: 'phone_disconnected', message: 'WhatsApp Web is disconnected from phone' });
+                }
                 break;
 
             case 'logged_in':
@@ -992,7 +1123,7 @@ function createWhatsAppWindow() {
         } else {
             clearInterval(statusCheckInterval);
         }
-    }, 10000);
+    }, 2000);
 
     return whatsappWindow;
 }
