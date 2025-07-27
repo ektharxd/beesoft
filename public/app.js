@@ -337,6 +337,27 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
+
+  const termsCheckbox = document.getElementById('accept-terms-checkbox');
+  const getStartedBtn = document.getElementById('get-started-btn');
+  if (termsCheckbox && getStartedBtn) {
+    // Check localStorage for acceptance
+    if (localStorage.getItem('beesoft_terms_accepted') === 'true') {
+      termsCheckbox.checked = true;
+      getStartedBtn.disabled = false;
+    } else {
+      getStartedBtn.disabled = true;
+    }
+    termsCheckbox.addEventListener('change', function () {
+      if (termsCheckbox.checked) {
+        localStorage.setItem('beesoft_terms_accepted', 'true');
+        getStartedBtn.disabled = false;
+      } else {
+        localStorage.removeItem('beesoft_terms_accepted');
+        getStartedBtn.disabled = true;
+      }
+    });
+  }
 });
 
 // ==========================================================================

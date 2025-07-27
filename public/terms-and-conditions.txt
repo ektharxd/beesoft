@@ -1,0 +1,199 @@
+BeeSoft WhatsApp Automation - Comprehensive Terms and Conditions
+
+Last Updated: 2025-07-27
+
+1. Introduction: Acknowledgment and Binding Agreement
+
+Welcome to BeeSoft WhatsApp Automation ("the Software"), a sophisticated tool designed to enhance your communication efficiency. These comprehensive Terms and Conditions ("Terms") govern your access to, download, installation, and utilization of this Software. By proceeding with any of these actions—downloading, installing, or using the Software—you explicitly and unequivocally signify your full understanding, acknowledgment, and agreement to be legally bound by every provision contained within these meticulously detailed Terms. It is imperative that you dedicate sufficient time to review them with the utmost care and attention. Should you find any aspect of these Terms unacceptable or if you do not agree with any of the stipulations herein, you are strictly prohibited from using or accessing the Software. Your continued use of the Software, even after any updates or modifications to these Terms, constitutes your explicit and ongoing acceptance of the then-current version of these Terms.
+
+2. Comprehensive Disclaimer of Warranty: "AS IS" and "AS AVAILABLE" Basis
+
+The Software, including all its features, functionalities, and any associated services, is provided to you strictly on an "AS IS" and "AS AVAILABLE" basis. This means that BeeSoft and its developers offer the Software without any warranties, guarantees, or representations of any kind, whether express, implied, statutory, or otherwise. This extensive disclaimer includes, but is not limited to, implied warranties of merchantability (that the Software will be fit for its ordinary purposes), fitness for a particular purpose (that the Software will meet your specific needs), non-infringement of third-party rights (that the Software will not infringe on any intellectual property or other rights), accuracy, completeness, reliability, currentness, timeliness, security, or error-freeness.[1]
+
+The developers make no warranty, representation, or guarantee whatsoever that:
+
+The Software will meet your precise requirements or expectations.
+
+The Software's operation will be entirely uninterrupted, continuously available, timely, secure, or free from any errors, bugs, or defects.
+
+Any errors or defects in the Software will be corrected or resolved.
+
+The Software will be compatible with any specific hardware, software, or system configurations.
+
+The results that may be obtained from the use of the Software will be accurate, reliable, or complete.
+
+The quality of any products, services, information, or other material obtained by you through the Software will meet your expectations.
+
+The Software or the servers that make it available are free of viruses or other harmful components.
+
+The Software will protect your data from all forms of unauthorized access, hacking, or breaches. While security measures are implemented, complete immunity cannot be guaranteed.
+
+You expressly acknowledge and agree that your use of the Software is undertaken solely at your own discretion and risk.[1] You assume full responsibility for any and all costs associated with necessary servicing, repair, or correction of your equipment, software, or data that may arise from the use of the Software.
+
+3. Robust Security Measures: Protocols and User Responsibilities
+
+BeeSoft is committed to safeguarding your data and employs what it considers to be industry-standard security protocols and best practices designed to protect your valuable information from unauthorized access, malicious hacking attempts, and data breaches. These measures may include, but are not limited to, the encryption of sensitive data both at rest and in transit, the implementation of secure update mechanisms to ensure software integrity, and the undertaking of regular security reviews and assessments to identify and mitigate potential vulnerabilities.
+
+However, it is crucial to understand that despite these diligent efforts, no digital system, network, or data transmission method can ever be guaranteed to be absolutely 100% immune or impervious to all forms of attacks, intrusions, or unforeseen technical failures. The inherent nature of online environments means that absolute security cannot be assured. Therefore, users bear significant responsibility for maintaining the security of their own devices (e.g., computers, smartphones), their network connections, and their BeeSoft WhatsApp Automation accounts. This includes, but is not limited to, using strong, unique passwords, enabling multi-factor authentication where available, regularly updating their operating systems and other software, exercising caution with suspicious links or communications, and refraining from sharing sensitive login credentials. Your vigilance is a critical component of your data's security.
+
+4. Data Collection and Storage: Localized Control with Limited Exceptions
+
+The Software is primarily designed to operate with a strong emphasis on user data privacy and localized control. Consequently, all critical operational data, including but not limited to your campaign details, device-specific information, and general usage patterns, are stored exclusively and securely on your local device. This architecture minimizes the transmission of your sensitive data to external servers, providing you with greater control and privacy.
+
+However, it is important to understand that certain limited and essential data transmissions to external servers are necessary for the proper functioning and improvement of the Software. These carefully defined exceptions include:
+
+Update Checks: The Software may periodically communicate with BeeSoft's servers to check for available software updates. This process may involve sending non-identifiable information such as the current Software version and your operating system platform details, solely for the purpose of determining update compatibility and availability.
+
+Error Reporting (Optional): If you explicitly enable the error reporting feature within the Software, anonymized crash logs and technical error data may be transmitted to BeeSoft's servers. This data is meticulously stripped of any personally identifiable information and is used exclusively for diagnosing and resolving software bugs, improving stability, and enhancing overall product performance. You retain full control over enabling or disabling this feature.
+
+License or Activation Checks (If Applicable): In scenarios where the Software requires a license key or activation, limited data necessary to verify the validity of your license or activation status may be transmitted to BeeSoft's license servers. This ensures legitimate use and compliance with licensing terms.
+
+BeeSoft firmly commits that it does not, and will not, engage in the sale, sharing, distribution, or utilization of your personal or campaign data for any purpose other than the core functionalities of providing, maintaining, supporting, and continually improving the Software. Your data privacy is paramount to our operational philosophy.
+
+5. Privacy Policy: Your Data, Your Control
+
+Your privacy is of the utmost importance to us at BeeSoft. We adhere to a strict privacy philosophy concerning the BeeSoft WhatsApp Automation Software. A fundamental principle of our design is that all your operational data, including messages, contact lists, and media processed by the Software, remains exclusively on your local device. We do not access, review, or store your communications, contacts, or media in any manner.
+
+Any data that is collected, as outlined in the "Data Collection and Storage" section (e.g., for update checks or optional error reporting), is rigorously anonymized to remove any direct or indirect personal identifiers. This anonymized data is then used solely for legitimate technical support, diagnostic purposes, and the ongoing enhancement of the Software's performance and features. Your explicit choice is required should you wish to export or share any data from your device. We are not a data broker; we are a software provider focused on empowering your automation needs while respecting your privacy.
+
+6. User Responsibilities: Adherence to Laws and Platform Policies is Paramount
+
+As a user of BeeSoft WhatsApp Automation, you acknowledge and agree that you bear sole and absolute responsibility for your actions and the manner in which you utilize the Software. This critical responsibility includes, but is not limited to, the following obligations:
+
+Compliance with Laws: You must strictly comply with all applicable local, national, and international laws, regulations, and statutes relevant to your use of the Software, including but not limited to those pertaining to electronic communications, data privacy, consumer protection, and anti-spam legislation.
+
+Adherence to WhatsApp's Terms of Service and Policies: THIS IS CRITICAL. You are solely and entirely responsible for understanding, continuously monitoring, and strictly adhering to WhatsApp’s own Terms of Service, Acceptable Use Policies, Business Messaging Policies, and any other guidelines or directives issued by WhatsApp (collectively, "WhatsApp Policies").[2][3][4][5][6][7][8] WhatsApp explicitly prohibits bulk messaging, automated messaging (unless via their official Business API with prior approval), and non-personal use without authorization.[3][4][5][7][8] Any violation of WhatsApp's Policies, regardless of whether it is facilitated by the Software, is entirely your responsibility and may lead to severe consequences, including the immediate and permanent banning or suspension of your WhatsApp account(s).[2][3][4][5][6]
+
+Recipient Consent: You must ensure that you possess all necessary and valid legal rights, permissions, and consents from all recipients before sending any messages to them using the Software. This includes obtaining explicit opt-in consent where required by law or platform policy. You are solely responsible for managing and proving such consents.
+
+Prohibited Activities: You explicitly agree not to use the Software for any unlawful, abusive, harassing, defamatory, or fraudulent activities. This includes, without limitation, sending unsolicited commercial communications (spam), engaging in harassment, disseminating misinformation, promoting illegal goods or services, or any other activity that could be deemed harmful, unethical, or illegal.[3][5][6][9]
+
+Device and Credential Security: You are solely responsible for maintaining the security and confidentiality of your own device(s) on which the Software is installed, as well as your login credentials for both the Software and your WhatsApp account. Any unauthorized access or activity occurring due to your failure to secure your device or credentials is your sole responsibility.
+
+WARNING: Failure to comply with any of the above user responsibilities, particularly the WhatsApp Policies, carries significant risks, including but not limited to the permanent loss of your WhatsApp account(s) and potential legal liabilities.
+
+7. Critical Warning Regarding WhatsApp Service Compliance and Account Bans: YOUR SOLE RESPONSIBILITY
+
+It is absolutely imperative that you, the user, fully understand and accept that using any automation software, including BeeSoft WhatsApp Automation, carries inherent risks related to the terms and conditions of third-party messaging platforms, most notably WhatsApp.
+
+WHATSAPP'S POLICIES ARE STRICT. WhatsApp has clearly stated that it is designed for private messaging and has implemented robust measures, including machine learning-based systems, to detect and ban accounts engaged in activities that violate its Terms of Service.[4][5] This explicitly includes, but is not limited to, sending bulk or automated messages, using unofficial or modified versions of their application, engaging in spam, or any other form of misuse that could put other users' safety at risk or violate their policies on acceptable use.[2][3][4][5][6][7] WhatsApp actively bans millions of accounts monthly for such violations.[4][5]
+
+CONSEQUENCES OF NON-COMPLIANCE: Automated or bulk messaging, especially when conducted without strict adherence to WhatsApp's official Business API guidelines or outside their explicitly permitted uses, may be considered a direct violation of WhatsApp's Terms of Service. Such violations can, and often do, result in severe penalties imposed by WhatsApp, which may include, but are not limited to, the temporary suspension, permanent banning, or complete termination of your WhatsApp account(s) without prior notice.[2][3][4][5][6]
+
+BEE SOFT'S DISCLAIMER OF RESPONSIBILITY FOR BANS:
+BEE SOFT AND ITS DEVELOPERS ARE NOT RESPONSIBLE, AND EXPRESSLY DISCLAIM ALL LIABILITY, FOR ANY AND ALL CONSEQUENCES, DAMAGES, LOSSES, OR LIABILITIES WHATSOEVER ARISING FROM OR RELATED TO YOUR MISUSE OF THE SOFTWARE, YOUR NON-COMPLIANCE WITH APPLICABLE LAWS, OR YOUR FAILURE TO ADHERE TO WHATSAPP'S TERMS OF SERVICE AND POLICIES. This includes, without limitation, any WhatsApp account bans, suspensions, or other actions taken by WhatsApp against your account(s) or associated numbers.[1][2][3][4][5][6][10]
+
+THE ENTIRE RISK OF WHATSAPP ACCOUNT BANS, LEGAL ACTIONS, OR ANY OTHER ADVERSE CONSEQUENCES RESTS SOLELY AND EXCLUSIVELY WITH YOU, THE USER. You acknowledge that you use this Software at your own peril regarding compliance with WhatsApp's ecosystem. We cannot and do not guarantee that your use of the Software will prevent WhatsApp from taking action against your account. It is your continuous and ongoing duty to ensure that your messaging practices, even when utilizing this Software, remain fully compliant with all prevailing WhatsApp Policies.
+
+8. Limitation of Liability: Scope of Non-Responsibility
+
+To the absolute fullest extent permissible by applicable law, BeeSoft, its developers, affiliates, directors, officers, employees, agents, partners, and licensors (collectively, "the Developers") shall under no circumstances whatsoever be liable for any direct, indirect, incidental, special, consequential, punitive, or exemplary damages, losses, or liabilities of any kind, regardless of the form of action, whether in contract, tort (including negligence), strict liability, or otherwise.[1][9]
+
+This comprehensive limitation of liability includes, but is not limited to, damages for:
+
+Loss of data, whether temporary or permanent.
+
+Loss of profits, goodwill, business opportunities, or revenue.
+
+Loss of anticipated savings.
+
+Interruption of business operations.
+
+Costs of procuring substitute goods, services, or technology.
+
+Unauthorized access to or alteration of your transmissions or data.
+
+Any conduct, content, statements, or actions of any third party on or through the Software.
+
+Any other tangible or intangible losses arising from:
+
+The use or inability to use the Software.[1]
+
+Any failures of performance, error, omission, interruption, defect, delay in operation or transmission, computer virus, or line or system failure.
+
+The accuracy, completeness, or usefulness of any information obtained from the Software.
+
+Any errors or omissions in the Software.
+
+Any events beyond the Developer's reasonable control.
+
+Any other matter relating to the Software or your use thereof.
+
+This limitation of liability applies even if the Developers have been advised of the possibility of such damages, and even if a remedy set forth herein is found to have failed of its essential purpose. Some jurisdictions do not allow the exclusion of certain warranties or the limitation or exclusion of liability for incidental or consequential damages. Accordingly, some of the above limitations may not apply to you. In such jurisdictions, the Developers' liability will be limited to the greatest extent permitted by law.
+
+9. Updates and Changes: Evolution of the Software and Terms
+
+The Software is subject to continuous development and improvement. Consequently, the Software may, from time to time, automatically check for, download, and install updates, upgrades, enhancements, or bug fixes ("Updates") without requiring separate notification or explicit user consent. These Updates are crucial for maintaining the Software's functionality, security, and compatibility. Where technically feasible and specifically provided as a feature within the Software, you may have limited control over certain update settings; however, critical security and functionality updates may be mandatory.
+
+Furthermore, these Terms and Conditions are not static documents. BeeSoft reserves the exclusive right, at its sole discretion, to modify, amend, revise, or update these Terms at any time and for any reason deemed necessary. Such changes may be prompted by technological advancements, changes in legal or regulatory requirements, evolving industry best practices, or modifications to the Software's features.
+
+It is your sole and continuing responsibility to regularly review these Terms periodically to stay informed of any modifications. Your continued use of the Software subsequent to the posting of any revised Terms on our designated channels (e.g., within the app, on our website, or via direct notification) will constitute your explicit and unequivocal acceptance of, and agreement to be bound by, the new, updated Terms. If you do not agree to the revised Terms, your sole remedy is to cease all use of the Software immediately.
+
+10. Third-Party Services: External Dependencies and Separate Terms
+
+The BeeSoft WhatsApp Automation Software is designed to interact with, connect to, or rely upon various third-party services, platforms, and external servers for its operation and functionality. These third-party services include, but are not limited to, WhatsApp itself (the primary communication platform), cloud services for update distribution, and potentially other external APIs or content providers.
+
+You acknowledge and agree that BeeSoft and its developers are not responsible for, nor do they exercise control over, the availability, reliability, accuracy, content, functionality, security, or privacy practices of these third-party services. Your use of such third-party services is governed solely by their respective terms of service, privacy policies, and any other applicable agreements or guidelines. You are solely responsible for reviewing and adhering to all such third-party terms and policies.
+
+BeeSoft makes no representation or warranty regarding any transactions, communications, or interactions conducted through or in connection with these third-party services. Any and all liabilities, damages, or losses arising from your interaction with or reliance upon third-party services are exclusively between you and the respective third-party provider.
+
+11. Security Best Practices: Your Role in Data Protection
+
+While BeeSoft implements security measures as outlined in Section 3, your active participation in maintaining robust security practices is essential for the protection of your data and the secure operation of the Software. We strongly advise and you agree to adhere to the following security best practices:
+
+Strong, Unique Passwords: Utilize strong, complex, and unique passwords for your device, your BeeSoft WhatsApp Automation account, your WhatsApp account, and all other online accounts. Avoid using easily guessable information or reusing passwords across multiple services.
+
+Regular Updates: Keep your operating system (e.g., Windows, macOS), the BeeSoft WhatsApp Automation Software, your WhatsApp application, and all other software on your device consistently updated to their latest versions. Updates often include critical security patches.
+
+Data Minimization: Do not share sensitive personal, financial, or confidential information unnecessarily, especially not through insecure channels.
+
+Regular Data Backups: Periodically back up your important data, including any campaign or usage data stored locally by the Software. This will help mitigate potential data loss in the event of device failure or unforeseen issues.
+
+Phishing and Social Engineering Awareness: Exercise extreme caution regarding unsolicited emails, messages, or phone calls that request personal information, login credentials, or instruct you to click on suspicious links. Be vigilant against phishing, malware, and social engineering attacks designed to compromise your accounts or data. Verify the authenticity of any communication before taking action.
+
+Antivirus/Anti-malware Software: Install and regularly update reputable antivirus and anti-malware software on your device.
+
+By following these best practices, you significantly enhance your personal security posture and contribute to a safer environment for your data.
+
+12. Indemnification: Your Responsibility for Misuse
+
+You agree to fully indemnify, defend, and hold harmless BeeSoft, its developers, affiliates, subsidiaries, parent companies, officers, directors, employees, agents, licensors, and partners (collectively, "Indemnified Parties") from and against any and all claims, demands, actions, liabilities, damages, losses, costs, and expenses (including, without limitation, reasonable attorneys' fees and legal costs) arising from or in any way connected with:
+
+Your access to, use, or misuse of the Software.
+
+Your violation of any provision of these Terms and Conditions.
+
+Your breach of any applicable local, national, or international laws or regulations.
+
+Your violation of any third-party rights, including but not limited to, intellectual property rights, privacy rights, or contractual rights, especially those pertaining to WhatsApp's Terms of Service and policies.[1][3]
+
+Any content, data, or information that you transmit, submit, or make available through the Software.
+
+Any negligence, willful misconduct, or fraudulent act or omission by you.
+
+This indemnification obligation will survive the termination or expiration of these Terms and your use of the Software. You agree to cooperate fully as reasonably required in the defense of any claim. BeeSoft reserves the right, at its own expense, to assume the exclusive defense and control of any matter otherwise subject to indemnification by you, and you shall not in any event settle any matter without the prior written consent of BeeSoft.
+
+13. Termination: Right to Suspend or End Access
+
+BeeSoft reserves the absolute right, in its sole and unfettered discretion, to terminate or suspend your access to all or part of the Software at any time, with or without prior notice, for any reason whatsoever. Such reasons may include, but are not limited to, conduct that BeeSoft, in its good faith judgment, believes violates these Terms and Conditions, is harmful to other users of the Software, is detrimental to BeeSoft or its reputation, or is injurious to any third parties.
+
+This includes, without limitation, any suspected fraudulent activity, abusive behavior, illegal activities, or any actions that contravene the spirit or letter of these Terms, particularly regarding the acceptable use of the Software and compliance with third-party platform policies like WhatsApp's Terms of Service. In the event of such termination or suspension, you agree to immediately cease all use of the Software, and the Developers shall have no liability to you or any third party for any claims or damages arising out of any such termination or suspension.
+
+14. Severability: Maintaining Validity of Provisions
+
+If any provision or part of a provision of these Terms and Conditions is found by a court of competent jurisdiction or other governmental authority to be invalid, illegal, or unenforceable for any reason, such provision or part thereof shall be eliminated or limited to the minimum extent necessary. The invalidity or unenforceability of such provision shall not affect the validity or enforceability of the remaining provisions of these Terms, which shall remain in full force and effect. The remaining provisions shall continue to be binding and enforceable. In such cases, the invalid or unenforceable provision shall be replaced by a valid and enforceable provision that most closely reflects the intent of the original provision.
+
+15. Entire Agreement: Comprehensive Understanding
+
+These Terms and Conditions constitute the entire and complete agreement between you and BeeSoft regarding your use of the BeeSoft WhatsApp Automation Software. This comprehensive agreement supersedes all prior or contemporaneous communications, agreements, and understandings, whether electronic, oral, or written, between you and BeeSoft with respect to the subject matter hereof. Any representations, promises, or statements not expressly included in these Terms are hereby disclaimed and shall not be binding on BeeSoft.
+
+16. Contact Information: Support and Inquiries
+
+For any questions, technical support inquiries, or legal inquiries pertaining to these Terms or the BeeSoft WhatsApp Automation Software, please utilize the designated support feature available within the application itself. Alternatively, you may reach us directly via email at: support@beesoft.com. We endeavor to respond to all legitimate inquiries in a timely manner.
+
+17. Acknowledgment: Your Binding Acceptance
+
+By proceeding to download, install, or use the BeeSoft WhatsApp Automation Software, you hereby acknowledge, confirm, and affirm that you have thoroughly read, fully understood, and unequivocally agree to be legally bound by each and every one of these comprehensive Terms and Conditions. Your use of the Software signifies your complete acceptance of these provisions.
+
+END OF TERMS AND CONDITIONS
+
