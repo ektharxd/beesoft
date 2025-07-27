@@ -99,7 +99,8 @@ export default function handler(req, res) {
             const deviceData = {
                 machineId,
                 ...device,
-                isOnline: new Date(device.lastSeen) > fiveMinutesAgo
+                isOnline: new Date(device.lastSeen) > fiveMinutesAgo,
+                logs: device.logs || [] // include logs for history
             };
 
             allDevicesList.push(deviceData);

@@ -1817,51 +1817,68 @@ function showDeveloperTools() {
     bottom: 20px;
     right: 20px;
     z-index: 9999;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 40, 0.95));
-    backdrop-filter: blur(20px);
-    color: white;
-    padding: 20px;
-    border-radius: 20px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-    box-shadow: 
-      0 20px 40px rgba(0, 255, 255, 0.2),
-      0 0 0 1px rgba(0, 255, 255, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    min-width: 280px;
-    max-width: 90vw;
-    animation: devPanelGlow 2s ease-in-out infinite alternate;
+    background: #1e1e1e;
+    color: #b6ffb6;
+    padding: 0;
+    border-radius: 10px;
+    border: 1.5px solid #222;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+    font-family: 'ntype82', 'Courier New', monospace;
+    font-size: 13px;
+    min-width: 340px;
+    max-width: 95vw;
+    overflow: hidden;
   `;
   
   devPanel.innerHTML = `
     <div style="
-      background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
-      background-size: 200% 100%;
-      animation: gradientShift 3s ease-in-out infinite;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-weight: bold;
-      margin-bottom: 15px;
-      text-align: center;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
+      background: #23272b;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid #222;
+      position: relative;
     ">
-      ⚡ EKTHAR DEV CONSOLE ⚡
+      <span style="display: flex; gap: 7px; align-items: center;">
+        <span style="width: 12px; height: 12px; background: #ff5f56; border-radius: 50%; display: inline-block; border: 1px solid #d4d4d4; box-shadow: 0 1px 2px #0002;"></span>
+        <span style="width: 12px; height: 12px; background: #ffbd2e; border-radius: 50%; display: inline-block; border: 1px solid #d4d4d4; box-shadow: 0 1px 2px #0002;"></span>
+        <span style="width: 12px; height: 12px; background: #27c93f; border-radius: 50%; display: inline-block; border: 1px solid #d4d4d4; box-shadow: 0 1px 2px #0002;"></span>
+      </span>
+      <span style="flex:1;text-align:center;font-family:'ntype82','Courier New',monospace;font-size:1em;color:#b6ffb6;letter-spacing:0.5px;user-select:none;">Terminal — EKTHAR DEV CONSOLE</span>
     </div>
-    
     <div style="
-      background: rgba(0, 255, 255, 0.1);
-      border: 1px solid rgba(0, 255, 255, 0.3);
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 15px;
-      font-size: 10px;
-      text-align: center;
-      color: #00ffff;
+      font-family: 'ntype82', 'Courier New', monospace;
+      font-weight: 600;
+      margin-bottom: 0;
+      text-align: left;
+      font-size: 1.08em;
+      color: #b6ffb6;
+      background: #181c20;
+      padding: 18px 18px 10px 18px;
+      border-radius: 0;
+      border-left: none;
+      letter-spacing: 0.5px;
+      box-shadow: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    ">
+      <span style='color:#00ff00;font-weight:bold;font-size:1.1em;'>ekthar@beesoft</span>
+      <span style='color:#b6ffb6;font-size:1.1em;'>~ %</span>
+      <span style='font-family:inherit;'>EKTHAR DEV CONSOLE <span style='color:#00ff00;'>⚡</span></span>
+    </div>
+    <div style="
+      background: #23272b;
+      border: none;
+      border-radius: 0 0 8px 8px;
+      padding: 12px 18px 16px 18px;
+      margin-bottom: 0;
+      font-size: 11.5px;
+      text-align: left;
+      color: #b6ffb6;
+      font-family: 'ntype82', 'Courier New', monospace;
+      box-shadow: none;
     ">
       <div>🔐 AUTHENTICATED SESSION</div>
       <div style="margin-top: 4px; opacity: 0.7;">Access Level: DEVELOPER</div>
@@ -2204,7 +2221,7 @@ function showDeveloperLogin() {
 
 // Add keyboard shortcut for developer login (Ctrl+Shift+E)
 document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && e.shiftKey && e.key === 'E') {
+  if (e.ctrlKey && e.shiftKey && (e.key === 'E' || e.key === 'e')) {
     e.preventDefault();
     if (!isDeveloperAuthenticated) {
       showDeveloperLogin();

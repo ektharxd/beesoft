@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Beesoft Live Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- ntype82 font import -->
+  <link href="https://fonts.cdnfonts.com/css/ntype82" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     * {
@@ -34,17 +35,19 @@
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-primary);
+      font-family: 'ntype82', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #181c20 0%, #23272b 100%);
       color: var(--text-primary);
       line-height: 1.6;
       overflow-x: hidden;
+      letter-spacing: 0.01em;
     }
 
     .container {
       min-height: 100vh;
-      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+      background: linear-gradient(135deg, #23272b 0%, #181c20 100%);
       position: relative;
+      box-shadow: 0 0 32px 0 rgba(0,0,0,0.12);
     }
 
     .background-pattern {
@@ -654,6 +657,21 @@
           </div>
         </div>
       </div>
+    <!-- Device History Section -->
+    <section id="deviceHistorySection" class="devices-section slide-up" style="animation-delay: 0.4s; margin-top:2rem; display:none;">
+      <div class="section-header">
+        <div class="section-title">
+          <i class="fas fa-history"></i>
+          Device Connection History
+        </div>
+      </div>
+      <div id="deviceHistoryContent">
+        <div class="loading">
+          <div class="spinner"></div>
+          <span>Loading device history...</span>
+        </div>
+      </div>
+    </section>
     </main>
   </div>
 
@@ -720,7 +738,7 @@
         const data = await response.json();
         updateStats(data);
         renderDevices(data.clients || []);
-        
+        renderDeviceHistory(data.clients || []);
       } catch (error) {
         console.error('Error loading devices:', error);
         showError('Failed to load device data: ' + error.message);
@@ -808,6 +826,53 @@
       `;
       
       container.innerHTML = tableHTML;
+    }
+
+    // Device History Rendering
+    function renderDeviceHistory(devices) {
+      const section = document.getElementById('deviceHistorySection');
+      const container = document.getElementById('deviceHistoryContent');
+      if (!devices || devices.length === 0) {
+        section.style.display = 'none';
+        return;
+      }
+      section.style.display = 'block';
+      let historyHTML = '';
+      devices.forEach(device => {
+        if (!device.logs || device.logs.length === 0) return;
+        historyHTML += `<div style="margin-bottom:2rem;">
+          <div style="font-weight:600;font-size:1.1rem;margin-bottom:0.5rem;color:var(--accent-primary);">
+            <i class='fas fa-desktop'></i> ${device.hostname || device.machineId} (${device.machineId})
+          </div>
+          <table class="devices-table" style="font-size:0.95em;">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>IP</th>
+                <th>Version</th>
+                <th>WhatsApp</th>
+                <th>Session</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${device.logs.map(log => `
+                <tr>
+                  <td><span style='font-family:monospace;'>${log.timestamp.replace('T',' ').replace('Z','')}</span></td>
+                  <td>${log.ip || 'unknown'}</td>
+                  <td>v${log.version || 'unknown'}</td>
+                  <td>${log.whatsappConnected ? '<span style="color:var(--success);">Connected</span>' : '<span style="color:var(--error);">No</span>'}</td>
+                  <td>${log.sessionActive ? '<span style="color:var(--success);">Active</span>' : '<span style="color:var(--warning);">Inactive</span>'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>`;
+      });
+      if (!historyHTML) {
+        container.innerHTML = `<div class='empty-state'><i class='fas fa-history'></i><h3>No device history yet</h3></div>`;
+      } else {
+        container.innerHTML = historyHTML;
+      }
     }
 
     function getDeviceInitials(machineId) {
