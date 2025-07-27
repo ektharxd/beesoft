@@ -449,16 +449,6 @@ function initializeTrialSystem() {
     localStorage.setItem('beesoft_trial', encrypt(JSON.stringify(obj)));
   }
 
-  function getAdminData() {
-    const data = localStorage.getItem('beesoft_admin');
-    if (!data) return null;
-    try { 
-      return JSON.parse(decrypt(data)); 
-    } catch { 
-      return null; 
-    }
-  }
-
   // Page display logic
   function showPage(pageId) {
     const pages = ['welcome-page', 'main-app-page', 'trial-lock-page'];
@@ -549,6 +539,7 @@ function initializeTrialSystem() {
     adminLoginBtn.addEventListener('click', () => {
       const form = document.getElementById('admin-login-form');
       if (form) {
+        // Only toggle the admin login form, do not show the main UI or trigger any other UI changes
         form.style.display = form.style.display === 'block' ? 'none' : 'block';
       }
     });
@@ -2309,6 +2300,10 @@ setTimeout(() => {
 const API_URL = 'https://beesoft-one.vercel.app/api/devices';
 
 function getOrCreateDeviceId() {
+  if (window.electronAPI && typeof window.electronAPI.getMachineId === 'function') {
+    return window.electronAPI.getMachineId();
+  }
+  // fallback to localStorage for browser
   let id = localStorage.getItem('beesoft_device_id');
   if (!id) {
     id = 'bs-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now();
@@ -2341,6 +2336,15 @@ async function checkActivationStatus() {
     });
     if (!response.ok) throw new Error('API error');
     const data = await response.json();
+    if (data.isBlacklisted) {
+      document.getElementById('main-app-page').style.display = 'none';
+      document.getElementById('trial-lock-page').style.display = 'flex';
+      const trialInfo = document.getElementById('trial-info');
+      if (trialInfo) {
+        trialInfo.textContent = 'Trial expired. Please contact admin to activate.';
+      }
+      return;
+    }
     if (data.canUse) {
       document.getElementById('main-app-page').style.display = 'flex';
       document.getElementById('trial-lock-page').style.display = 'none';

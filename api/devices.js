@@ -21,6 +21,7 @@ export default async function handler(req, res) {
     const db = client.db(dbName);
     const devices = db.collection('devices');
     const admins = db.collection('admins');
+    const trialBlacklist = db.collection('trialBlacklist');
 
     // Handle heartbeat (POST)
     if (req.method === 'POST') {
@@ -81,7 +82,15 @@ export default async function handler(req, res) {
             { upsert: true }
         );
         // Calculate status
-        const isTrialExpired = now > trialEnd;
+        let isTrialExpired = false;
+        if (trialEnd && now > trialEnd) {
+            isTrialExpired = true;
+            // Add to blacklist if not already
+            const isBlacklisted = await trialBlacklist.findOne({ machineId });
+            if (!isBlacklisted) {
+                await trialBlacklist.insertOne({ machineId });
+            }
+        }
         return res.status(200).json({
             machineId,
             trialStart,
@@ -90,7 +99,8 @@ export default async function handler(req, res) {
             activationDate,
             activatedBy,
             isTrialExpired,
-            canUse: activated || !isTrialExpired
+            isBlacklisted: !!isBlacklisted || isTrialExpired,
+            canUse: activated || (!isTrialExpired && !isBlacklisted)
         });
     }
 
