@@ -2303,20 +2303,35 @@ setTimeout(() => {
 }, 500);
 
 // === Activation & Trial System Integration ===
+const API_URL = 'https://beesoft-one.vercel.app/api/devices';
+
 function getOrCreateDeviceId() {
   let id = localStorage.getItem('beesoft_device_id');
   if (!id) {
-    // Simple random ID generator
     id = 'bs-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now();
     localStorage.setItem('beesoft_device_id', id);
   }
   return id;
 }
 
+async function registerDeviceIfNeeded(machineId) {
+  // Try to POST to register the device; ignore errors if already exists
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ machineId })
+    });
+  } catch (e) {
+    // Ignore errors (device may already exist)
+  }
+}
+
 async function checkActivationStatus() {
   const machineId = getOrCreateDeviceId();
+  await registerDeviceIfNeeded(machineId);
   try {
-    const response = await fetch('/api/devices', {
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ machineId })
@@ -2324,10 +2339,8 @@ async function checkActivationStatus() {
     if (!response.ok) throw new Error('API error');
     const data = await response.json();
     if (data.canUse) {
-      // Allow app usage
       document.getElementById('main-app-page').style.display = 'flex';
       document.getElementById('trial-lock-page').style.display = 'none';
-      // Optionally show trial/activation info
       const statusAlert = document.getElementById('status-alert');
       if (statusAlert) {
         if (data.activated) {
@@ -2338,7 +2351,6 @@ async function checkActivationStatus() {
         }
       }
     } else {
-      // Block usage
       document.getElementById('main-app-page').style.display = 'none';
       document.getElementById('trial-lock-page').style.display = 'flex';
       const trialInfo = document.getElementById('trial-info');
@@ -2351,13 +2363,41 @@ async function checkActivationStatus() {
       }
     }
   } catch (e) {
-    // Fallback: show error and block usage
     document.getElementById('main-app-page').style.display = 'none';
     document.getElementById('trial-lock-page').style.display = 'flex';
     const trialInfo = document.getElementById('trial-info');
-    if (trialInfo) trialInfo.textContent = 'Unable to verify activation. Please check your internet connection.';
+    if (trialInfo) trialInfo.textContent = 'Unable to verify activation. Please check your internet connection or contact support.';
   }
 }
 
-// Call this on app startup
+if (window.adminAuthBtn) {
+  adminAuthBtn.addEventListener('click', async () => {
+    const username = document.getElementById('admin-username').value.trim();
+    const password = document.getElementById('admin-password').value.trim();
+    const errorEl = document.getElementById('admin-login-error');
+    if (!username || !password) {
+      if (errorEl) errorEl.textContent = 'Please enter both admin email and password.';
+      return;
+    }
+    const machineId = getOrCreateDeviceId();
+    await registerDeviceIfNeeded(machineId);
+    try {
+      const response = await fetch(API_URL, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ machineId, adminEmail: username, adminPassword: password })
+      });
+      if (!response.ok) {
+        const msg = await response.text();
+        if (errorEl) errorEl.textContent = msg || 'Activation failed.';
+        return;
+      }
+      await checkActivationStatus();
+      if (errorEl) errorEl.textContent = '';
+    } catch (e) {
+      if (errorEl) errorEl.textContent = 'Network error. Please check your internet connection or contact support.';
+    }
+  });
+}
+
 window.addEventListener('DOMContentLoaded', checkActivationStatus);
