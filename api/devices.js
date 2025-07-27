@@ -46,18 +46,19 @@ export default async function handler(req, res) {
                     return res.status(400).send('machineId is required');
                 }
 
+                // Always define isBlacklisted at the very top
+                let isBlacklisted = false;
+                let isTrialExpired = false;
+                let trialStart, trialEnd, activated, activationDate, activatedBy;
+                const TRIAL_DAYS = 7;
+
                 const now = new Date();
                 const deviceIP = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
                 
-                // Always define isBlacklisted as boolean
-                let isBlacklisted = false;
                 // Check if device exists and if it's blacklisted
                 let device = await devices.findOne({ machineId });
                 let blacklistDoc = await trialBlacklist.findOne({ machineId });
                 if (blacklistDoc) isBlacklisted = true;
-                
-                let trialStart, trialEnd, activated, activationDate, activatedBy;
-                const TRIAL_DAYS = 7;
                 
                 if (!device) {
                     // New device: set trial period and not activated
@@ -120,7 +121,6 @@ export default async function handler(req, res) {
                 }
 
                 // Calculate status
-                let isTrialExpired = false;
                 if (trialEnd && now > trialEnd) {
                     isTrialExpired = true;
                     // Add to blacklist if not already
