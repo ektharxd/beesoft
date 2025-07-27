@@ -1479,7 +1479,9 @@ document.addEventListener('keydown', (e) => {
     }
   }
 });
-// ==========================================================================// ==========================================================================// ==========================================================================// ==========================================================================
+// ==========================================================================// ==========================================================================
+// ==========================================================================
+// ==========================================================================
 // TOTAL MESSAGES COUNTER SYSTEM (MAIN APP ONLY)
 // ==========================================================================
 
@@ -1590,67 +1592,61 @@ function incrementTotalMessagesSent(count = 1) {
 // Show detailed total messages modal
 function showTotalMessagesModal() {
   const totalCount = getTotalMessagesSent();
-  const modalHTML = `
-    <div style="text-align: center;">
-      <div style="font-size: 4rem; margin-bottom: 20px;">📊</div>
-      <h3 style="margin-bottom: 10px; color: var(--color-primary);">Total Messages Statistics</h3>
-      <div style="background: var(--surface-secondary); padding: 20px; border-radius: 12px; margin: 20px 0;">
-        <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-success); margin-bottom: 8px;">
-          ${totalCount.toLocaleString()}
-        </div>
-        <div style="font-size: 1.1rem; color: var(--text-secondary);">
-          Total Messages Sent All Time
-        </div>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0;">
-        <div style="background: var(--surface-secondary); padding: 16px; border-radius: 8px;">
-          <div style="font-size: 1.5rem; font-weight: 600; color: var(--color-primary);">
-            ${Math.ceil(totalCount / 30)}
+  // Custom modal HTML with X button
+  const modalId = 'total-messages-modal';
+  let modal = document.getElementById(modalId);
+  if (modal) modal.remove();
+  modal = document.createElement('div');
+  modal.id = modalId;
+  modal.className = 'modal-overlay';
+  modal.style.display = 'flex';
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 400px; position: relative;">
+      <button id="close-total-messages-modal-btn" class="btn btn-ghost btn-sm" style="position: absolute; top: 16px; right: 16px; z-index: 10;">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      <div style="text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 20px;">📊</div>
+        <h3 style="margin-bottom: 10px; color: var(--color-primary);">Total Messages Statistics</h3>
+        <div style="background: var(--surface-secondary); padding: 20px; border-radius: 12px; margin: 20px 0;">
+          <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-success); margin-bottom: 8px;">
+            ${totalCount.toLocaleString()}
           </div>
-          <div style="font-size: 0.9rem; color: var(--text-tertiary);">
-            Avg. per Month
-          </div>
-        </div>
-        <div style="background: var(--surface-secondary); padding: 16px; border-radius: 8px;">
-          <div style="font-size: 1.5rem; font-weight: 600; color: var(--color-primary);">
-            ${Math.ceil(totalCount / 7)}
-          </div>
-          <div style="font-size: 0.9rem; color: var(--text-tertiary);">
-            Avg. per Week
+          <div style="font-size: 1.1rem; color: var(--text-secondary);">
+            Total Messages Sent All Time
           </div>
         </div>
-      </div>
-      <div style="margin-top: 20px; padding: 16px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 8px; color: white;">
-        <div style="font-size: 0.9rem; opacity: 0.9;">
-          🎯 Keep up the great work! Every message sent helps grow your business.
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0;">
+          <div style="background: var(--surface-secondary); padding: 16px; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: 600; color: var(--color-primary);">
+              ${Math.ceil(totalCount / 30)}
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-tertiary);">
+              Avg. per Month
+            </div>
+          </div>
+          <div style="background: var(--surface-secondary); padding: 16px; border-radius: 8px;">
+            <div style="font-size: 1.5rem; font-weight: 600; color: var(--color-primary);">
+              ${Math.ceil(totalCount / 7)}
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-tertiary);">
+              Avg. per Week
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 20px; padding: 16px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 8px; color: white;">
+          <div style="font-size: 0.9rem; opacity: 0.9;">
+            🎯 Keep up the great work! Every message sent helps grow your business.
+          </div>
         </div>
       </div>
     </div>
   `;
-
-  if (typeof showModal === 'function') {
-    showModal('📊 Message Statistics', modalHTML, {
-      okText: 'Close',
-      cancelText: 'Reset Counter',
-      validate: () => true
-    }).then((result) => {
-      if (result === false) { // Cancel button (Reset Counter)
-        if (typeof showConfirmationModal === 'function') {
-          showConfirmationModal(
-            'Reset Message Counter',
-            'Are you sure you want to reset the total message counter to zero? This action cannot be undone.',
-            () => {
-              localStorage.setItem('beesoft_total_messages_sent', '0');
-              updateTotalMessagesDisplay();
-              if (window.notifications) {
-                window.notifications.success('Message counter reset to zero');
-              }
-            }
-          );
-        }
-      }
-    });
-  }
+  document.body.appendChild(modal);
+  // Close on X click or overlay click
+  const closeBtn = document.getElementById('close-total-messages-modal-btn');
+  closeBtn.onclick = () => { modal.remove(); };
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 }
 
 // Celebrate milestone achievements
