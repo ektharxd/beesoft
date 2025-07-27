@@ -555,25 +555,34 @@ function initializeTrialSystem() {
   }
 
   if (adminAuthBtn) {
-    adminAuthBtn.addEventListener('click', () => {
+    adminAuthBtn.addEventListener('click', async () => {
       const username = document.getElementById('admin-username').value.trim();
       const password = document.getElementById('admin-password').value.trim();
       const errorEl = document.getElementById('admin-login-error');
 
       if (!username || !password) {
-        if (errorEl) errorEl.textContent = 'Please enter both username and password.';
+        if (errorEl) errorEl.textContent = 'Please enter both admin email and password.';
         return;
       }
 
-      let admin = getAdminData();
-      if (!admin) {
-        admin = { username: 'admin', password: 'beesoft@2025' };
-      }
-
-      if (admin.username === username && admin.password === password) {
-        showAdminModal(setTrialData);
-      } else {
-        if (errorEl) errorEl.textContent = 'Invalid admin credentials.';
+      // Server-based activation only
+      const machineId = getOrCreateDeviceId();
+      try {
+        const response = await fetch('/api/devices', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ machineId, adminEmail: username, adminPassword: password })
+        });
+        if (!response.ok) {
+          const msg = await response.text();
+          if (errorEl) errorEl.textContent = msg || 'Activation failed.';
+          return;
+        }
+        // Success: re-check activation status
+        await checkActivationStatus();
+        if (errorEl) errorEl.textContent = '';
+      } catch (e) {
+        if (errorEl) errorEl.textContent = 'Network error. Please try again.';
       }
     });
   }
@@ -1413,62 +1422,6 @@ function showConfirmationModal(title, message, onConfirm) {
       onConfirm();
     }
   });
-}
-
-function showAdminModal(setTrialData) {
-  const bodyHTML = `
-    <div class="form-group">
-      <label class="form-label" for="trial-days-input">Trial Days</label>
-      <input id="trial-days-input" type="number" class="form-input" min="1" max="365" placeholder="Enter number of days" />
-    </div>
-    <div class="form-group">
-      <button id="test-expiry-btn" class="btn btn-outline btn-full">Test Trial Expiry</button>
-    </div>
-    <div class="form-group">
-      <button id="change-admin-password-btn" class="btn btn-outline btn-full">Change Admin Password</button>
-    </div>
-  `;
-
-  showModal('Admin Actions', bodyHTML, {
-    okText: 'Update Trial',
-    cancelText: 'Activate App',
-    validate: () => {
-      const input = document.getElementById('trial-days-input');
-      const value = parseInt(input.value);
-      const errorEl = document.getElementById('modal-error');
-      
-      if (!value || value < 1 || value > 365) {
-        errorEl.textContent = 'Please enter a valid number of days (1-365).';
-        return false;
-      }
-      return true;
-    }
-  }).then((result) => {
-    if (result === true) {
-      // Update trial
-      const days = parseInt(document.getElementById('trial-days-input').value);
-      setTrialData({ start: Date.now(), days, activated: false });
-      window.notifications.success('Trial period updated. Reloading...');
-      setTimeout(() => location.reload(), 1000);
-    } else if (result === false) {
-      // Activate app (Cancel button)
-      setTrialData({ start: Date.now(), days: 9999, activated: true });
-      window.notifications.success('Application activated! Reloading...');
-      setTimeout(() => location.reload(), 1000);
-    }
-  });
-
-  // Add test expiry button handler
-  setTimeout(() => {
-    const testBtn = document.getElementById('test-expiry-btn');
-    if (testBtn) {
-      testBtn.onclick = () => {
-        setTrialData({ start: Date.now() - 8 * 24 * 60 * 60 * 1000, days: 7, activated: false });
-        window.notifications.info('Trial set to expired state. Reloading...');
-        setTimeout(() => location.reload(), 1000);
-      };
-    }
-  }, 100);
 }
 
 // ==========================================================================
@@ -2348,3 +2301,63 @@ setTimeout(() => {
     initializeTotalMessagesCounter();
   }
 }, 500);
+
+// === Activation & Trial System Integration ===
+function getOrCreateDeviceId() {
+  let id = localStorage.getItem('beesoft_device_id');
+  if (!id) {
+    // Simple random ID generator
+    id = 'bs-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now();
+    localStorage.setItem('beesoft_device_id', id);
+  }
+  return id;
+}
+
+async function checkActivationStatus() {
+  const machineId = getOrCreateDeviceId();
+  try {
+    const response = await fetch('/api/devices', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ machineId })
+    });
+    if (!response.ok) throw new Error('API error');
+    const data = await response.json();
+    if (data.canUse) {
+      // Allow app usage
+      document.getElementById('main-app-page').style.display = 'flex';
+      document.getElementById('trial-lock-page').style.display = 'none';
+      // Optionally show trial/activation info
+      const statusAlert = document.getElementById('status-alert');
+      if (statusAlert) {
+        if (data.activated) {
+          statusAlert.textContent = 'Application is permanently activated.';
+        } else {
+          const daysLeft = Math.ceil((new Date(data.trialEnd) - Date.now()) / (1000*60*60*24));
+          statusAlert.textContent = `Trial active. ${daysLeft} days left.`;
+        }
+      }
+    } else {
+      // Block usage
+      document.getElementById('main-app-page').style.display = 'none';
+      document.getElementById('trial-lock-page').style.display = 'flex';
+      const trialInfo = document.getElementById('trial-info');
+      if (trialInfo) {
+        if (data.isTrialExpired) {
+          trialInfo.textContent = 'Trial expired. Please contact admin to activate.';
+        } else {
+          trialInfo.textContent = 'This software is not activated. Please contact admin.';
+        }
+      }
+    }
+  } catch (e) {
+    // Fallback: show error and block usage
+    document.getElementById('main-app-page').style.display = 'none';
+    document.getElementById('trial-lock-page').style.display = 'flex';
+    const trialInfo = document.getElementById('trial-info');
+    if (trialInfo) trialInfo.textContent = 'Unable to verify activation. Please check your internet connection.';
+  }
+}
+
+// Call this on app startup
+window.addEventListener('DOMContentLoaded', checkActivationStatus);
