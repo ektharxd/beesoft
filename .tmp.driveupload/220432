@@ -25,83 +25,98 @@ export default async function handler(req, res) {
 
     // Handle heartbeat (POST)
     if (req.method === 'POST') {
-        const { machineId, version, platform, hostname, whatsappConnected, sessionActive } = req.body;
-        if (!machineId) {
-            return res.status(400).send('machineId is required');
-        }
-        const now = new Date();
-        const deviceIP = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
-        // Check if device exists
-        let device = await devices.findOne({ machineId });
-        let trialStart, trialEnd, activated, activationDate, activatedBy;
-        const TRIAL_DAYS = 7;
-        if (!device) {
-            // New device: set trial period and not activated
-            trialStart = now;
-            trialEnd = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
-            activated = false;
-            activationDate = null;
-            activatedBy = null;
-        } else {
-            trialStart = device.trialStart || now;
-            trialEnd = device.trialEnd || new Date(trialStart.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
-            activated = device.activated || false;
-            activationDate = device.activationDate || null;
-            activatedBy = device.activatedBy || null;
-        }
-        // Upsert device and add log
-        await devices.updateOne(
-            { machineId },
-            {
-                $set: {
-                    machineId,
-                    version: version || 'unknown',
-                    platform: platform || 'unknown',
-                    hostname: hostname || machineId,
-                    ip: deviceIP,
-                    whatsappConnected: whatsappConnected || false,
-                    sessionActive: sessionActive || false,
-                    lastSeen: now,
-                    trialStart,
-                    trialEnd,
-                    activated,
-                    activationDate,
-                    activatedBy
-                },
-                $push: {
-                    logs: {
-                        timestamp: now,
-                        type: 'heartbeat',
+        try {
+            const { machineId, version, platform, hostname, whatsappConnected, sessionActive } = req.body;
+            if (!machineId) {
+                return res.status(400).send('machineId is required');
+            }
+            const now = new Date();
+            const deviceIP = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
+            
+            // Check if device exists and if it's blacklisted
+            let device = await devices.findOne({ machineId });
+            let isBlacklisted = await trialBlacklist.findOne({ machineId });
+            
+            let trialStart, trialEnd, activated, activationDate, activatedBy;
+            const TRIAL_DAYS = 7;
+            
+            if (!device) {
+                // New device: set trial period and not activated
+                trialStart = now;
+                trialEnd = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+                activated = false;
+                activationDate = null;
+                activatedBy = null;
+            } else {
+                trialStart = device.trialStart || now;
+                trialEnd = device.trialEnd || new Date(trialStart.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+                activated = device.activated || false;
+                activationDate = device.activationDate || null;
+                activatedBy = device.activatedBy || null;
+            }
+
+            // Upsert device and add log
+            await devices.updateOne(
+                { machineId },
+                {
+                    $set: {
+                        machineId,
+                        version: version || 'unknown',
+                        platform: platform || 'unknown',
+                        hostname: hostname || machineId,
                         ip: deviceIP,
                         whatsappConnected: whatsappConnected || false,
                         sessionActive: sessionActive || false,
-                        version: version || 'unknown',
+                        lastSeen: now,
+                        trialStart,
+                        trialEnd,
+                        activated,
+                        activationDate,
+                        activatedBy
+                    },
+                    $push: {
+                        logs: {
+                            timestamp: now,
+                            type: 'heartbeat',
+                            ip: deviceIP,
+                            whatsappConnected: whatsappConnected || false,
+                            sessionActive: sessionActive || false,
+                            version: version || 'unknown',
+                        }
                     }
+                },
+                { upsert: true }
+            );
+
+            // Calculate status
+            let isTrialExpired = false;
+            if (trialEnd && now > trialEnd) {
+                isTrialExpired = true;
+                // Add to blacklist if not already
+                if (!isBlacklisted) {
+                    await trialBlacklist.insertOne({ machineId });
+                    isBlacklisted = true;
                 }
-            },
-            { upsert: true }
-        );
-        // Calculate status
-        let isTrialExpired = false;
-        if (trialEnd && now > trialEnd) {
-            isTrialExpired = true;
-            // Add to blacklist if not already
-            const isBlacklisted = await trialBlacklist.findOne({ machineId });
-            if (!isBlacklisted) {
-                await trialBlacklist.insertOne({ machineId });
             }
+
+            return res.status(200).json({
+                machineId,
+                trialStart,
+                trialEnd,
+                activated,
+                activationDate,
+                activatedBy,
+                isTrialExpired,
+                isBlacklisted: !!isBlacklisted,
+                canUse: activated || (!isTrialExpired && !isBlacklisted)
+            });
+        } catch (error) {
+            console.error('Error in POST handler:', error);
+            return res.status(500).json({ 
+                error: 'Internal server error', 
+                message: error.message 
+            });
         }
-        return res.status(200).json({
-            machineId,
-            trialStart,
-            trialEnd,
-            activated,
-            activationDate,
-            activatedBy,
-            isTrialExpired,
-            isBlacklisted: !!isBlacklisted || isTrialExpired,
-            canUse: activated || (!isTrialExpired && !isBlacklisted)
-        });
     }
 
     // Handle device activation (PATCH)

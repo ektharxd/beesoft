@@ -257,106 +257,87 @@ class FormValidator {
 // MAIN APPLICATION
 // ==========================================================================
 
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize global objects
-  window.appState = new AppState();
-  window.notifications = new NotificationManager();
-  window.logger = new ActivityLogger('live-log-list');
+// Define API_URL at the top level
+const API_URL = 'https://beesoft-one.vercel.app/api/devices';
 
-  // Initialize theme system
-  initializeTheme();
-  
-  // Initialize trial system
-  initializeTrialSystem();
-  
-  // Initialize main application
-  initializeMainApp();
-  
-  // Initialize network monitoring
-  initializeNetworkMonitoring();
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    console.log('Initializing app...');
+    
+    // Initialize core UI components first
+    initializeTheme();
+    window.appState = new AppState();
+    window.notifications = new NotificationManager();
+    window.logger = new ActivityLogger('activity-log');
 
-  // Start with trial check
-  checkTrial();
+    console.log('Core components initialized');
 
-  // Support modal logic
-  const supportModal = document.getElementById('support-modal');
-  const openSupportBtn = document.getElementById('open-support-modal-btn');
-  const openSupportBtnFooter = document.getElementById('open-support-modal-btn-footer');
-  const closeSupportBtn = document.getElementById('close-support-modal-btn');
-  const supportForm = document.getElementById('support-form');
-  const supportFormSuccess = document.getElementById('support-form-success');
-  const supportFormError = document.getElementById('support-form-error');
+    // Initialize admin functionality
+    initializeAdminButton();
+    console.log('Admin functionality initialized');
 
-  function openSupportModal() {
-    if (supportModal) supportModal.style.display = 'flex';
-    if (supportForm) {
-      supportForm.reset();
-      supportFormSuccess.style.display = 'none';
-      supportFormError.style.display = 'none';
-    }
-  }
-  function closeSupportModal() {
-    if (supportModal) supportModal.style.display = 'none';
-  }
-  if (openSupportBtn) openSupportBtn.addEventListener('click', openSupportModal);
-  if (openSupportBtnFooter) openSupportBtnFooter.addEventListener('click', openSupportModal);
-  if (closeSupportBtn) closeSupportBtn.addEventListener('click', closeSupportModal);
-  if (supportModal) {
-    supportModal.addEventListener('click', function(e) {
-      if (e.target === supportModal) closeSupportModal();
-    });
-  }
-  if (supportForm) {
-    supportForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      supportFormSuccess.style.display = 'none';
-      supportFormError.style.display = 'none';
-      const email = document.getElementById('support-email').value.trim();
-      const message = document.getElementById('support-message').value.trim();
-      try {
-        const response = await fetch('https://formspree.io/f/xblkoyno', {
-          method: 'POST',
-          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, message })
-        });
-        if (response.ok) {
-          supportFormSuccess.style.display = 'block';
-          supportFormError.style.display = 'none';
-          supportForm.reset();
-          setTimeout(() => {
-            // Optionally close modal here
-          }, 1800);
-        } else {
-          const data = await response.json();
-          supportFormError.textContent = (data && data.errors && data.errors[0] && data.errors[0].message) || 'Failed to send. Please try again.';
-          supportFormError.style.display = 'block';
-        }
-      } catch (err) {
-        supportFormError.textContent = 'Network error. Please try again.';
-        supportFormError.style.display = 'block';
-      }
-    });
-  }
-
-  const termsCheckbox = document.getElementById('accept-terms-checkbox');
-  const getStartedBtn = document.getElementById('get-started-btn');
-  if (termsCheckbox && getStartedBtn) {
-    // Check localStorage for acceptance
-    if (localStorage.getItem('beesoft_terms_accepted') === 'true') {
-      termsCheckbox.checked = true;
-      getStartedBtn.disabled = false;
-    } else {
-      getStartedBtn.disabled = true;
-    }
-    termsCheckbox.addEventListener('change', function () {
-      if (termsCheckbox.checked) {
-        localStorage.setItem('beesoft_terms_accepted', 'true');
-        getStartedBtn.disabled = false;
+    // Show loading or welcome state
+    const pages = ['welcome-page', 'main-app-page', 'trial-lock-page'];
+    pages.forEach(id => {
+      const page = document.getElementById(id);
+      if (page) {
+        page.style.display = 'none';
+        console.log(`Hidden page: ${id}`);
       } else {
-        localStorage.removeItem('beesoft_terms_accepted');
-        getStartedBtn.disabled = true;
+        console.warn(`Page not found: ${id}`);
       }
     });
+
+    // Start with welcome page
+    const welcomePage = document.getElementById('welcome-page');
+    if (welcomePage) {
+      welcomePage.style.display = 'flex';
+      console.log('Welcome page shown');
+    }
+
+    // Check activation status
+    console.log('Checking activation status...');
+    await checkActivationStatus();
+    console.log('Activation status checked');
+
+    // Initialize app features only if needed
+    const mainAppPage = document.getElementById('main-app-page');
+    if (mainAppPage && mainAppPage.style.display === 'flex') {
+      console.log('Initializing main app features...');
+      initializeMainApp();
+      initializeSessionControls();
+      initializeFileUpload();
+      initializeMessageComposer();
+      initializeImageUpload();
+      initializeWhatsAppConnection();
+      initializeNetworkMonitoring();
+      initializeTotalMessagesCounter();
+      console.log('Main app features initialized');
+    }
+
+    // Initialize common features
+    manageResponsiveUI();
+    initializePageMonitoring();
+    console.log('App initialization complete');
+
+  } catch (error) {
+    console.error('Error initializing app:', error);
+    // Show error state with more details
+    const pages = ['welcome-page', 'main-app-page', 'trial-lock-page'];
+    pages.forEach(id => {
+      const page = document.getElementById(id);
+      if (page) page.style.display = 'none';
+    });
+
+    const trialLockPage = document.getElementById('trial-lock-page');
+    if (trialLockPage) {
+      trialLockPage.style.display = 'flex';
+      const trialInfo = document.getElementById('trial-info');
+      if (trialInfo) {
+        const errorMessage = error.message || 'Unknown error';
+        trialInfo.textContent = `Error initializing application: ${errorMessage}. Please check your internet connection and try again.`;
+      }
+    }
   }
 });
 
@@ -2282,276 +2263,92 @@ function enhanceAdminLogin() {
   }
 }
 
-// Initialize everything when DOM is ready
-setTimeout(() => {
-  checkDeveloperAuth();
-  enhanceAdminLogin();
-  initializePageMonitoring();
-  manageResponsiveUI();
-  
-  // Initialize counter only when in main app
-  const mainAppPage = document.getElementById('main-app-page');
-  if (mainAppPage && mainAppPage.style.display !== 'none') {
-    initializeTotalMessagesCounter();
-  }
-}, 500);
+// Add admin button functionality
+function initializeAdminButton() {
+  const adminLoginBtn = document.getElementById('admin-login-btn');
+  const adminLoginForm = document.getElementById('admin-login-form');
+  const adminAuthBtn = document.getElementById('admin-auth-btn');
 
-// === Activation & Trial System Integration ===
-const API_URL = 'https://beesoft-one.vercel.app/api/devices';
-
-function getOrCreateDeviceId() {
-  if (window.electronAPI && typeof window.electronAPI.getMachineId === 'function') {
-    return window.electronAPI.getMachineId();
-  }
-  // fallback to localStorage for browser
-  let id = localStorage.getItem('beesoft_device_id');
-  if (!id) {
-    id = 'bs-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now();
-    localStorage.setItem('beesoft_device_id', id);
-  }
-  return id;
-}
-
-async function registerDeviceIfNeeded(machineId) {
-  // Try to POST to register the device; ignore errors if already exists
-  try {
-    await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ machineId })
-    });
-  } catch (e) {
-    // Ignore errors (device may already exist)
-  }
-}
-
-async function checkActivationStatus() {
-  const machineId = getOrCreateDeviceId();
-  await registerDeviceIfNeeded(machineId);
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ machineId })
-    });
-    if (!response.ok) throw new Error('API error');
-    const data = await response.json();
-    if (data.isBlacklisted) {
-      document.getElementById('main-app-page').style.display = 'none';
-      document.getElementById('trial-lock-page').style.display = 'flex';
-      const trialInfo = document.getElementById('trial-info');
-      if (trialInfo) {
-        trialInfo.textContent = 'Trial expired. Please contact admin to activate.';
-      }
-      return;
-    }
-    if (data.canUse) {
-      document.getElementById('main-app-page').style.display = 'flex';
-      document.getElementById('trial-lock-page').style.display = 'none';
-      const statusAlert = document.getElementById('status-alert');
-      if (statusAlert) {
-        if (data.activated) {
-          statusAlert.textContent = 'Application is permanently activated.';
-        } else {
-          const daysLeft = Math.ceil((new Date(data.trialEnd) - Date.now()) / (1000*60*60*24));
-          statusAlert.textContent = `Trial active. ${daysLeft} days left.`;
-        }
-      }
-    } else {
-      document.getElementById('main-app-page').style.display = 'none';
-      document.getElementById('trial-lock-page').style.display = 'flex';
-      const trialInfo = document.getElementById('trial-info');
-      if (trialInfo) {
-        if (data.isTrialExpired) {
-          trialInfo.textContent = 'Trial expired. Please contact admin to activate.';
-        } else {
-          trialInfo.textContent = 'This software is not activated. Please contact admin.';
-        }
-      }
-    }
-  } catch (e) {
-    document.getElementById('main-app-page').style.display = 'none';
-    document.getElementById('trial-lock-page').style.display = 'flex';
-    const trialInfo = document.getElementById('trial-info');
-    if (trialInfo) trialInfo.textContent = 'Unable to verify activation. Please check your internet connection or contact support.';
-  }
-}
-
-if (window.adminAuthBtn) {
-  adminAuthBtn.addEventListener('click', async () => {
-    const username = document.getElementById('admin-username').value.trim();
-    const password = document.getElementById('admin-password').value.trim();
-    const errorEl = document.getElementById('admin-login-error');
-    if (!username || !password) {
-      if (errorEl) errorEl.textContent = 'Please enter both admin email and password.';
-      return;
-    }
-    const machineId = getOrCreateDeviceId();
-    await registerDeviceIfNeeded(machineId);
-    try {
-      const response = await fetch(API_URL, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ machineId, adminEmail: username, adminPassword: password })
-      });
-      if (!response.ok) {
-        const msg = await response.text();
-        if (errorEl) errorEl.textContent = msg || 'Activation failed.';
-        return;
-      }
-      await checkActivationStatus();
-      if (errorEl) errorEl.textContent = '';
-    } catch (e) {
-      if (errorEl) errorEl.textContent = 'Network error. Please check your internet connection or contact support.';
-    }
-  });
-}
-
-window.addEventListener('DOMContentLoaded', checkActivationStatus);
-
-function showAdminActivationPanel(machineId) {
-  const bodyHTML = `
-    <div class="form-group">
-      <h3>Device Activation Options</h3>
-      <p>Device ID: ${machineId}</p>
-      
-      <div class="activation-options">
-        <div class="option trial">
-          <input type="radio" name="activation-type" id="trial-option" value="trial" checked>
-          <label for="trial-option">Set Trial Period</label>
-          <div class="trial-days-input">
-            <input type="number" id="trial-days" min="1" max="365" value="7" class="form-input">
-            <span>days</span>
-          </div>
-        </div>
-        
-        <div class="option permanent">
-          <input type="radio" name="activation-type" id="permanent-option" value="permanent">
-          <label for="permanent-option">Activate Permanently</label>
-        </div>
-      </div>
-    </div>
-  `;
-
-  return new Promise((resolve) => {
-    showModal('Device Activation', bodyHTML, {
-      okText: 'Activate',
-      cancelText: 'Cancel',
-      validate: () => {
-        const trialDays = document.getElementById('trial-days').value;
-        if (document.getElementById('trial-option').checked && (!trialDays || trialDays < 1 || trialDays > 365)) {
-          const errorEl = document.getElementById('modal-error');
-          if (errorEl) errorEl.textContent = 'Please enter valid trial days (1-365).';
-          return false;
-        }
-        return true;
-      }
-    }).then(async (result) => {
-      if (result === true) {
-        const isPermanent = document.getElementById('permanent-option').checked;
-        const trialDays = isPermanent ? null : parseInt(document.getElementById('trial-days').value);
-        resolve({ isPermanent, trialDays });
-      } else {
-        resolve(null);
+  if (adminLoginBtn) {
+    adminLoginBtn.addEventListener('click', () => {
+      if (adminLoginForm) {
+        adminLoginForm.style.display = adminLoginForm.style.display === 'block' ? 'none' : 'block';
       }
     });
-  });
+  }
+
+  if (adminAuthBtn) {
+    adminAuthBtn.addEventListener('click', async () => {
+      const username = document.getElementById('admin-username').value.trim();
+      const password = document.getElementById('admin-password').value.trim();
+      const errorEl = document.getElementById('admin-login-error');
+
+      if (!username || !password) {
+        if (errorEl) errorEl.textContent = 'Please enter both admin email and password.';
+        return;
+      }
+
+      const machineId = getOrCreateDeviceId();
+      try {
+        // First verify admin credentials
+        const verifyResponse = await fetch(API_URL, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            machineId, 
+            adminEmail: username, 
+            adminPassword: password,
+            verifyOnly: true
+          })
+        });
+
+        if (!verifyResponse.ok) {
+          const msg = await verifyResponse.text();
+          if (errorEl) errorEl.textContent = msg || 'Invalid admin credentials.';
+          return;
+        }
+
+        // Show activation options panel
+        const activationOptions = await showAdminActivationPanel(machineId);
+        if (!activationOptions) {
+          // User cancelled
+          return;
+        }
+
+        // Activate the device with chosen options
+        const activateResponse = await fetch(API_URL, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            machineId, 
+            adminEmail: username, 
+            adminPassword: password,
+            isPermanent: activationOptions.isPermanent,
+            trialDays: activationOptions.trialDays
+          })
+        });
+
+        if (!activateResponse.ok) {
+          const msg = await activateResponse.text();
+          if (errorEl) errorEl.textContent = msg || 'Activation failed.';
+          return;
+        }
+
+        // Success: re-check activation status
+        await checkActivationStatus();
+        if (errorEl) errorEl.textContent = '';
+        // Hide the admin form
+        if (adminLoginForm) adminLoginForm.style.display = 'none';
+        window.notifications.success(activationOptions.isPermanent ? 
+          'Device permanently activated!' : 
+          `Trial activated for ${activationOptions.trialDays} days.`
+        );
+      } catch (e) {
+        if (errorEl) errorEl.textContent = 'Network error. Please check your internet connection and try again.';
+      }
+    });
+  }
 }
 
-// Update the admin auth button handler
-if (adminAuthBtn) {
-  adminAuthBtn.addEventListener('click', async () => {
-    const username = document.getElementById('admin-username').value.trim();
-    const password = document.getElementById('admin-password').value.trim();
-    const errorEl = document.getElementById('admin-login-error');
-
-    if (!username || !password) {
-      if (errorEl) errorEl.textContent = 'Please enter both admin email and password.';
-      return;
-    }
-
-    const machineId = getOrCreateDeviceId();
-    try {
-      // First verify admin credentials
-      const verifyResponse = await fetch(API_URL, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          machineId, 
-          adminEmail: username, 
-          adminPassword: password,
-          verifyOnly: true
-        })
-      });
-
-      if (!verifyResponse.ok) {
-        const msg = await verifyResponse.text();
-        if (errorEl) errorEl.textContent = msg || 'Invalid admin credentials.';
-        return;
-      }
-
-      // Show activation options panel
-      const activationOptions = await showAdminActivationPanel(machineId);
-      if (!activationOptions) {
-        // User cancelled
-        return;
-      }
-
-      // Activate the device with chosen options
-      const activateResponse = await fetch(API_URL, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          machineId, 
-          adminEmail: username, 
-          adminPassword: password,
-          isPermanent: activationOptions.isPermanent,
-          trialDays: activationOptions.trialDays
-        })
-      });
-
-      if (!activateResponse.ok) {
-        const msg = await activateResponse.text();
-        if (errorEl) errorEl.textContent = msg || 'Activation failed.';
-        return;
-      }
-
-      // Success: re-check activation status
-      await checkActivationStatus();
-      if (errorEl) errorEl.textContent = '';
-      window.notifications.success(activationOptions.isPermanent ? 
-        'Device permanently activated!' : 
-        `Trial activated for ${activationOptions.trialDays} days.`
-      );
-    } catch (e) {
-      if (errorEl) errorEl.textContent = 'Network error. Please check your internet connection and try again.';
-    }
-  });
-}
-
-// Add some CSS for the activation panel
-const style = document.createElement('style');
-style.textContent = `
-  .activation-options {
-    margin: 20px 0;
-  }
-  .activation-options .option {
-    margin: 15px 0;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-  }
-  .activation-options .option:hover {
-    background: #f5f5f5;
-  }
-  .trial-days-input {
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .trial-days-input input {
-    width: 80px;
-  }
-`;
-document.head.appendChild(style);
+// Remove any setTimeout-based initialization
+// ... existing code ...
