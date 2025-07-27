@@ -107,30 +107,50 @@ export default async function handler(req, res) {
     // Handle device activation (PATCH)
     if (req.method === 'PATCH') {
         // Require admin credentials
-        const { machineId, adminEmail, adminPassword } = req.body;
+        const { machineId, adminEmail, adminPassword, verifyOnly, isPermanent, trialDays } = req.body;
         if (!machineId || !adminEmail || !adminPassword) {
             return res.status(400).send('machineId, adminEmail, and adminPassword are required');
         }
+
         // Check admin in DB
         const admin = await admins.findOne({ email: adminEmail, password: adminPassword });
         if (!admin) {
             return res.status(401).send('Invalid admin credentials');
         }
+
+        // If verifyOnly is true, just return success (admin credentials are valid)
+        if (verifyOnly) {
+            return res.status(200).send('Admin verified');
+        }
+
         const now = new Date();
+        let updateData = {
+            activated: isPermanent ? true : false,
+            activationDate: now,
+            activatedBy: adminEmail
+        };
+
+        // If not permanent activation, set trial period
+        if (!isPermanent && trialDays) {
+            updateData.trialStart = now;
+            updateData.trialEnd = new Date(now.getTime() + (trialDays * 24 * 60 * 60 * 1000));
+        }
+
+        // If permanent activation, remove from blacklist
+        if (isPermanent) {
+            await trialBlacklist.deleteOne({ machineId });
+        }
+
         const result = await devices.updateOne(
             { machineId },
-            {
-                $set: {
-                    activated: true,
-                    activationDate: now,
-                    activatedBy: adminEmail
-                }
-            }
+            { $set: updateData }
         );
+
         if (result.matchedCount === 0) {
             return res.status(404).send('Device not found');
         }
-        return res.status(200).send('Device activated');
+
+        return res.status(200).send(isPermanent ? 'Device permanently activated' : `Trial set for ${trialDays} days`);
     }
 
     // Handle status check (GET)

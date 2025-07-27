@@ -2408,3 +2408,150 @@ if (window.adminAuthBtn) {
 }
 
 window.addEventListener('DOMContentLoaded', checkActivationStatus);
+
+function showAdminActivationPanel(machineId) {
+  const bodyHTML = `
+    <div class="form-group">
+      <h3>Device Activation Options</h3>
+      <p>Device ID: ${machineId}</p>
+      
+      <div class="activation-options">
+        <div class="option trial">
+          <input type="radio" name="activation-type" id="trial-option" value="trial" checked>
+          <label for="trial-option">Set Trial Period</label>
+          <div class="trial-days-input">
+            <input type="number" id="trial-days" min="1" max="365" value="7" class="form-input">
+            <span>days</span>
+          </div>
+        </div>
+        
+        <div class="option permanent">
+          <input type="radio" name="activation-type" id="permanent-option" value="permanent">
+          <label for="permanent-option">Activate Permanently</label>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return new Promise((resolve) => {
+    showModal('Device Activation', bodyHTML, {
+      okText: 'Activate',
+      cancelText: 'Cancel',
+      validate: () => {
+        const trialDays = document.getElementById('trial-days').value;
+        if (document.getElementById('trial-option').checked && (!trialDays || trialDays < 1 || trialDays > 365)) {
+          const errorEl = document.getElementById('modal-error');
+          if (errorEl) errorEl.textContent = 'Please enter valid trial days (1-365).';
+          return false;
+        }
+        return true;
+      }
+    }).then(async (result) => {
+      if (result === true) {
+        const isPermanent = document.getElementById('permanent-option').checked;
+        const trialDays = isPermanent ? null : parseInt(document.getElementById('trial-days').value);
+        resolve({ isPermanent, trialDays });
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
+
+// Update the admin auth button handler
+if (adminAuthBtn) {
+  adminAuthBtn.addEventListener('click', async () => {
+    const username = document.getElementById('admin-username').value.trim();
+    const password = document.getElementById('admin-password').value.trim();
+    const errorEl = document.getElementById('admin-login-error');
+
+    if (!username || !password) {
+      if (errorEl) errorEl.textContent = 'Please enter both admin email and password.';
+      return;
+    }
+
+    const machineId = getOrCreateDeviceId();
+    try {
+      // First verify admin credentials
+      const verifyResponse = await fetch(API_URL, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          machineId, 
+          adminEmail: username, 
+          adminPassword: password,
+          verifyOnly: true
+        })
+      });
+
+      if (!verifyResponse.ok) {
+        const msg = await verifyResponse.text();
+        if (errorEl) errorEl.textContent = msg || 'Invalid admin credentials.';
+        return;
+      }
+
+      // Show activation options panel
+      const activationOptions = await showAdminActivationPanel(machineId);
+      if (!activationOptions) {
+        // User cancelled
+        return;
+      }
+
+      // Activate the device with chosen options
+      const activateResponse = await fetch(API_URL, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          machineId, 
+          adminEmail: username, 
+          adminPassword: password,
+          isPermanent: activationOptions.isPermanent,
+          trialDays: activationOptions.trialDays
+        })
+      });
+
+      if (!activateResponse.ok) {
+        const msg = await activateResponse.text();
+        if (errorEl) errorEl.textContent = msg || 'Activation failed.';
+        return;
+      }
+
+      // Success: re-check activation status
+      await checkActivationStatus();
+      if (errorEl) errorEl.textContent = '';
+      window.notifications.success(activationOptions.isPermanent ? 
+        'Device permanently activated!' : 
+        `Trial activated for ${activationOptions.trialDays} days.`
+      );
+    } catch (e) {
+      if (errorEl) errorEl.textContent = 'Network error. Please check your internet connection and try again.';
+    }
+  });
+}
+
+// Add some CSS for the activation panel
+const style = document.createElement('style');
+style.textContent = `
+  .activation-options {
+    margin: 20px 0;
+  }
+  .activation-options .option {
+    margin: 15px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  .activation-options .option:hover {
+    background: #f5f5f5;
+  }
+  .trial-days-input {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .trial-days-input input {
+    width: 80px;
+  }
+`;
+document.head.appendChild(style);
