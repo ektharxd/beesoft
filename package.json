@@ -1,6 +1,6 @@
 {
   "name": "beesoft",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "🐝 Beesoft — Smart WhatsApp Automation & Dashboard",
   "main": "main.cjs",
   "scripts": {

@@ -1463,3 +1463,85 @@ body {
 .ml-auto { margin-left: auto !important; }
 .mr-auto { margin-right: auto !important; }
 .mb-auto { margin-bottom: auto !important; }
+/* ==========================================================================
+   20. TOTAL MESSAGES COUNTER & ENHANCED ANIMATIONS
+   ========================================================================== */
+
+/* Total Messages Counter Animations */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes counterGlow {
+  0% { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+  50% { box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6); }
+  100% { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+}
+
+.total-messages-chip {
+  animation: counterGlow 3s ease-in-out infinite;
+}
+
+.total-messages-chip:hover {
+  animation: none;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+/* Developer Panel Enhanced Animations */
+@keyframes devPanelGlow {
+  0% { 
+    box-shadow: 0 20px 40px rgba(0, 255, 255, 0.2), 
+                0 0 0 1px rgba(0, 255, 255, 0.3), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.1); 
+  }
+  100% { 
+    box-shadow: 0 20px 40px rgba(255, 0, 255, 0.3), 
+                0 0 0 1px rgba(255, 0, 255, 0.4), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.2); 
+  }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes buttonGlow {
+  0% { 
+    background-position: 0% 50%; 
+    transform: scale(1); 
+  }
+  100% { 
+    background-position: 100% 50%; 
+    transform: scale(1.02); 
+  }
+}
+
+@keyframes neonPulse {
+  0%, 100% { 
+    text-shadow: 0 0 5px currentColor, 
+                 0 0 10px currentColor, 
+                 0 0 15px currentColor; 
+  }
+  50% { 
+    text-shadow: 0 0 10px currentColor, 
+                 0 0 20px currentColor, 
+                 0 0 30px currentColor; 
+  }
+}
+
+/* Milestone celebration animation */
+@keyframes celebrate {
+  0% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.2) rotate(-5deg); }
+  50% { transform: scale(1.1) rotate(5deg); }
+  75% { transform: scale(1.2) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.milestone-celebration {
+  animation: celebrate 0.8s ease-in-out;
+}
