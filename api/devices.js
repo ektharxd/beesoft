@@ -49,10 +49,12 @@ export default async function handler(req, res) {
                 const now = new Date();
                 const deviceIP = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
                 
+                // Always define isBlacklisted as boolean
+                let isBlacklisted = false;
                 // Check if device exists and if it's blacklisted
                 let device = await devices.findOne({ machineId });
                 let blacklistDoc = await trialBlacklist.findOne({ machineId });
-                let isBlacklisted = !!blacklistDoc;
+                if (blacklistDoc) isBlacklisted = true;
                 
                 let trialStart, trialEnd, activated, activationDate, activatedBy;
                 const TRIAL_DAYS = 7;
