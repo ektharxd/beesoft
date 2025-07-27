@@ -51,7 +51,8 @@ export default async function handler(req, res) {
                 
                 // Check if device exists and if it's blacklisted
                 let device = await devices.findOne({ machineId });
-                let isBlacklisted = await trialBlacklist.findOne({ machineId });
+                let blacklistDoc = await trialBlacklist.findOne({ machineId });
+                let isBlacklisted = !!blacklistDoc;
                 
                 let trialStart, trialEnd, activated, activationDate, activatedBy;
                 const TRIAL_DAYS = 7;
@@ -135,7 +136,7 @@ export default async function handler(req, res) {
                     activationDate,
                     activatedBy,
                     isTrialExpired,
-                    isBlacklisted: !!isBlacklisted,
+                    isBlacklisted,
                     canUse: activated || (!isTrialExpired && !isBlacklisted)
                 });
             } catch (error) {
