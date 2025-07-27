@@ -559,7 +559,7 @@ function initializeTrialSystem() {
       // Server-based activation only
       const machineId = getOrCreateDeviceId();
       try {
-        const response = await fetch('/api/devices', {
+        const response = await fetch('https://beesoft-one.vercel.app/api/devices', {  // Use API_URL here
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ machineId, adminEmail: username, adminPassword: password })
@@ -573,7 +573,7 @@ function initializeTrialSystem() {
         await checkActivationStatus();
         if (errorEl) errorEl.textContent = '';
       } catch (e) {
-        if (errorEl) errorEl.textContent = 'Network error. Please try again.';
+        if (errorEl) errorEl.textContent = 'Network error. Please check your internet connection and try again.';
       }
     });
   }
