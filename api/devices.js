@@ -1,18 +1,50 @@
-// Unified API endpoint for both heartbeat and status
-const ADMIN_API_KEY = 'Ekthar@8302';
+// Unified API endpoint for both heartbeat and status, now with PIN-based admin auth
+let ADMIN_PIN = null; // Set on signup, stored in memory (demo only)
+let ADMIN_SESSION = null; // Simple session token for demo
 
 // Permanent device storage (persists across function calls)
 let allDevices = {};
+
+function makeToken() {
+  return Math.random().toString(36).substr(2) + Date.now().toString(36);
+}
 
 export default function handler(req, res) {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-session, x-pin');
     
     // Handle preflight requests
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
+    }
+
+    // Admin PIN signup/login
+    if (req.method === 'POST' && req.url.endsWith('/admin-auth')) {
+        const { pin, action } = req.body;
+        if (!pin || typeof pin !== 'string' || pin.length < 4) {
+            return res.status(400).json({ error: 'PIN must be at least 4 digits.' });
+        }
+        if (action === 'signup') {
+            if (ADMIN_PIN) {
+                return res.status(400).json({ error: 'PIN already set. Use login.' });
+            }
+            ADMIN_PIN = pin;
+            ADMIN_SESSION = makeToken();
+            return res.json({ success: true, session: ADMIN_SESSION });
+        } else if (action === 'login') {
+            if (!ADMIN_PIN) {
+                return res.status(400).json({ error: 'No PIN set. Please sign up.' });
+            }
+            if (pin !== ADMIN_PIN) {
+                return res.status(401).json({ error: 'Invalid PIN.' });
+            }
+            ADMIN_SESSION = makeToken();
+            return res.json({ success: true, session: ADMIN_SESSION });
+        } else {
+            return res.status(400).json({ error: 'Invalid action.' });
+        }
     }
 
     // Handle heartbeat (POST)
@@ -81,14 +113,14 @@ export default function handler(req, res) {
 
     // Handle status check (GET)
     if (req.method === 'GET') {
-        // Check admin API key
-        const apiKey = req.headers['x-api-key'];
-        if (!apiKey || apiKey !== ADMIN_API_KEY) {
+        // Check admin session token
+        const session = req.headers['x-session'];
+        if (!session || session !== ADMIN_SESSION) {
             return res.status(401).send('Unauthorized');
         }
 
         const now = new Date();
-        const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+        const oneMinuteAgo = new Date(now.getTime() - 1 * 60 * 1000); // 1 minute for more responsive offline
         
         const allDevicesList = [];
         const activeDevices = [];
@@ -99,7 +131,7 @@ export default function handler(req, res) {
             const deviceData = {
                 machineId,
                 ...device,
-                isOnline: new Date(device.lastSeen) > fiveMinutesAgo,
+                isOnline: new Date(device.lastSeen) > oneMinuteAgo,
                 logs: device.logs || [] // include logs for history
             };
 
