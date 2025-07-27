@@ -634,7 +634,7 @@ function initializeMainApp() {
   initializeImageUpload();
   initializeWhatsAppConnection();
   initializeSessionControls();
-  initializeSessionReset(); // Add this line
+  initializeSessionReset();
 }
 
 function initializeSessionReset() {
@@ -1140,7 +1140,7 @@ function initializeSessionControls() {
         return;
       }
 
-      // Process file data
+      // Get contact count for confirmation
       const file = fileInput.files[0];
       const reader = new FileReader();
       
@@ -1166,23 +1166,36 @@ function initializeSessionControls() {
             return;
           }
 
-          // Start session
-          const sessionData = {
-            numbers: uniqueNumbers,
-            message: messageInput.value.trim(),
-            imagePath: window.appState.selectedImagePath
-          };
+          // Show confirmation dialog
+          const confirmMessage = `Are you sure you want to start the campaign?\n\n` +
+            `• ${uniqueNumbers.length} contacts will receive your message\n` +
+            `• Message: "${messageInput.value.trim().substring(0, 100)}${messageInput.value.trim().length > 100 ? '...' : ''}"\n` +
+            `${window.appState.selectedImagePath ? '• An image will be attached\n' : ''}` +
+            `\nThis action cannot be undone once started.`;
 
-          if (window.electronAPI && window.electronAPI.startSession) {
-            window.appState.isSessionActive = true;
-            window.appState.updateWorkflowUI();
-            
-            const response = await window.electronAPI.startSession(sessionData);
-            window.logger.success(`Campaign started with ${uniqueNumbers.length} contacts`);
-            window.notifications.success('Campaign started successfully!');
-          } else {
-            window.notifications.error('Session management not available');
-          }
+          showConfirmationModal(
+            'Start Campaign',
+            confirmMessage,
+            async () => {
+              // Start session after confirmation
+              const sessionData = {
+                numbers: uniqueNumbers,
+                message: messageInput.value.trim(),
+                imagePath: window.appState.selectedImagePath
+              };
+
+              if (window.electronAPI && window.electronAPI.startSession) {
+                window.appState.isSessionActive = true;
+                window.appState.updateWorkflowUI();
+                
+                const response = await window.electronAPI.startSession(sessionData);
+                window.logger.success(`Campaign started with ${uniqueNumbers.length} contacts`);
+                window.notifications.success('Campaign started successfully!');
+              } else {
+                window.notifications.error('Session management not available');
+              }
+            }
+          );
         } catch (error) {
           window.notifications.error('Error starting session: ' + error.message);
           window.logger.error('Session start error: ' + error.message);
@@ -1384,7 +1397,8 @@ function showConfirmationModal(title, message, onConfirm) {
 
 function showAdminModal(setTrialData) {
   const bodyHTML = `
-    <div class="form-group"<label class="form-label" for="trial-days-input">Trial Days</label>
+    <div class="form-group">
+      <label class="form-label" for="trial-days-input">Trial Days</label>
       <input id="trial-days-input" type="number" class="form-input" min="1" max="365" placeholder="Enter number of days" />
     </div>
     <div class="form-group">
