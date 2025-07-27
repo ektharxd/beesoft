@@ -1,5 +1,7 @@
 import { MongoClient } from 'mongodb';
 
+console.log('DEPLOYMENT_MARKER: 2024-07-28-FIXED-VERSION');
+
 const uri = process.env.MONGODB_URI;
 const dbName = 'beesoft';
 
@@ -30,6 +32,7 @@ async function connectToDatabase() {
 
 export default async function handler(req, res) {
     console.log(`API Request: ${req.method} ${req.url}`);
+    console.log('Handler started - checking environment...');
     
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -64,11 +67,13 @@ export default async function handler(req, res) {
                     return res.status(400).send('machineId is required');
                 }
 
-                // Always define isBlacklisted at the very top
+                console.log('POST: Declaring variables at top of scope');
+                // Always define ALL variables at the very top to prevent ReferenceError
                 let isBlacklisted = false;
                 let isTrialExpired = false;
                 let trialStart, trialEnd, activated, activationDate, activatedBy;
                 const TRIAL_DAYS = 7;
+                console.log('POST: Variables declared successfully');
 
                 const now = new Date();
                 const deviceIP = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
@@ -82,7 +87,10 @@ export default async function handler(req, res) {
                 let blacklistDoc = await trialBlacklist.findOne({ machineId });
                 console.log('Blacklist status:', !!blacklistDoc);
                 
-                if (blacklistDoc) isBlacklisted = true;
+                if (blacklistDoc) {
+                    isBlacklisted = true;
+                    console.log('Device is blacklisted');
+                }
                 
                 if (!device) {
                     console.log('Creating new device record');
@@ -148,6 +156,7 @@ export default async function handler(req, res) {
                     console.log('Device updated');
                 }
 
+                console.log('POST: About to check trial expiry - isBlacklisted value:', isBlacklisted);
                 // Calculate status
                 if (trialEnd && now > trialEnd) {
                     console.log('Trial expired, updating status');
@@ -160,6 +169,7 @@ export default async function handler(req, res) {
                     }
                 }
 
+                console.log('POST: About to prepare response - isBlacklisted value:', isBlacklisted);
                 const response = {
                     machineId,
                     trialStart,
@@ -262,7 +272,8 @@ export default async function handler(req, res) {
                 console.error('Error in PATCH handler:', error);
                 return res.status(500).json({ 
                     error: 'Internal server error', 
-                    details: error.message 
+                    details: error.message,
+                    stack: error.stack
                 });
             }
         }
@@ -307,7 +318,8 @@ export default async function handler(req, res) {
                 console.error('Error in GET handler:', error);
                 return res.status(500).json({ 
                     error: 'Internal server error', 
-                    details: error.message 
+                    details: error.message,
+                    stack: error.stack
                 });
             }
         }
