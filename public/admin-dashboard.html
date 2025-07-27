@@ -8,304 +8,284 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     :root {
-      --mui-bg: #f5f7fa;
-      --mui-surface: #fff;
-      --mui-primary: #1976d2;
-      --mui-primary-dark: #115293;
-      --mui-secondary: #00bcd4;
-      --mui-success: #43a047;
-      --mui-warning: #ffa000;
-      --mui-error: #e53935;
-      --mui-text: #222;
-      --mui-text-secondary: #666;
-      --mui-border: #e0e0e0;
-      --mui-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      --mui-radius: 14px;
-      --mui-font: 'ntype82', 'Inter', sans-serif;
+      --vercel-bg: #0a0a0a;
+      --vercel-surface: #18181b;
+      --vercel-card: #1c1c1f;
+      --vercel-primary: #fff;
+      --vercel-secondary: #888;
+      --vercel-accent: #6366f1;
+      --vercel-success: #22c55e;
+      --vercel-warning: #facc15;
+      --vercel-error: #ef4444;
+      --vercel-border: #232323;
+      --vercel-radius: 16px;
+      --vercel-shadow: 0 2px 16px 0 #000a;
+      --vercel-font: 'ntype82', 'Inter', sans-serif;
     }
     html, body {
       height: 100%;
       margin: 0;
       padding: 0;
-      font-family: var(--mui-font);
-      background: var(--mui-bg);
-      color: var(--mui-text);
+      font-family: var(--vercel-font);
+      background: var(--vercel-bg);
+      color: var(--vercel-primary);
       letter-spacing: 0.01em;
     }
-    .mui-container {
+    .vercel-container {
       max-width: 1100px;
       margin: 40px auto;
-      padding: 24px;
-      background: var(--mui-surface);
-      border-radius: var(--mui-radius);
-      box-shadow: var(--mui-shadow);
+      padding: 32px 20px;
+      background: var(--vercel-surface);
+      border-radius: var(--vercel-radius);
+      box-shadow: var(--vercel-shadow);
     }
-    .mui-header {
+    .vercel-header {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      margin-bottom: 2rem;
+      gap: 1.2rem;
+      margin-bottom: 2.5rem;
     }
-    .mui-header .mui-logo {
+    .vercel-header .vercel-logo {
       font-size: 2.2rem;
-      color: var(--mui-primary);
+      color: var(--vercel-accent);
       font-weight: 700;
+      font-family: var(--vercel-font);
+    }
+    .vercel-header .vercel-title {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--vercel-primary);
+      font-family: var(--vercel-font);
       letter-spacing: 1px;
-      font-family: var(--mui-font);
     }
-    .mui-header .mui-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--mui-text);
-      font-family: var(--mui-font);
+    .vercel-card {
+      background: var(--vercel-card);
+      border-radius: var(--vercel-radius);
+      box-shadow: var(--vercel-shadow);
+      padding: 2.2rem 2rem 2rem 2rem;
+      margin-bottom: 2.5rem;
+      border: 1.5px solid var(--vercel-border);
     }
-    .mui-card {
-      background: var(--mui-surface);
-      border-radius: var(--mui-radius);
-      box-shadow: var(--mui-shadow);
-      padding: 2rem;
-      margin-bottom: 2rem;
-      border: 1px solid var(--mui-border);
-    }
-    .mui-card-title {
+    .vercel-card-title {
       font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 1.2rem;
-      color: var(--mui-primary);
-      font-family: var(--mui-font);
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--vercel-primary);
+      font-family: var(--vercel-font);
+      letter-spacing: 0.5px;
     }
-    .mui-form-group {
+    .vercel-form-group {
       margin-bottom: 1.5rem;
     }
-    .mui-label {
+    .vercel-label {
       display: block;
       font-size: 1rem;
       margin-bottom: 0.5rem;
-      color: var(--mui-text-secondary);
-      font-family: var(--mui-font);
+      color: var(--vercel-secondary);
+      font-family: var(--vercel-font);
     }
-    .mui-input {
+    .vercel-input {
       width: 100%;
-      padding: 0.9rem 1.1rem;
-      border: 1.5px solid var(--mui-border);
+      padding: 1rem 1.2rem;
+      border: 1.5px solid var(--vercel-border);
       border-radius: 8px;
       font-size: 1.1rem;
-      font-family: var(--mui-font);
-      background: #f8fafc;
-      color: var(--mui-text);
+      font-family: var(--vercel-font);
+      background: #101014;
+      color: var(--vercel-primary);
       outline: none;
       transition: border 0.2s;
     }
-    .mui-input:focus {
-      border-color: var(--mui-primary);
+    .vercel-input:focus {
+      border-color: var(--vercel-accent);
     }
-    .mui-btn {
-      padding: 0.9rem 2.2rem;
+    .vercel-btn {
+      padding: 1rem 2.5rem;
       border: none;
       border-radius: 8px;
-      background: var(--mui-primary);
+      background: var(--vercel-accent);
       color: #fff;
       font-size: 1.1rem;
-      font-family: var(--mui-font);
-      font-weight: 600;
+      font-family: var(--vercel-font);
+      font-weight: 700;
       cursor: pointer;
       transition: background 0.2s;
-      box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
-    }
-    .mui-btn:hover {
-      background: var(--mui-primary-dark);
-    }
-    .mui-error {
-      color: var(--mui-error);
-      font-size: 1rem;
+      box-shadow: 0 2px 8px #6366f133;
       margin-top: 0.5rem;
-      font-family: var(--mui-font);
     }
-    .mui-stats {
+    .vercel-btn:hover {
+      background: #4f46e5;
+    }
+    .vercel-error {
+      color: var(--vercel-error);
+      font-size: 1rem;
+      margin-top: 0.7rem;
+      font-family: var(--vercel-font);
+    }
+    .vercel-stats {
       display: flex;
       gap: 2rem;
       margin-bottom: 2rem;
     }
-    .mui-stat-card {
+    .vercel-stat-card {
       flex: 1;
-      background: #f8fafc;
+      background: #101014;
       border-radius: 12px;
-      box-shadow: var(--mui-shadow);
+      box-shadow: var(--vercel-shadow);
       padding: 1.2rem 1.5rem;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      border: 1px solid var(--mui-border);
+      border: 1px solid var(--vercel-border);
     }
-    .mui-stat-title {
+    .vercel-stat-title {
       font-size: 1rem;
-      color: var(--mui-text-secondary);
+      color: var(--vercel-secondary);
       margin-bottom: 0.5rem;
-      font-family: var(--mui-font);
+      font-family: var(--vercel-font);
     }
-    .mui-stat-value {
+    .vercel-stat-value {
       font-size: 2.2rem;
       font-weight: 700;
-      color: var(--mui-primary);
-      font-family: var(--mui-font);
+      color: var(--vercel-primary);
+      font-family: var(--vercel-font);
     }
-    .mui-table {
+    .vercel-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 1.5rem;
-      font-family: var(--mui-font);
+      font-family: var(--vercel-font);
     }
-    .mui-table th, .mui-table td {
+    .vercel-table th, .vercel-table td {
       padding: 1rem 1.2rem;
-      border-bottom: 1px solid var(--mui-border);
+      border-bottom: 1px solid var(--vercel-border);
       text-align: left;
       font-size: 1rem;
     }
-    .mui-table th {
-      color: var(--mui-primary);
-      background: #f0f4fa;
-      font-weight: 600;
+    .vercel-table th {
+      color: var(--vercel-accent);
+      background: #18181b;
+      font-weight: 700;
       text-transform: uppercase;
       font-size: 0.95rem;
     }
-    .mui-table tr:hover {
-      background: #f5f7fa;
+    .vercel-table tr:hover {
+      background: #18181b;
     }
-    .mui-status {
+    .vercel-status {
       display: inline-block;
       padding: 0.3em 1em;
       border-radius: 20px;
       font-size: 0.95em;
-      font-weight: 600;
+      font-weight: 700;
       color: #fff;
     }
-    .mui-status.online {
-      background: var(--mui-success);
+    .vercel-status.online {
+      background: var(--vercel-success);
     }
-    .mui-status.offline {
-      background: var(--mui-warning);
+    .vercel-status.offline {
+      background: var(--vercel-warning);
       color: #fff;
     }
-    .mui-history-section {
+    .vercel-history-section {
       margin-top: 2.5rem;
     }
-    .mui-history-title {
+    .vercel-history-title {
       font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--mui-primary);
+      font-weight: 700;
+      color: var(--vercel-accent);
       margin-bottom: 1rem;
-      font-family: var(--mui-font);
+      font-family: var(--vercel-font);
     }
     @media (max-width: 900px) {
-      .mui-stats { flex-direction: column; gap: 1rem; }
+      .vercel-stats { flex-direction: column; gap: 1rem; }
     }
     @media (max-width: 600px) {
-      .mui-container { padding: 8px; }
-      .mui-card { padding: 1rem; }
-      .mui-stats { gap: 0.5rem; }
-      .mui-table th, .mui-table td { padding: 0.5rem 0.5rem; }
+      .vercel-container { padding: 8px; }
+      .vercel-card { padding: 1rem; }
+      .vercel-stats { gap: 0.5rem; }
+      .vercel-table th, .vercel-table td { padding: 0.5rem 0.5rem; }
     }
   </style>
 </head>
 <body>
-  <div class="mui-container">
-    <div class="mui-header">
-      <span class="mui-logo"><i class="fas fa-bee"></i></span>
-      <span class="mui-title">Beesoft Admin Dashboard</span>
+  <div class="vercel-container">
+    <div class="vercel-header">
+      <span class="vercel-logo"><i class="fas fa-bee"></i></span>
+      <span class="vercel-title">Beesoft Admin Dashboard</span>
     </div>
-    <div id="authCard" class="mui-card">
-      <div class="mui-card-title">Admin Access</div>
-      <form id="pinForm">
-        <div class="mui-form-group">
-          <label class="mui-label" for="pinInput">Enter Admin PIN</label>
-          <input type="password" id="pinInput" class="mui-input" placeholder="4+ digit PIN" minlength="4" maxlength="12" required />
+    <div id="authCard" class="vercel-card">
+      <div class="vercel-card-title">Admin Access</div>
+      <form id="apiKeyForm">
+        <div class="vercel-form-group">
+          <label class="vercel-label" for="apiKeyInput">Enter Admin API Key</label>
+          <input type="password" id="apiKeyInput" class="vercel-input" placeholder="API Key" required />
         </div>
-        <div class="mui-form-group" id="pinActionGroup">
-          <button type="submit" class="mui-btn" id="pinLoginBtn">Login</button>
-          <button type="button" class="mui-btn" id="pinSignupBtn" style="background:var(--mui-secondary);margin-left:1rem;">Sign Up</button>
-        </div>
-        <div id="pinError" class="mui-error" style="display:none;"></div>
+        <button type="submit" class="vercel-btn" id="apiKeyLoginBtn">Login</button>
+        <div id="apiKeyError" class="vercel-error" style="display:none;"></div>
       </form>
     </div>
     <div id="dashboard" style="display:none;">
-      <div class="mui-stats">
-        <div class="mui-stat-card">
-          <div class="mui-stat-title">Total Devices</div>
-          <div class="mui-stat-value" id="totalDevices">0</div>
+      <div class="vercel-stats">
+        <div class="vercel-stat-card">
+          <div class="vercel-stat-title">Total Devices</div>
+          <div class="vercel-stat-value" id="totalDevices">0</div>
         </div>
-        <div class="mui-stat-card">
-          <div class="mui-stat-title">Online</div>
-          <div class="mui-stat-value" id="activeDevices">0</div>
+        <div class="vercel-stat-card">
+          <div class="vercel-stat-title">Online</div>
+          <div class="vercel-stat-value" id="activeDevices">0</div>
         </div>
-        <div class="mui-stat-card">
-          <div class="mui-stat-title">Offline</div>
-          <div class="mui-stat-value" id="offlineDevices">0</div>
+        <div class="vercel-stat-card">
+          <div class="vercel-stat-title">Offline</div>
+          <div class="vercel-stat-value" id="offlineDevices">0</div>
         </div>
       </div>
-      <div class="mui-card">
-        <div class="mui-card-title">Device Status</div>
-        <button class="mui-btn" style="float:right;margin-top:-2.5rem;" onclick="loadDevices()"><i class="fas fa-refresh"></i> Refresh</button>
+      <div class="vercel-card">
+        <div class="vercel-card-title">Device Status</div>
+        <button class="vercel-btn" style="float:right;margin-top:-2.5rem;" onclick="loadDevices()"><i class="fas fa-refresh"></i> Refresh</button>
         <div id="devicesContent">
-          <div style="padding:2rem;text-align:center;color:var(--mui-text-secondary);">Loading devices...</div>
+          <div style="padding:2rem;text-align:center;color:var(--vercel-secondary);">Loading devices...</div>
         </div>
       </div>
-      <div class="mui-card mui-history-section">
-        <div class="mui-history-title"><i class="fas fa-history"></i> Device Connection History</div>
+      <div class="vercel-card vercel-history-section">
+        <div class="vercel-history-title"><i class="fas fa-history"></i> Device Connection History</div>
         <div id="deviceHistoryContent">
-          <div style="padding:2rem;text-align:center;color:var(--mui-text-secondary);">Loading history...</div>
+          <div style="padding:2rem;text-align:center;color:var(--vercel-secondary);">Loading history...</div>
         </div>
       </div>
     </div>
   </div>
   <script>
-    let sessionToken = null;
+    let apiKey = null;
     let refreshInterval;
-    let pinMode = 'login'; // or 'signup'
-
-    document.getElementById('pinSignupBtn').onclick = function(e) {
+    document.getElementById('apiKeyForm').onsubmit = async function(e) {
       e.preventDefault();
-      pinMode = 'signup';
-      document.getElementById('pinLoginBtn').textContent = 'Sign Up';
-      document.getElementById('pinSignupBtn').style.display = 'none';
-    };
-
-    document.getElementById('pinForm').onsubmit = async function(e) {
-      e.preventDefault();
-      const pin = document.getElementById('pinInput').value.trim();
-      const errorDiv = document.getElementById('pinError');
+      apiKey = document.getElementById('apiKeyInput').value.trim();
+      const errorDiv = document.getElementById('apiKeyError');
       errorDiv.style.display = 'none';
-      if (!pin || pin.length < 4) {
-        errorDiv.textContent = 'PIN must be at least 4 digits.';
+      if (!apiKey) {
+        errorDiv.textContent = 'API Key required.';
         errorDiv.style.display = 'block';
         return;
       }
       try {
-        const response = await fetch('/api/devices/admin-auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pin, action: pinMode })
+        const response = await fetch('/api/devices', {
+          headers: { 'x-api-key': apiKey }
         });
-        const data = await response.json();
-        if (!response.ok || !data.success) {
-          errorDiv.textContent = data.error || 'Authentication failed.';
-          errorDiv.style.display = 'block';
-          return;
-        }
-        sessionToken = data.session;
+        if (!response.ok) throw new Error('Invalid API key or server error.');
         document.getElementById('authCard').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         await loadDevices();
         refreshInterval = setInterval(loadDevices, 30000);
       } catch (err) {
-        errorDiv.textContent = 'Network error.';
+        errorDiv.textContent = err.message;
         errorDiv.style.display = 'block';
       }
     };
-
     async function loadDevices() {
       try {
         const response = await fetch('/api/devices', {
-          headers: { 'x-session': sessionToken }
+          headers: { 'x-api-key': apiKey }
         });
         if (!response.ok) throw new Error('Failed to fetch device data');
         const data = await response.json();
@@ -313,7 +293,7 @@
         renderDevices(data.clients || []);
         renderDeviceHistory(data.clients || []);
       } catch (err) {
-        document.getElementById('devicesContent').innerHTML = `<div style='color:var(--mui-error);padding:2rem;'>${err.message}</div>`;
+        document.getElementById('devicesContent').innerHTML = `<div style='color:var(--vercel-error);padding:2rem;'>${err.message}</div>`;
       }
     }
     function updateStats(data) {
@@ -324,14 +304,14 @@
     function renderDevices(devices) {
       const container = document.getElementById('devicesContent');
       if (!devices || devices.length === 0) {
-        container.innerHTML = `<div style='padding:2rem;text-align:center;color:var(--mui-text-secondary);'>No devices found.</div>`;
+        container.innerHTML = `<div style='padding:2rem;text-align:center;color:var(--vercel-secondary);'>No devices found.</div>`;
         return;
       }
-      let html = `<table class='mui-table'><thead><tr><th>Device</th><th>Status</th><th>Platform</th><th>IP</th><th>Version</th><th>Last Seen</th></tr></thead><tbody>`;
+      let html = `<table class='vercel-table'><thead><tr><th>Device</th><th>Status</th><th>Platform</th><th>IP</th><th>Version</th><th>Last Seen</th></tr></thead><tbody>`;
       html += devices.map(device => `
         <tr>
-          <td><b>${device.hostname || device.machineId}</b><br><span style='color:var(--mui-text-secondary);font-size:0.95em;'>${device.machineId}</span></td>
-          <td><span class='mui-status ${device.isOnline ? 'online' : 'offline'}'>${device.isOnline ? 'Online' : 'Offline'}</span></td>
+          <td><b>${device.hostname || device.machineId}</b><br><span style='color:var(--vercel-secondary);font-size:0.95em;'>${device.machineId}</span></td>
+          <td><span class='vercel-status ${device.isOnline ? 'online' : 'offline'}'>${device.isOnline ? 'Online' : 'Offline'}</span></td>
           <td><i class='fab fa-${getPlatformIcon(device.platform)}'></i> ${formatPlatform(device.platform)}</td>
           <td><span style='font-family:monospace;'>${device.ip || 'unknown'}</span></td>
           <td><span style='font-family:monospace;'>v${device.version}</span></td>
@@ -344,26 +324,26 @@
     function renderDeviceHistory(devices) {
       const container = document.getElementById('deviceHistoryContent');
       if (!devices || devices.length === 0) {
-        container.innerHTML = `<div style='padding:2rem;text-align:center;color:var(--mui-text-secondary);'>No device history.</div>`;
+        container.innerHTML = `<div style='padding:2rem;text-align:center;color:var(--vercel-secondary);'>No device history.</div>`;
         return;
       }
       let html = '';
       devices.forEach(device => {
         if (!device.logs || device.logs.length === 0) return;
-        html += `<div style='margin-bottom:1.5rem;'><b>${device.hostname || device.machineId}</b> <span style='color:var(--mui-text-secondary);font-size:0.95em;'>(${device.machineId})</span><table class='mui-table' style='font-size:0.95em;margin-top:0.5rem;'><thead><tr><th>Timestamp</th><th>IP</th><th>Version</th><th>WhatsApp</th><th>Session</th></tr></thead><tbody>`;
+        html += `<div style='margin-bottom:1.5rem;'><b>${device.hostname || device.machineId}</b> <span style='color:var(--vercel-secondary);font-size:0.95em;'>(${device.machineId})</span><table class='vercel-table' style='font-size:0.95em;margin-top:0.5rem;'><thead><tr><th>Timestamp</th><th>IP</th><th>Version</th><th>WhatsApp</th><th>Session</th></tr></thead><tbody>`;
         html += device.logs.map(log => `
           <tr>
             <td><span style='font-family:monospace;'>${log.timestamp.replace('T',' ').replace('Z','')}</span></td>
             <td>${log.ip || 'unknown'}</td>
             <td>v${log.version || 'unknown'}</td>
-            <td>${log.whatsappConnected ? '<span style="color:var(--mui-success);">Connected</span>' : '<span style="color:var(--mui-error);">No</span>'}</td>
-            <td>${log.sessionActive ? '<span style="color:var(--mui-success);">Active</span>' : '<span style="color:var(--mui-warning);">Inactive</span>'}</td>
+            <td>${log.whatsappConnected ? '<span style=\"color:var(--vercel-success);\">Connected</span>' : '<span style=\"color:var(--vercel-error);\">No</span>'}</td>
+            <td>${log.sessionActive ? '<span style=\"color:var(--vercel-success);\">Active</span>' : '<span style=\"color:var(--vercel-warning);\">Inactive</span>'}</td>
           </tr>
         `).join('');
         html += '</tbody></table></div>';
       });
       if (!html) {
-        container.innerHTML = `<div style='padding:2rem;text-align:center;color:var(--mui-text-secondary);'>No device history.</div>`;
+        container.innerHTML = `<div style='padding:2rem;text-align:center;color:var(--vercel-secondary);'>No device history.</div>`;
       } else {
         container.innerHTML = html;
       }
