@@ -604,8 +604,11 @@ function initializeTrialSystem() {
   // Get started button
   const getStartedBtn = document.getElementById('get-started-btn');
   if (getStartedBtn) {
-    getStartedBtn.addEventListener('click', () => {
-      showPage('main-app-page'); window.logger.info('Application started'); setTimeout(() => { if (typeof initializeTotalMessagesCounter === 'function') { initializeTotalMessagesCounter(); } }, 500);
+    getStartedBtn.addEventListener('click', async () => {
+      // Always re-check activation status before allowing entry
+      await checkActivationStatus();
+      // If not allowed, checkActivationStatus will keep the user on the trial/activation page
+      // If allowed, main-app-page will be shown by checkActivationStatus
     });
   }
 
