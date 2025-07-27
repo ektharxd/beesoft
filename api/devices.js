@@ -6,20 +6,31 @@ const dbName = 'beesoft';
 let client = null;
 
 async function connectToDatabase() {
-    if (client && client.topology && client.topology.isConnected()) {
-        return client;
-    }
+    console.log('Attempting to connect to MongoDB...');
     try {
+        if (!uri) {
+            throw new Error('MONGODB_URI is not defined');
+        }
+
+        if (client && client.topology && client.topology.isConnected()) {
+            console.log('Reusing existing MongoDB connection');
+            return client;
+        }
+
+        console.log('Creating new MongoDB connection...');
         client = new MongoClient(uri);
         await client.connect();
+        console.log('MongoDB connection successful');
         return client;
     } catch (error) {
         console.error('MongoDB connection error:', error);
-        throw new Error('Database connection failed');
+        throw new Error(`Database connection failed: ${error.message}`);
     }
 }
 
 export default async function handler(req, res) {
+    console.log(`API Request: ${req.method} ${req.url}`);
+    
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PATCH');
@@ -32,7 +43,10 @@ export default async function handler(req, res) {
 
     let client;
     try {
+        // Connect to MongoDB
         client = await connectToDatabase();
+        console.log('Database connection established');
+
         const db = client.db(dbName);
         const devices = db.collection('devices');
         const admins = db.collection('admins');
@@ -40,9 +54,13 @@ export default async function handler(req, res) {
 
         // Handle heartbeat (POST)
         if (req.method === 'POST') {
+            console.log('Processing POST request');
             try {
                 const { machineId } = req.body;
+                console.log('Request body:', req.body);
+                
                 if (!machineId) {
+                    console.log('Missing machineId in request');
                     return res.status(400).send('machineId is required');
                 }
 
@@ -55,12 +73,19 @@ export default async function handler(req, res) {
                 const now = new Date();
                 const deviceIP = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
                 
+                console.log('Checking device and blacklist status for:', machineId);
+                
                 // Check if device exists and if it's blacklisted
                 let device = await devices.findOne({ machineId });
+                console.log('Device found:', !!device);
+                
                 let blacklistDoc = await trialBlacklist.findOne({ machineId });
+                console.log('Blacklist status:', !!blacklistDoc);
+                
                 if (blacklistDoc) isBlacklisted = true;
                 
                 if (!device) {
+                    console.log('Creating new device record');
                     // New device: set trial period and not activated
                     trialStart = now;
                     trialEnd = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
@@ -89,7 +114,9 @@ export default async function handler(req, res) {
                             ip: deviceIP
                         }]
                     });
+                    console.log('New device created');
                 } else {
+                    console.log('Updating existing device');
                     trialStart = device.trialStart || now;
                     trialEnd = device.trialEnd || new Date(trialStart.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
                     activated = device.activated || false;
@@ -118,19 +145,22 @@ export default async function handler(req, res) {
                             }
                         }
                     );
+                    console.log('Device updated');
                 }
 
                 // Calculate status
                 if (trialEnd && now > trialEnd) {
+                    console.log('Trial expired, updating status');
                     isTrialExpired = true;
                     // Add to blacklist if not already
                     if (!isBlacklisted) {
                         await trialBlacklist.insertOne({ machineId });
                         isBlacklisted = true;
+                        console.log('Device added to blacklist');
                     }
                 }
 
-                return res.status(200).json({
+                const response = {
                     machineId,
                     trialStart,
                     trialEnd,
@@ -140,12 +170,15 @@ export default async function handler(req, res) {
                     isTrialExpired,
                     isBlacklisted,
                     canUse: activated || (!isTrialExpired && !isBlacklisted)
-                });
+                };
+                console.log('Sending response:', response);
+                return res.status(200).json(response);
             } catch (error) {
                 console.error('Error in POST handler:', error);
                 return res.status(500).json({ 
                     error: 'Internal server error', 
-                    details: error.message 
+                    details: error.message,
+                    stack: error.stack
                 });
             }
         }
@@ -284,9 +317,8 @@ export default async function handler(req, res) {
         console.error('API error:', error);
         return res.status(500).json({ 
             error: 'A server error has occurred', 
-            details: error.message 
+            details: error.message,
+            stack: error.stack
         });
-    } finally {
-        // Don't close the connection as it's reused
     }
 }
