@@ -26,11 +26,12 @@ export default async function handler(req, res) {
     const db = client.db(dbName);
     const admins = db.collection('admins');
 
-    const admin = await admins.findOne({ username, password });
+    // Use email instead of username for authentication
+    const admin = await admins.findOne({ email: username, password });
     if (!admin) {
         return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Optionally, generate a session token here for further requests
-    return res.status(200).json({ success: true, admin: { username: admin.username } });
+    return res.status(200).json({ success: true, admin: { email: admin.email } });
 }

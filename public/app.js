@@ -520,24 +520,24 @@ async function initializeActivationSystem() {
   const adminAuthBtn = document.getElementById('admin-auth-btn');
   if (adminAuthBtn) {
     adminAuthBtn.addEventListener('click', async () => {
+      const username = document.getElementById('admin-username').value.trim();
       const password = document.getElementById('admin-password').value.trim();
       const errorEl = document.getElementById('admin-login-error');
-      if (!password) {
-        if (errorEl) errorEl.textContent = 'API key required.';
+      if (!username || !password) {
+        if (errorEl) errorEl.textContent = 'Please enter both username and password.';
         return;
       }
-      // Try to authenticate using the API key
-      const res = await fetch('https://beesoft-one.vercel.app/api/devices', {
-        method: 'GET',
-        headers: { 'x-api-key': password }
+      // Authenticate with backend
+      const res = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
       });
       if (!res.ok) {
-        if (errorEl) errorEl.textContent = 'Invalid API key.';
+        if (errorEl) errorEl.textContent = 'Invalid admin credentials.';
         return;
       }
-      // Success: show admin features
-      if (errorEl) errorEl.textContent = '';
-      window.notifications?.success('Admin login successful. You can now assign subscription.');
+      window.notifications.success('Admin login successful. You can now assign subscription.');
       // Optionally, unlock admin features or show admin dashboard here
     });
   }
