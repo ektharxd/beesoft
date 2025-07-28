@@ -1,5 +1,4 @@
 import { MongoClient } from 'mongodb';
-
 console.log('DEPLOYMENT_MARKER: 2024-07-28-FIXED-VERSION');
 
 const uri = process.env.MONGODB_URI;
