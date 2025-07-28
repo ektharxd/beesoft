@@ -1,5 +1,4 @@
 const { contextBridge, ipcRenderer } = require('electron');
-const { machineIdSync } = require('node-machine-id');
 
 contextBridge.exposeInMainWorld('electronAPI', {
     // WhatsApp connection
@@ -44,6 +43,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     onWhatsAppLoading: (callback) => {
         ipcRenderer.on('whatsapp-loading', (event, data) => callback(data));
-    },
-    getMachineId: () => machineIdSync(),
+    }
 });
