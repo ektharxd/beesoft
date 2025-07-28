@@ -520,38 +520,25 @@ async function initializeActivationSystem() {
   const adminAuthBtn = document.getElementById('admin-auth-btn');
   if (adminAuthBtn) {
     adminAuthBtn.addEventListener('click', async () => {
-      const username = document.getElementById('admin-username').value.trim();
       const password = document.getElementById('admin-password').value.trim();
       const errorEl = document.getElementById('admin-login-error');
-      if (!username || !password) {
-        if (errorEl) errorEl.textContent = 'Please enter both username and password.';
+      if (!password) {
+        if (errorEl) errorEl.textContent = 'API key required.';
         return;
       }
-      // Authenticate with backend
-      const res = await fetch('/api/admin-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+      // Try to authenticate using the API key
+      const res = await fetch('https://beesoft-one.vercel.app/api/devices', {
+        method: 'GET',
+        headers: { 'x-api-key': password }
       });
       if (!res.ok) {
-        if (errorEl) errorEl.textContent = 'Invalid admin credentials.';
+        if (errorEl) errorEl.textContent = 'Invalid API key.';
         return;
       }
-      // Register device with username if not already
-      await registerDevice(username);
-      window.notifications.success('Admin login successful. You can now assign subscription.');
-      // Show admin modal for assigning subscription
-      showAdminModal(async (obj) => {
-        // Assign subscription via API
-        const machineId = getDeviceId();
-        await fetch('/api/assign-subscription', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ machineId, type: 'subscription', days: obj.days })
-        });
-        window.notifications.success('Subscription updated. Reloading...');
-        setTimeout(() => location.reload(), 1000);
-      });
+      // Success: show admin features
+      if (errorEl) errorEl.textContent = '';
+      window.notifications?.success('Admin login successful. You can now assign subscription.');
+      // Optionally, unlock admin features or show admin dashboard here
     });
   }
 
