@@ -79,19 +79,17 @@ class AppState {
   updateConnectionStatus(connected) {
     this.isConnected = connected;
     const statusEl = document.getElementById('connection-status');
-    
     if (statusEl) {
       if (connected) {
         statusEl.className = 'status-indicator online';
-        statusEl.innerHTML = '<span class="status-dot"></span><span>Connected</span>';
+        statusEl.innerHTML = 'Connected';
         this.updateStep(Math.max(this.currentStep, 2));
       } else {
         statusEl.className = 'status-indicator offline';
-        statusEl.innerHTML = '<span class="status-dot"></span><span>Disconnected</span>';
+        statusEl.innerHTML = 'Disconnected';
         this.updateStep(1);
       }
     }
-
     this.updateWorkflowUI();
   }
 
@@ -1331,6 +1329,10 @@ function initializeWhatsAppConnection() {
 // ==========================================================================
 
 function handleBackendUpdate(data) {
+    // Ignore messages that do not have a 'type' property
+    if (!data || typeof data !== 'object' || !data.type) {
+        return;
+    }
     const qrContainer = document.getElementById('qr-container');
     const qrCodeDisplay = document.getElementById('qr-code-display');
     const connectionPlaceholder = document.getElementById('connection-placeholder');

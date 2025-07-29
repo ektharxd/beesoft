@@ -162,6 +162,7 @@ function sendToUI(type, payload) {
         console.log(`[${payload.level || 'info'}] ${payload.message}`);
     }
     if (mainWindow) {
+        console.log('Sending to UI:', { type, ...payload });
         mainWindow.webContents.send('update', { type, ...payload });
     }
 }

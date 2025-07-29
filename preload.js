@@ -38,7 +38,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   testSentryError: () => ipcRenderer.invoke('test-sentry-error'),
 
   // Event listeners
-  onUpdate: (callback) => ipcRenderer.on('update', callback),
+  onUpdate: (callback) => ipcRenderer.on('update', (event, data) => callback(data)),
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
 
   // Device info (for compatibility)
