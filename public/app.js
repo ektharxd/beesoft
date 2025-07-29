@@ -455,7 +455,7 @@ async function initializeActivationSystem() {
   async function registerDevice(username) {
     const machineId = getDeviceId();
     setUsername(username);
-    await fetch('http://localhost:3000/api/devices?register=1', {
+    await fetch('http://localhost:3001/api/devices?register=1', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ machineId, username })
@@ -466,7 +466,7 @@ async function initializeActivationSystem() {
   async function fetchDeviceStatus() {
     const machineId = getDeviceId();
     try {
-      const res = await fetch(`http://localhost:3000/api/device-status?machineId=${encodeURIComponent(machineId)}`);
+      const res = await fetch(`http://localhost:3001/api/device-status?machineId=${encodeURIComponent(machineId)}`);
       if (!res.ok) return null;
       return await res.json();
     } catch (error) {
@@ -677,7 +677,7 @@ async function initializeActivationSystem() {
         return;
       }
       // Authenticate with backend
-      const API_BASE = "http://localhost:3000/api";
+      const API_BASE = "http://localhost:3001/api";
       const res = await fetch(`${API_BASE}/admin-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -817,7 +817,7 @@ function showAdminActionsWindow() {
         
         console.log('Register device payload:', payload);
         
-        const res = await fetch('http://localhost:3000/api/devices?register=1', {
+        const res = await fetch('http://localhost:3001/api/devices?register=1', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -849,7 +849,7 @@ function showAdminActionsWindow() {
     // Remove device
     document.getElementById('remove-device-btn').onclick = async () => {
       // Remove device from DB
-      const res = await fetch(`http://localhost:3000/api/devices?remove=1&machineId=${encodeURIComponent(deviceId)}`, {
+      const res = await fetch(`http://localhost:3001/api/devices?remove=1&machineId=${encodeURIComponent(deviceId)}`, {
         method: 'DELETE'
       });
       document.getElementById('admin-action-result').textContent = res.ok ? 'Device removed.' : 'Failed to remove device.';
@@ -873,7 +873,7 @@ function showAdminActionsWindow() {
         resultEl.style.color = '#1d4ed8';
         resultEl.textContent = 'Activating trial...';
         
-        const res = await fetch('http://localhost:3000/api/assign-subscription', {
+        const res = await fetch('http://localhost:3001/api/assign-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ machineId: deviceId, type: 'trial', days })
@@ -931,7 +931,7 @@ function showAdminActionsWindow() {
         resultEl.style.color = '#1d4ed8';
         resultEl.textContent = 'Validating activation key...';
         
-        const res = await fetch('http://localhost:3000/api/assign-subscription', {
+        const res = await fetch('http://localhost:3001/api/assign-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ machineId: deviceId, type: 'subscription', days: 9999, key })
