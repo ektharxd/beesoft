@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beesoft Admin Dashboard</title>
+  <link href="https://fonts.cdnfonts.com/css/ntype82" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --vercel-bg: #0a0a0a;
+      --vercel-surface: #18181b;
+      --vercel-card: #1c1c1f;
+      --vercel-primary: #fff;
+      --vercel-secondary: #888;
+      --vercel-accent: #6366f1;
+      --vercel-success: #22c55e;
+      --vercel-warning: #facc15;
+      --vercel-error: #ef4444;
+      --vercel-border: #232323;
+      --vercel-radius: 16px;
+      --vercel-shadow: 0 2px 16px 0 #000a;
+      --vercel-font: 'ntype82', 'Inter', sans-serif;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+      font-family: var(--vercel-font);
+      background: var(--vercel-bg);
+      color: var(--vercel-primary);
+      letter-spacing: 0.01em;
+    }
+    
+    .dashboard-container {
+      display: flex;
+      height: 100vh;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: var(--vercel-surface);
+      border-right: 1px solid var(--vercel-border);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-header {
+      padding: 2rem 1.5rem;
+      border-bottom: 1px solid var(--vercel-border);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    
+    .logo i {
+      color: var(--vercel-accent);
+      font-size: 1.5rem;
+    }
+    
+    .sidebar-nav {
+      flex: 1;
+      padding: 1rem 0;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      color: var(--vercel-secondary);
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .nav-item:hover,
+    .nav-item.active {
+      background: var(--vercel-card);
+      color: var(--vercel-primary);
+    }
+    
+    .nav-item.active {
+      border-right: 2px solid var(--vercel-accent);
+    }
+    
+    .sidebar-footer {
+      padding: 1.5rem;
+      border-top: 1px solid var(--vercel-border);
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--vercel-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    
+    .logout-btn {
+      width: 100%;
+      padding: 0.5rem;
+      background: var(--vercel-error);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: var(--vercel-font);
+      transition: background 0.2s;
+    }
+    
+    .logout-btn:hover {
+      background: #dc2626;
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .main-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--vercel-border);
+      background: var(--vercel-surface);
+    }
+    
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .page-subtitle {
+      color: var(--vercel-secondary);
+    }
+    
+    .main-body {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: var(--vercel-card);
+      border-radius: var(--vercel-radius);
+      padding: 1.5rem;
+      border: 1px solid var(--vercel-border);
+    }
+    
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    
+    .stat-title {
+      color: var(--vercel-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-change {
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .stat-change.positive {
+      color: var(--vercel-success);
+    }
+    
+    .stat-change.negative {
+      color: var(--vercel-error);
+    }
+    
+    /* Content Cards */
+    .content-card {
+      background: var(--vercel-card);
+      border-radius: var(--vercel-radius);
+      border: 1px solid var(--vercel-border);
+      margin-bottom: 2rem;
+    }
+    
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--vercel-border);
+      display: flex;
+      align-items: center;
+      justify-content: between;
+    }
+    
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      flex: 1;
+    }
+    
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--vercel-font);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-primary {
+      background: var(--vercel-accent);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #4f46e5;
+    }
+    
+    .btn-success {
+      background: var(--vercel-success);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #16a34a;
+    }
+    
+    .btn-warning {
+      background: var(--vercel-warning);
+      color: #000;
+    }
+    
+    .btn-warning:hover {
+      background: #eab308;
+    }
+    
+    .btn-danger {
+      background: var(--vercel-error);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--vercel-primary);
+      border: 1px solid var(--vercel-border);
+    }
+    
+    .btn-outline:hover {
+      background: var(--vercel-surface);
+    }
+    
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--vercel-border);
+    }
+    
+    .table th {
+      background: var(--vercel-surface);
+      font-weight: 600;
+      color: var(--vercel-secondary);
+      font-size: 0.875rem;
+    }
+    
+    .table tr:hover {
+      background: var(--vercel-surface);
+    }
+    
+    /* Status badges */
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-online {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--vercel-success);
+    }
+    
+    .status-offline {
+      background: rgba(156, 163, 175, 0.1);
+      color: var(--vercel-secondary);
+    }
+    
+    .status-banned {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--vercel-error);
+    }
+    
+    .status-active {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--vercel-success);
+    }
+    
+    .status-expired {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--vercel-error);
+    }
+    
+    .status-expiring {
+      background: rgba(250, 204, 21, 0.1);
+      color: var(--vercel-warning);
+    }
+    
+    .status-permanent {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--vercel-accent);
+    }
+    
+    /* Forms */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--vercel-secondary);
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--vercel-border);
+      border-radius: 8px;
+      background: var(--vercel-surface);
+      color: var(--vercel-primary);
+      font-family: var(--vercel-font);
+    }
+    
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--vercel-accent);
+    }
+    
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .modal {
+      background: var(--vercel-card);
+      border-radius: var(--vercel-radius);
+      border: 1px solid var(--vercel-border);
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--vercel-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .modal-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--vercel-secondary);
+      cursor: pointer;
+      font-size: 1.25rem;
+    }
+    
+    .modal-body {
+      padding: 1.5rem;
+    }
+    
+    .modal-footer {
+      padding: 1.5rem;
+      border-top: 1px solid var(--vercel-border);
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+    
+    /* Loading */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--vercel-border);
+      border-radius: 50%;
+      border-top-color: var(--vercel-accent);
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Utilities */
+    .hidden {
+      display: none !important;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    .text-right {
+      text-align: right;
+    }
+    
+    .mb-4 {
+      margin-bottom: 1rem;
+    }
+    
+    .mt-4 {
+      margin-top: 1rem;
+    }
+    
+    .flex {
+      display: flex;
+    }
+    
+    .items-center {
+      align-items: center;
+    }
+    
+    .justify-between {
+      justify-content: space-between;
+    }
+    
+    .gap-2 {
+      gap: 0.5rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: -100%;
+        z-index: 999;
+        transition: left 0.3s;
+      }
+      
+      .sidebar.open {
+        left: 0;
+      }
+      
+      .main-content {
+        width: 100%;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fas fa-bee"></i>
+          <span>Beesoft Admin</span>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-page="dashboard">
+          <i class="fas fa-chart-line"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-page="devices">
+          <i class="fas fa-desktop"></i>
+          <span>Devices</span>
+        </a>
+        <a href="#" class="nav-item" data-page="licenses">
+          <i class="fas fa-key"></i>
+          <span>License Keys</span>
+        </a>
+        <a href="#" class="nav-item" data-page="settings">
+          <i class="fas fa-cog"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">E</div>
+          <div>
+            <div style="font-weight: 600;" id="username">ekthar</div>
+            <div style="font-size: 0.75rem; color: var(--vercel-secondary);">Super Admin</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </button>
+      </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="main-header">
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+        <p class="page-subtitle" id="pageSubtitle">Overview of your Beesoft system</p>
+      </div>
+      
+      <div class="main-body" id="mainBody">
+        <!-- Dashboard content will be loaded here -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Modal Title</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        Modal content
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="modalConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let currentPage = 'dashboard';
+    let authToken = localStorage.getItem('adminToken');
+    let currentUser = localStorage.getItem('adminUsername');
+    const API_BASE = 'http://localhost:4000/api/admin';
+    
+    // Check authentication
+    if (!authToken) {
+      window.location.href = '/admin-login.html';
+    }
+    
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeDashboard();
+      loadPage('dashboard');
+    });
+    
+    function initializeDashboard() {
+      // Set user info
+      if (currentUser) {
+        document.getElementById('username').textContent = currentUser;
+        document.getElementById('userAvatar').textContent = currentUser.charAt(0).toUpperCase();
+      }
+      
+      // Add navigation event listeners
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          const page = this.dataset.page;
+          loadPage(page);
+        });
+      });
+    }
+    
+    function loadPage(page) {
+      // Update navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.querySelector(`[data-page="${page}"]`).classList.add('active');
+      
+      currentPage = page;
+      
+      // Update page title
+      const titles = {
+        dashboard: { title: 'Dashboard', subtitle: 'Overview of your Beesoft system' },
+        devices: { title: 'Device Management', subtitle: 'Manage connected devices and licenses' },
+        licenses: { title: 'License Keys', subtitle: 'Generate and manage license keys' },
+        settings: { title: 'Settings', subtitle: 'System configuration and preferences' }
+      };
+      
+      document.getElementById('pageTitle').textContent = titles[page].title;
+      document.getElementById('pageSubtitle').textContent = titles[page].subtitle;
+      
+      // Load page content
+      switch (page) {
+        case 'dashboard':
+          loadDashboard();
+          break;
+        case 'devices':
+          loadDevices();
+          break;
+        case 'licenses':
+          loadLicenses();
+          break;
+        case 'settings':
+          loadSettings();
+          break;
+      }
+    }
+    
+    async function loadDashboard() {
+      const mainBody = document.getElementById('mainBody');
+      mainBody.innerHTML = '<div class="loading"></div>';
+      
+      try {
+        // Fetch dashboard stats
+        const [deviceStats, licenseStats] = await Promise.all([
+          apiRequest('/devices/stats'),
+          apiRequest('/licenses/stats')
+        ]);
+        
+        mainBody.innerHTML = `
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Total Devices</span>
+                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--vercel-accent);">
+                  <i class="fas fa-desktop"></i>
+                </div>
+              </div>
+              <div class="stat-value">${deviceStats.totalDevices || 0}</div>
+              <div class="stat-change">
+                <span>Registered devices</span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Online Devices</span>
+                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--vercel-success);">
+                  <i class="fas fa-circle"></i>
+                </div>
+              </div>
+              <div class="stat-value">${deviceStats.onlineDevices || 0}</div>
+              <div class="stat-change">
+                <span>${deviceStats.offlineDevices || 0} offline</span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Active Licenses</span>
+                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--vercel-success);">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+              </div>
+              <div class="stat-value">${deviceStats.activeSubscriptions || 0}</div>
+              <div class="stat-change">
+                <span>${deviceStats.permanentLicenses || 0} permanent, ${deviceStats.trialLicenses || 0} trial</span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Available Keys</span>
+                <div class="stat-icon" style="background: rgba(250, 204, 21, 0.1); color: var(--vercel-warning);">
+                  <i class="fas fa-key"></i>
+                </div>
+              </div>
+              <div class="stat-value">${licenseStats.availableKeys || 0}</div>
+              <div class="stat-change">
+                <span>${licenseStats.usedKeys || 0} used</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">Recent Activity</h3>
+              <button class="btn btn-outline" onclick="loadPage('devices')">
+                <i class="fas fa-external-link-alt"></i>
+                View All
+              </button>
+            </div>
+            <div class="card-body">
+              <div id="recentActivity">Loading recent activity...</div>
+            </div>
+          </div>
+        `;
+        
+        // Load recent devices
+        loadRecentActivity();
+        
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+        mainBody.innerHTML = '<div class="text-center">Error loading dashboard data</div>';
+      }
+    }
+    
+    async function loadRecentActivity() {
+      try {
+        const devices = await apiRequest('/devices?limit=5&sortBy=lastSeen&sortOrder=desc');
+        const activityContainer = document.getElementById('recentActivity');
+        
+        if (devices.devices && devices.devices.length > 0) {
+          activityContainer.innerHTML = `
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Device</th>
+                    <th>Status</th>
+                    <th>License</th>
+                    <th>Last Seen</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${devices.devices.map(device => `
+                    <tr>
+                      <td>
+                        <div>
+                          <div style="font-weight: 600;">${device.name || device.username}</div>
+                          <div style="font-size: 0.75rem; color: var(--vercel-secondary);">${device.machineId}</div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="status-badge ${device.isOnline ? 'status-online' : 'status-offline'}">
+                          ${device.isOnline ? 'Online' : 'Offline'}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="status-badge status-${getSubscriptionStatusClass(device.subscriptionStatus)}">
+                          ${getSubscriptionStatusText(device.subscriptionStatus)}
+                        </span>
+                      </td>
+                      <td>${formatTimeAgo(device.lastSeen)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        } else {
+          activityContainer.innerHTML = '<div class="text-center">No devices found</div>';
+        }
+      } catch (error) {
+        console.error('Error loading recent activity:', error);
+        document.getElementById('recentActivity').innerHTML = '<div class="text-center">Error loading activity</div>';
+      }
+    }
+    
+    // Continue with more functions...
+    // This is getting quite long, so I'll continue in the next part
+    
+    // Utility functions
+    function getSubscriptionStatusClass(status) {
+      const statusMap = {
+        'active': 'active',
+        'permanent': 'permanent',
+        'expired': 'expired',
+        'expiring_soon': 'expiring',
+        'expiring_warning': 'expiring',
+        'banned': 'banned',
+        'inactive': 'offline'
+      };
+      return statusMap[status] || 'offline';
+    }
+    
+    function getSubscriptionStatusText(status) {
+      const statusMap = {
+        'active': 'Active',
+        'permanent': 'Permanent',
+        'expired': 'Expired',
+        'expiring_soon': 'Expiring',
+        'expiring_warning': 'Expiring',
+        'banned': 'Banned',
+        'inactive': 'Inactive'
+      };
+      return statusMap[status] || 'Unknown';
+    }
+    
+    function formatTimeAgo(dateString) {
+      const now = new Date();
+      const date = new Date(dateString);
+      const diffMs = now - date;
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMinutes / 60);
+      const diffDays = Math.floor(diffHours / 24);
+      
+      if (diffMinutes < 1) return 'Just now';
+      if (diffMinutes < 60) return `${diffMinutes}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      return `${diffDays}d ago`;
+    }
+    
+    async function apiRequest(endpoint, options = {}) {
+      const url = `${API_BASE}${endpoint}`;
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        ...options
+      };
+      
+      const response = await fetch(url, config);
+      
+      if (response.status === 401) {
+        logout();
+        return;
+      }
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    }
+    
+    function logout() {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUsername');
+      window.location.href = '/admin-login.html';
+    }
+    
+    function showModal(title, body, footer) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalBody').innerHTML = body;
+      if (footer) {
+        document.getElementById('modalFooter').innerHTML = footer;
+      }
+      document.getElementById('modalOverlay').classList.remove('hidden');
+    }
+    
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.add('hidden');
+    }
+    
+    // Placeholder functions for other pages - will be implemented
+    async function loadDevices() {
+      document.getElementById('mainBody').innerHTML = '<div class="text-center">Device management coming soon...</div>';
+    }
+    
+    async function loadLicenses() {
+      document.getElementById('mainBody').innerHTML = '<div class="text-center">License management coming soon...</div>';
+    }
+    
+    async function loadSettings() {
+      document.getElementById('mainBody').innerHTML = '<div class="text-center">Settings coming soon...</div>';
+    }
+  </script>
+</body>
+</html>
