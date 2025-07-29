@@ -453,7 +453,7 @@ async function initializeActivationSystem() {
   async function registerDevice(username) {
     const machineId = getDeviceId();
     setUsername(username);
-    await fetch('/api/devices?register=1', {
+    await fetch('http://localhost:3000/api/devices?register=1', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ machineId, username })
@@ -463,7 +463,7 @@ async function initializeActivationSystem() {
   // Fetch device status (subscription/trial)
   async function fetchDeviceStatus() {
     const machineId = getDeviceId();
-    const res = await fetch(`/api/device-status?machineId=${encodeURIComponent(machineId)}`);
+    const res = await fetch(`http://localhost:3000/api/device-status?machineId=${encodeURIComponent(machineId)}`);
     if (!res.ok) return null;
     return await res.json();
   }
@@ -481,38 +481,67 @@ async function initializeActivationSystem() {
 
   // Check activation/subscription status
   window.checkTrial = async function() {
-    const status = await fetchDeviceStatus();
-    if (!status || !status.subscription) {
+    console.log('checkTrial called');
+    try {
+      const status = await fetchDeviceStatus();
+      console.log('Device status:', status);
+      
+      if (!status || !status.subscription) {
+        console.log('No subscription found, showing trial lock page');
+        showPage('trial-lock-page');
+        const trialInfo = document.getElementById('trial-info');
+        if (trialInfo) trialInfo.textContent = 'This software is not activated. Please contact an administrator.';
+        return;
+      }
+      
+      const { subscription } = status;
+      console.log('Subscription details:', subscription);
+      
+      if (!subscription.active) {
+        console.log('Subscription not active, showing trial lock page');
+        showPage('trial-lock-page');
+        const trialInfo = document.getElementById('trial-info');
+        if (trialInfo) trialInfo.textContent = 'No active subscription. Please contact admin.';
+        return;
+      }
+      
+      // Calculate expiry
+      const now = Date.now();
+      const start = new Date(subscription.start).getTime();
+      const expiry = start + (subscription.days * 24 * 60 * 60 * 1000);
+      
+      console.log('Expiry calculation:', { now, start, expiry, days: subscription.days });
+      
+      if (now > expiry) {
+        console.log('Subscription expired, showing trial lock page');
+        showPage('trial-lock-page');
+        const trialInfo = document.getElementById('trial-info');
+        if (trialInfo) trialInfo.textContent = `Subscription expired on ${new Date(expiry).toLocaleDateString()}.`;
+        return;
+      }
+      
+      const daysLeft = Math.ceil((expiry - now) / (24 * 60 * 60 * 1000));
+      console.log('Subscription active, showing welcome page. Days left:', daysLeft);
+      
+      showPage('welcome-page');
+      const statusAlert = document.getElementById('status-alert');
+      if (statusAlert) {
+        if (subscription.type === 'permanent') {
+          statusAlert.textContent = '✅ Permanent license activated!';
+        } else {
+          statusAlert.textContent = `✅ Trial active. You have ${daysLeft} days left.`;
+        }
+        statusAlert.className = 'notification success';
+        statusAlert.style.display = 'block';
+        setTimeout(() => { 
+          if (statusAlert) statusAlert.style.display = 'none'; 
+        }, 5000);
+      }
+    } catch (error) {
+      console.error('Error in checkTrial:', error);
       showPage('trial-lock-page');
       const trialInfo = document.getElementById('trial-info');
-      if (trialInfo) trialInfo.textContent = 'This software is not activated. Please contact an administrator.';
-      return;
-    }
-    const { subscription } = status;
-    if (!subscription.active) {
-      showPage('trial-lock-page');
-      const trialInfo = document.getElementById('trial-info');
-      if (trialInfo) trialInfo.textContent = 'No active subscription. Please contact admin.';
-      return;
-    }
-    // Calculate expiry
-    const now = Date.now();
-    const start = new Date(subscription.start).getTime();
-    const expiry = start + (subscription.days * 24 * 60 * 60 * 1000);
-    if (now > expiry) {
-      showPage('trial-lock-page');
-      const trialInfo = document.getElementById('trial-info');
-      if (trialInfo) trialInfo.textContent = `Subscription expired on ${new Date(expiry).toLocaleDateString()}.`;
-      return;
-    }
-    const daysLeft = Math.ceil((expiry - now) / (24 * 60 * 60 * 1000));
-    showPage('welcome-page');
-    const statusAlert = document.getElementById('status-alert');
-    if (statusAlert) {
-      statusAlert.textContent = `Subscription active. You have ${daysLeft} days left.`;
-      statusAlert.className = 'notification success';
-      statusAlert.style.display = 'block';
-      setTimeout(() => { statusAlert.style.display = 'none'; }, 5000);
+      if (trialInfo) trialInfo.textContent = 'Error checking subscription status. Please contact admin.';
     }
   };
 

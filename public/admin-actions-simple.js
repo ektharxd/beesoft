@@ -98,9 +98,9 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
 
-    // Helper function to directly show welcome page
+    // Helper function to redirect to welcome page after successful activation
     function forceShowWelcomePage() {
-      console.log('Force showing welcome page');
+      console.log('Force showing welcome page after successful activation');
       
       setTimeout(() => {
         // Close the modal first
@@ -110,49 +110,44 @@ document.addEventListener('DOMContentLoaded', function() {
           console.log('Modal closed');
         }
         
-        // Force show welcome page directly
+        // Wait a bit then call checkTrial to properly handle the redirect
         setTimeout(() => {
-          console.log('Directly showing welcome page');
+          console.log('Calling window.checkTrial to handle redirect');
           
-          // Hide all pages
-          const pages = ['welcome-page', 'main-app-page', 'trial-lock-page'];
-          pages.forEach(id => {
-            const page = document.getElementById(id);
-            if (page) {
-              page.style.display = 'none';
-              console.log(`Hidden page: ${id}`);
-            }
-          });
-          
-          // Show welcome page
-          const welcomePage = document.getElementById('welcome-page');
-          if (welcomePage) {
-            welcomePage.style.display = 'flex';
-            console.log('Welcome page shown');
-            
-            // Update status alert
-            const statusAlert = document.getElementById('status-alert');
-            if (statusAlert) {
-              statusAlert.textContent = '✅ Trial activated successfully!';
-              statusAlert.className = 'notification success';
-              statusAlert.style.display = 'block';
-              
-              // Auto-hide after 5 seconds
-              setTimeout(() => { 
-                if (statusAlert) statusAlert.style.display = 'none'; 
-              }, 5000);
-            }
-          } else {
-            console.error('Welcome page element not found');
-          }
-          
-          // Also try calling checkTrial as backup
           if (typeof window.checkTrial === 'function') {
-            console.log('Also calling window.checkTrial as backup');
+            // Call the fixed checkTrial function which will properly check the backend
+            // and redirect to the welcome page if activation was successful
             window.checkTrial();
+          } else {
+            console.error('window.checkTrial function not available');
+            
+            // Fallback: manually show welcome page
+            console.log('Fallback: manually showing welcome page');
+            const pages = ['welcome-page', 'main-app-page', 'trial-lock-page'];
+            pages.forEach(id => {
+              const page = document.getElementById(id);
+              if (page) page.style.display = 'none';
+            });
+            
+            const welcomePage = document.getElementById('welcome-page');
+            if (welcomePage) {
+              welcomePage.style.display = 'flex';
+              
+              // Update status alert
+              const statusAlert = document.getElementById('status-alert');
+              if (statusAlert) {
+                statusAlert.textContent = '✅ Trial activated successfully!';
+                statusAlert.className = 'notification success';
+                statusAlert.style.display = 'block';
+                
+                setTimeout(() => { 
+                  if (statusAlert) statusAlert.style.display = 'none'; 
+                }, 5000);
+              }
+            }
           }
         }, 500);
-      }, 1500);
+      }, 1000);
     }
 
     // Register device button
