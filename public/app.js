@@ -419,6 +419,10 @@ function initializeTheme() {
 // TRIAL SYSTEM
 // ==========================================================================
 
+// Global variables for monitoring
+let deviceStatusMonitor = null;
+let lastKnownStatus = null;
+
 async function getTrustedTime() {
   try {
     const response = await fetch('https://worldtimeapi.org/api/ip');
@@ -463,9 +467,14 @@ async function initializeActivationSystem() {
   // Fetch device status (subscription/trial)
   async function fetchDeviceStatus() {
     const machineId = getDeviceId();
-    const res = await fetch(`http://localhost:3000/api/device-status?machineId=${encodeURIComponent(machineId)}`);
-    if (!res.ok) return null;
-    return await res.json();
+    try {
+      const res = await fetch(`http://localhost:3000/api/device-status?machineId=${encodeURIComponent(machineId)}`);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (error) {
+      console.error('Error fetching device status:', error);
+      return null;
+    }
   }
 
   // Show page logic
@@ -479,19 +488,105 @@ async function initializeActivationSystem() {
     if (targetPage) targetPage.style.display = 'flex';
   }
 
-  // Check activation/subscription status
-  window.checkTrial = async function() {
+  // Start real-time device status monitoring
+  function startDeviceStatusMonitoring() {
+    // Clear any existing monitor
+    if (deviceStatusMonitor) {
+      clearInterval(deviceStatusMonitor);
+    }
+
+    console.log('Starting real-time device status monitoring...');
+    
+    // Check status every 2 seconds for real-time monitoring
+    deviceStatusMonitor = setInterval(async () => {
+      try {
+        const currentStatus = await fetchDeviceStatus();
+        
+        // Compare with last known status to detect changes
+        const statusChanged = JSON.stringify(currentStatus) !== JSON.stringify(lastKnownStatus);
+        
+        if (statusChanged) {
+          console.log('Device status changed:', { 
+            previous: lastKnownStatus, 
+            current: currentStatus 
+          });
+          
+          // Update last known status
+          lastKnownStatus = currentStatus;
+          
+          // Check if device was removed (status becomes null)
+          if (!currentStatus) {
+            console.log('Device removed from database - redirecting to lock page');
+            showPage('trial-lock-page');
+            const trialInfo = document.getElementById('trial-info');
+            if (trialInfo) {
+              trialInfo.textContent = 'Device has been removed from the system. Please contact an administrator.';
+            }
+            if (window.notifications) {
+              window.notifications.error('Device access revoked. Redirecting to lock screen.');
+            }
+            return;
+          }
+          
+          // Check if subscription was deactivated
+          if (currentStatus.subscription && !currentStatus.subscription.active) {
+            console.log('Subscription deactivated - redirecting to lock page');
+            showPage('trial-lock-page');
+            const trialInfo = document.getElementById('trial-info');
+            if (trialInfo) {
+              trialInfo.textContent = 'Subscription has been deactivated. Please contact an administrator.';
+            }
+            if (window.notifications) {
+              window.notifications.warning('Subscription deactivated. Redirecting to lock screen.');
+            }
+            return;
+          }
+          
+          // If status is valid and we're on lock page, redirect to welcome
+          if (currentStatus.subscription && currentStatus.subscription.active) {
+            const currentPage = document.querySelector('.page-wrapper[style*="flex"]');
+            if (currentPage && currentPage.id === 'trial-lock-page') {
+              console.log('Valid subscription detected while on lock page - redirecting to welcome');
+              await checkTrial(); // This will handle the proper redirect
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error in device status monitoring:', error);
+      }
+    }, 2000); // Check every 2 seconds
+  }
+
+  // Stop device status monitoring
+  function stopDeviceStatusMonitoring() {
+    if (deviceStatusMonitor) {
+      clearInterval(deviceStatusMonitor);
+      deviceStatusMonitor = null;
+      console.log('Device status monitoring stopped');
+    }
+  }
+
+  // Enhanced check activation/subscription status
+  window.checkTrial = async function(skipMonitoring = false) {
     console.log('checkTrial called');
     try {
       const status = await fetchDeviceStatus();
       console.log('Device status:', status);
+      
+      // Update last known status
+      lastKnownStatus = status;
       
       if (!status || !status.subscription) {
         console.log('No subscription found, showing trial lock page');
         showPage('trial-lock-page');
         const trialInfo = document.getElementById('trial-info');
         if (trialInfo) trialInfo.textContent = 'This software is not activated. Please contact an administrator.';
-        return;
+        
+        // Start monitoring even on lock page to detect activation
+        if (!skipMonitoring) {
+          startDeviceStatusMonitoring();
+        }
+        return false;
       }
       
       const { subscription } = status;
@@ -502,7 +597,12 @@ async function initializeActivationSystem() {
         showPage('trial-lock-page');
         const trialInfo = document.getElementById('trial-info');
         if (trialInfo) trialInfo.textContent = 'No active subscription. Please contact admin.';
-        return;
+        
+        // Start monitoring to detect activation
+        if (!skipMonitoring) {
+          startDeviceStatusMonitoring();
+        }
+        return false;
       }
       
       // Calculate expiry
@@ -517,7 +617,12 @@ async function initializeActivationSystem() {
         showPage('trial-lock-page');
         const trialInfo = document.getElementById('trial-info');
         if (trialInfo) trialInfo.textContent = `Subscription expired on ${new Date(expiry).toLocaleDateString()}.`;
-        return;
+        
+        // Start monitoring to detect reactivation
+        if (!skipMonitoring) {
+          startDeviceStatusMonitoring();
+        }
+        return false;
       }
       
       const daysLeft = Math.ceil((expiry - now) / (24 * 60 * 60 * 1000));
@@ -537,13 +642,30 @@ async function initializeActivationSystem() {
           if (statusAlert) statusAlert.style.display = 'none'; 
         }, 5000);
       }
+      
+      // Start monitoring for changes (deactivation, removal, etc.)
+      if (!skipMonitoring) {
+        startDeviceStatusMonitoring();
+      }
+      return true;
+      
     } catch (error) {
       console.error('Error in checkTrial:', error);
       showPage('trial-lock-page');
       const trialInfo = document.getElementById('trial-info');
       if (trialInfo) trialInfo.textContent = 'Error checking subscription status. Please contact admin.';
+      
+      // Start monitoring to detect when connection is restored
+      if (!skipMonitoring) {
+        startDeviceStatusMonitoring();
+      }
+      return false;
     }
   };
+
+  // Expose monitoring controls globally
+  window.startDeviceStatusMonitoring = startDeviceStatusMonitoring;
+  window.stopDeviceStatusMonitoring = stopDeviceStatusMonitoring;
 
   // Admin login handler (API-based)
   const adminAuthBtn = document.getElementById('admin-auth-btn');
@@ -576,25 +698,50 @@ async function initializeActivationSystem() {
 // Show admin actions window/modal after successful login
 function showAdminActionsWindow() {
   const modalHtml = `
-    <div style="padding: 16px; max-width: 400px;">
-      <h2 style="margin-bottom: 18px;">Admin Actions</h2>
+    <div style="padding: 16px; max-width: 500px;">
+      <h2 style="margin-bottom: 18px;">Admin Actions - Device Activation</h2>
       <div class="form-group">
         <label>Device ID</label>
         <div id="device-id-chip" style="display:inline-block;padding:8px 16px;background:#f3f4f6;color:#222;border-radius:16px;font-weight:600;font-size:1rem;margin-bottom:8px;user-select:all;"></div>
-        <button id="register-device-btn" class="btn btn-primary" style="margin-top: 8px;">Register Device</button>
-        <button id="remove-device-btn" class="btn btn-danger" style="margin-top: 8px;">Remove Device</button>
       </div>
+      
       <div class="form-group" style="margin-top: 18px;">
-        <label for="trial-days-input">Trial Activation Days</label>
+        <h3 style="margin-bottom: 12px; color: #4f46e5;">Device Registration Details</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label for="device-name-input" class="form-label required">Full Name</label>
+            <input id="device-name-input" type="text" class="form-input" placeholder="Enter full name" required />
+          </div>
+          <div>
+            <label for="device-email-input" class="form-label required">Email Address</label>
+            <input id="device-email-input" type="email" class="form-input" placeholder="Enter email" required />
+          </div>
+        </div>
+        <div style="margin-top: 12px;">
+          <label for="device-mobile-input" class="form-label required">Mobile Number</label>
+          <input id="device-mobile-input" type="tel" class="form-input" placeholder="Enter mobile number with country code" required />
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 12px;">
+          <button id="register-device-btn" class="btn btn-primary" style="flex: 1;">Register Device</button>
+          <button id="remove-device-btn" class="btn btn-danger" style="flex: 1;">Remove Device</button>
+        </div>
+      </div>
+      
+      <div class="form-group" style="margin-top: 18px;">
+        <h3 style="margin-bottom: 12px; color: #059669;">Trial Activation</h3>
+        <label for="trial-days-input">Trial Days</label>
         <input id="trial-days-input" type="number" class="form-input" min="1" max="365" placeholder="Enter days" />
-        <button id="activate-trial-btn" class="btn btn-success" style="margin-top: 8px;">Activate Trial</button>
+        <button id="activate-trial-btn" class="btn btn-success" style="margin-top: 8px; width: 100%;">Activate Trial</button>
       </div>
+      
       <div class="form-group" style="margin-top: 18px;">
-        <label for="perm-key-input">Permanent Activation Key</label>
+        <h3 style="margin-bottom: 12px; color: #f59e0b;">Permanent Activation</h3>
+        <label for="perm-key-input">Activation Key</label>
         <input id="perm-key-input" type="text" class="form-input" placeholder="Enter activation key" />
-        <button id="activate-perm-btn" class="btn btn-warning" style="margin-top: 8px;">Permanent Activate</button>
+        <button id="activate-perm-btn" class="btn btn-warning" style="margin-top: 8px; width: 100%;">Permanent Activate</button>
       </div>
-      <div id="admin-action-result" style="margin-top: 16px; color: #059669;"></div>
+      
+      <div id="admin-action-result" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none;"></div>
     </div>
   `;
   showModal('Admin Actions', modalHtml, { okText: 'Close', cancelText: '' });
@@ -612,18 +759,94 @@ function showAdminActionsWindow() {
       console.log('window.electronAPI not available');
     }
     document.getElementById('register-device-btn').onclick = async () => {
-      // Gather device details
-      const version = (window.electronAPI && window.electronAPI.getAppVersion) ? (await window.electronAPI.getAppVersion()).version : 'unknown';
-      const platform = navigator.platform || 'unknown';
-      const hostname = window.location.hostname || 'unknown';
-      const payload = { machineId: deviceId, username: 'admin', version, platform, hostname };
-      console.log('Register device payload:', payload);
-      const res = await fetch('http://localhost:3000/api/devices?register=1', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      document.getElementById('admin-action-result').textContent = res.ok ? 'Device registered.' : 'Failed to register device.';
+      // Get the required form values
+      const name = document.getElementById('device-name-input').value.trim();
+      const email = document.getElementById('device-email-input').value.trim();
+      const mobile = document.getElementById('device-mobile-input').value.trim();
+      const resultEl = document.getElementById('admin-action-result');
+      
+      // Validate required fields
+      if (!name || !email || !mobile) {
+        resultEl.style.display = 'block';
+        resultEl.style.background = '#fee2e2';
+        resultEl.style.color = '#dc2626';
+        resultEl.textContent = 'Please fill in all required fields: Name, Email, and Mobile Number.';
+        return;
+      }
+      
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        resultEl.style.display = 'block';
+        resultEl.style.background = '#fee2e2';
+        resultEl.style.color = '#dc2626';
+        resultEl.textContent = 'Please enter a valid email address.';
+        return;
+      }
+      
+      // Validate mobile number (basic check for digits and length)
+      const mobileRegex = /^[\+]?[1-9][\d]{7,14}$/;
+      if (!mobileRegex.test(mobile.replace(/[\s\-\(\)]/g, ''))) {
+        resultEl.style.display = 'block';
+        resultEl.style.background = '#fee2e2';
+        resultEl.style.color = '#dc2626';
+        resultEl.textContent = 'Please enter a valid mobile number with country code.';
+        return;
+      }
+      
+      try {
+        // Show loading state
+        resultEl.style.display = 'block';
+        resultEl.style.background = '#dbeafe';
+        resultEl.style.color = '#1d4ed8';
+        resultEl.textContent = 'Registering device...';
+        
+        // Gather device details
+        const version = (window.electronAPI && window.electronAPI.getAppVersion) ? (await window.electronAPI.getAppVersion()).version : 'unknown';
+        const platform = navigator.platform || 'unknown';
+        const hostname = window.location.hostname || 'unknown';
+        
+        const payload = { 
+          machineId: deviceId, 
+          username: 'admin', 
+          name: name,
+          email: email,
+          mobile: mobile,
+          version, 
+          platform, 
+          hostname 
+        };
+        
+        console.log('Register device payload:', payload);
+        
+        const res = await fetch('http://localhost:3000/api/devices?register=1', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        const responseData = await res.json();
+        
+        if (res.ok) {
+          resultEl.style.background = '#dcfce7';
+          resultEl.style.color = '#166534';
+          resultEl.textContent = `Device registered successfully for ${name} (${email})`;
+          
+          // Clear the form
+          document.getElementById('device-name-input').value = '';
+          document.getElementById('device-email-input').value = '';
+          document.getElementById('device-mobile-input').value = '';
+        } else {
+          resultEl.style.background = '#fee2e2';
+          resultEl.style.color = '#dc2626';
+          resultEl.textContent = responseData.error || 'Failed to register device.';
+        }
+      } catch (error) {
+        resultEl.style.display = 'block';
+        resultEl.style.background = '#fee2e2';
+        resultEl.style.color = '#dc2626';
+        resultEl.textContent = 'Network error: ' + error.message;
+      }
     };
     // Remove device
     document.getElementById('remove-device-btn').onclick = async () => {
@@ -636,24 +859,117 @@ function showAdminActionsWindow() {
     // Activate trial
     document.getElementById('activate-trial-btn').onclick = async () => {
       const days = parseInt(document.getElementById('trial-days-input').value);
-      if (!days) return alert('Enter trial days');
-      const res = await fetch('http://localhost:3000/api/assign-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ machineId: deviceId, type: 'trial', days })
-      });
-      document.getElementById('admin-action-result').textContent = res.ok ? 'Trial activated.' : 'Failed to activate trial.';
+      const resultEl = document.getElementById('admin-action-result');
+      
+      if (!days) {
+        resultEl.style.display = 'block';
+        resultEl.style.background = '#fee2e2';
+        resultEl.style.color = '#dc2626';
+        resultEl.textContent = 'Please enter trial days';
+        return;
+      }
+      
+      try {
+        resultEl.style.display = 'block';
+        resultEl.style.background = '#dbeafe';
+        resultEl.style.color = '#1d4ed8';
+        resultEl.textContent = 'Activating trial...';
+        
+        const res = await fetch('http://localhost:3000/api/assign-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ machineId: deviceId, type: 'trial', days })
+        });
+        
+        const responseData = await res.json();
+        
+        if (res.ok && responseData.success) {
+          resultEl.style.background = '#dcfce7';
+          resultEl.style.color = '#166534';
+          resultEl.textContent = `Trial activated for ${days} days!`;
+          
+          // Close modal and redirect to welcome page
+          setTimeout(() => {
+            const modal = document.getElementById('modal');
+            if (modal) modal.style.display = 'none';
+            
+            // Force check trial to redirect to welcome page
+            setTimeout(() => {
+              checkTrial();
+              if (window.notifications) {
+                window.notifications.success('Trial activated successfully! Welcome to the application.');
+              }
+            }, 500);
+          }, 1500);
+        } else {
+          resultEl.style.background = '#fee2e2';
+          resultEl.style.color = '#dc2626';
+          resultEl.textContent = responseData.error || 'Failed to activate trial.';
+        }
+      } catch (error) {
+        resultEl.style.display = 'block';
+        resultEl.style.background = '#fee2e2';
+        resultEl.style.color = '#dc2626';
+        resultEl.textContent = 'Network error: ' + error.message;
+      }
     };
+    
     // Permanent activation
     document.getElementById('activate-perm-btn').onclick = async () => {
       const key = document.getElementById('perm-key-input').value.trim();
-      if (!key) return alert('Enter activation key');
-      const res = await fetch('http://localhost:3000/api/assign-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ machineId: deviceId, type: 'subscription', days: 9999, key })
-      });
-      document.getElementById('admin-action-result').textContent = res.ok ? 'Permanent activation successful.' : 'Failed to activate permanently.';
+      const resultEl = document.getElementById('admin-action-result');
+      
+      if (!key) {
+        resultEl.style.display = 'block';
+        resultEl.style.background = '#fee2e2';
+        resultEl.style.color = '#dc2626';
+        resultEl.textContent = 'Please enter activation key';
+        return;
+      }
+      
+      try {
+        resultEl.style.display = 'block';
+        resultEl.style.background = '#dbeafe';
+        resultEl.style.color = '#1d4ed8';
+        resultEl.textContent = 'Validating activation key...';
+        
+        const res = await fetch('http://localhost:3000/api/assign-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ machineId: deviceId, type: 'subscription', days: 9999, key })
+        });
+        
+        const responseData = await res.json();
+        
+        if (res.ok && responseData.success) {
+          resultEl.style.background = '#dcfce7';
+          resultEl.style.color = '#166534';
+          resultEl.textContent = 'Permanent activation successful!';
+          
+          // Close modal and redirect to welcome page
+          setTimeout(() => {
+            const modal = document.getElementById('modal');
+            if (modal) modal.style.display = 'none';
+            
+            // Force check trial to redirect to welcome page
+            setTimeout(() => {
+              checkTrial();
+              if (window.notifications) {
+                window.notifications.success('Permanent license activated! Welcome to the application.');
+              }
+            }, 500);
+          }, 1500);
+        } else {
+          resultEl.style.background = '#fee2e2';
+          resultEl.style.color = '#dc2626';
+          resultEl.textContent = responseData.error || 'Failed to activate permanently.';
+        }
+      } catch (error) {
+        resultEl.style.display = 'block';
+        resultEl.style.background = '#fee2e2';
+        resultEl.style.color = '#dc2626';
+        resultEl.textContent = 'Network error: ' + error.message;
+      }
     };
   }, 200);
 }

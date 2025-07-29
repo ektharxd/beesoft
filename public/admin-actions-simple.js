@@ -9,28 +9,53 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('showAdminActionsWindow called');
     
     const modalHtml = `
-      <div style="padding: 16px; max-width: 450px;">
-        <h2 style="margin-bottom: 18px;">Admin Actions</h2>
+      <div style="padding: 16px; max-width: 500px;">
+        <h2 style="margin-bottom: 18px;">Admin Actions - Device Activation</h2>
         <div class="form-group">
           <label>Device ID</label>
           <div id="device-id-chip" style="display:inline-block;padding:8px 16px;background:#f3f4f6;color:#222;border-radius:16px;font-weight:600;font-size:1rem;margin-bottom:8px;user-select:all;"></div>
-          <button id="register-device-btn" class="btn btn-primary" style="margin-top: 8px;">Register Device</button>
-          <button id="remove-device-btn" class="btn btn-danger" style="margin-top: 8px;">Remove Device</button>
         </div>
+        
         <div class="form-group" style="margin-top: 18px;">
-          <label for="trial-days-input">Trial Activation Days</label>
+          <h3 style="margin-bottom: 12px; color: #4f46e5;">Device Registration Details</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label for="device-name-input" class="form-label required">Full Name</label>
+              <input id="device-name-input" type="text" class="form-input" placeholder="Enter full name" required />
+            </div>
+            <div>
+              <label for="device-email-input" class="form-label required">Email Address</label>
+              <input id="device-email-input" type="email" class="form-input" placeholder="Enter email" required />
+            </div>
+          </div>
+          <div style="margin-top: 12px;">
+            <label for="device-mobile-input" class="form-label required">Mobile Number</label>
+            <input id="device-mobile-input" type="tel" class="form-input" placeholder="Enter mobile number with country code" required />
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 12px;">
+            <button id="register-device-btn" class="btn btn-primary" style="flex: 1;">Register Device</button>
+            <button id="remove-device-btn" class="btn btn-danger" style="flex: 1;">Remove Device</button>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 18px;">
+          <h3 style="margin-bottom: 12px; color: #059669;">Trial Activation</h3>
+          <label for="trial-days-input">Trial Days</label>
           <input id="trial-days-input" type="number" class="form-input" min="1" max="365" placeholder="Enter days" />
-          <button id="activate-trial-btn" class="btn btn-success" style="margin-top: 8px;">Activate Trial</button>
+          <button id="activate-trial-btn" class="btn btn-success" style="margin-top: 8px; width: 100%;">Activate Trial</button>
         </div>
+        
         <div class="form-group" style="margin-top: 18px;">
-          <label for="perm-key-input">Permanent Activation Key</label>
+          <h3 style="margin-bottom: 12px; color: #f59e0b;">Permanent Activation</h3>
+          <label for="perm-key-input">Activation Key</label>
           <input id="perm-key-input" type="text" class="form-input" placeholder="Enter activation key (e.g., TEST-1234-ABCD-5678)" style="font-family: monospace;" />
-          <button id="activate-perm-btn" class="btn btn-warning" style="margin-top: 8px;">Permanent Activate</button>
+          <button id="activate-perm-btn" class="btn btn-warning" style="margin-top: 8px; width: 100%;">Permanent Activate</button>
           <div style="font-size: 0.85rem; color: #6b7280; margin-top: 4px;">
             ⚠️ Valid keys: TEST-1234-ABCD-5678, DEMO-9876-WXYZ-4321, PERM-5555-AAAA-9999
           </div>
         </div>
-        <div id="admin-action-result" style="margin-top: 16px; font-weight: bold; padding: 12px; border-radius: 6px; background: #f8f9fa; min-height: 20px;"></div>
+        
+        <div id="admin-action-result" style="margin-top: 16px; font-weight: bold; padding: 12px; border-radius: 6px; background: #f8f9fa; min-height: 20px; display: none;"></div>
       </div>
     `;
     
@@ -68,6 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const resultElement = document.getElementById('admin-action-result');
       if (resultElement) {
         resultElement.textContent = message;
+        resultElement.style.display = 'block';
         
         // Set colors based on type
         switch(type) {
@@ -155,6 +181,32 @@ document.addEventListener('DOMContentLoaded', function() {
     if (registerBtn) {
       registerBtn.onclick = async () => {
         console.log('Register device button clicked');
+        
+        // Get the required form values
+        const name = document.getElementById('device-name-input').value.trim();
+        const email = document.getElementById('device-email-input').value.trim();
+        const mobile = document.getElementById('device-mobile-input').value.trim();
+        
+        // Validate required fields
+        if (!name || !email || !mobile) {
+          showResult('Please fill in all required fields: Name, Email, and Mobile Number.', 'error');
+          return;
+        }
+        
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          showResult('Please enter a valid email address.', 'error');
+          return;
+        }
+        
+        // Validate mobile number (basic check for digits and length)
+        const mobileRegex = /^[\+]?[1-9][\d]{7,14}$/;
+        if (!mobileRegex.test(mobile.replace(/[\s\-\(\)]/g, ''))) {
+          showResult('Please enter a valid mobile number with country code.', 'error');
+          return;
+        }
+        
         showResult('Registering device...', 'info');
         
         try {
@@ -173,6 +225,9 @@ document.addEventListener('DOMContentLoaded', function() {
           const payload = { 
             machineId: deviceId, 
             username: 'admin', 
+            name: name,
+            email: email,
+            mobile: mobile,
             version, 
             platform, 
             hostname 
@@ -192,7 +247,12 @@ document.addEventListener('DOMContentLoaded', function() {
           console.log('Register response data:', result);
           
           if (res.ok) {
-            showResult(result.message || 'Device registered successfully!', 'success');
+            showResult(`Device registered successfully for ${name} (${email})`, 'success');
+            
+            // Clear the form
+            document.getElementById('device-name-input').value = '';
+            document.getElementById('device-email-input').value = '';
+            document.getElementById('device-mobile-input').value = '';
           } else if (res.status === 409) {
             // Device already registered
             showResult(result.message || 'Device already registered!', 'warning');

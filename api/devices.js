@@ -23,9 +23,9 @@ export default async function handler(req, res) {
 
     // Device registration (POST /api/devices?register=1)
     if (req.method === 'POST' && req.query.register === '1') {
-        const { machineId, username } = req.body;
-        if (!machineId || !username) {
-            return res.status(400).json({ error: 'machineId and username are required' });
+        const { machineId, username, email, mobile, name } = req.body;
+        if (!machineId || !username || !email || !mobile || !name) {
+            return res.status(400).json({ error: 'machineId, username, email, mobile, and name are required' });
         }
         
         // Check if device already exists
@@ -46,6 +46,9 @@ export default async function handler(req, res) {
         const newDevice = {
             machineId,
             username,
+            email,
+            mobile,
+            name,
             subscription: { type: 'trial', days: 0, start: null, active: false },
             createdAt: new Date(),
             lastSeen: new Date(),
@@ -59,7 +62,10 @@ export default async function handler(req, res) {
                 timestamp: new Date(),
                 type: 'registration',
                 ip: req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown',
-                username: username
+                username: username,
+                email: email,
+                mobile: mobile,
+                name: name
             }]
         };
         
