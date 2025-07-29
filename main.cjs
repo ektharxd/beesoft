@@ -58,10 +58,8 @@ function createWindow() {
     });
     mainWindow.setMenu(null);
     mainWindow.loadFile(path.join(__dirname, 'public', 'index.html'));
-    // Only open DevTools in development
-    if (process.env.NODE_ENV === 'development') {
-        mainWindow.webContents.openDevTools();
-    }
+    // Always open DevTools for debugging
+    mainWindow.webContents.openDevTools();
     // Handle window close
     mainWindow.on('closed', () => {
         mainWindow = null;
@@ -147,7 +145,7 @@ app.whenReady().then(() => {
     if (!app.isPackaged) {
         app.setPath('userData', appDataPath);
     }
-    sendToUI('log', { level: 'info', message: `ðŸ“ App data path: ${appDataPath}` });
+    sendToUI('log', { level: 'info', message: `ï¿½ App data path: ${appDataPath}` });
     createWindow();
     // Initialize heartbeat system
     initializeHeartbeat();
@@ -175,7 +173,7 @@ function clearBrowserCache() {
     if (success) {
         sendToUI('log', { level: 'info', message: 'âœ… Cache cleanup completed' });
     } else {
-        sendToUI('log', { level: 'error', message: 'âŒ Cache cleanup failed: Directory in use or permission denied' });
+        sendToUI('log', { level: 'error', message: 'ï¿½ Cache cleanup failed: Directory in use or permission denied' });
     }
     return success;
 }
@@ -187,7 +185,7 @@ function clearAuthData() {
     if (success) {
         sendToUI('log', { level: 'info', message: 'âœ… Auth cleanup completed' });
     } else {
-        sendToUI('log', { level: 'error', message: 'âŒ Auth cleanup failed: Directory in use or permission denied' });
+        sendToUI('log', { level: 'error', message: 'ï¿½ Auth cleanup failed: Directory in use or permission denied' });
     }
     return success;
 }
@@ -203,14 +201,14 @@ function findSystemChrome() {
     for (const chromePath of possiblePaths) {
         try {
             if (fs.existsSync(chromePath)) {
-                sendToUI('log', { level: 'info', message: `ðŸŒ Found system browser: ${chromePath}` });
+                sendToUI('log', { level: 'info', message: `ï¿½ Found system browser: ${chromePath}` });
                 return chromePath;
             }
         } catch (error) {
             // Continue checking other paths
         }
     }
-    sendToUI('log', { level: 'warning', message: 'âš ï¸ No system browser found, using bundled Chromium' });
+    sendToUI('log', { level: 'warning', message: 'âš ï¿½ No system browser found, using bundled Chromium' });
     return null;
 }
 // Get Puppeteer executable path for different environments
@@ -228,7 +226,7 @@ function getPuppeteerExecutablePath() {
             if (chromeDir) {
                 const chromePath = path.join(puppeteerPath, chromeDir, 'chrome-win', 'chrome.exe');
                 if (fs.existsSync(chromePath)) {
-                    sendToUI('log', { level: 'info', message: `ðŸŒ Using extracted Chromium: ${chromePath}` });
+                    sendToUI('log', { level: 'info', message: `ï¿½ Using extracted Chromium: ${chromePath}` });
                     return chromePath;
                 }
             }
@@ -245,7 +243,7 @@ function initWhatsAppClient(bypassCooldown = false) {
     // CRITICAL FIX: Allow bypass of cooldown when browser is connected
     if (!bypassCooldown && now - lastConnectionTime < CONNECTION_COOLDOWN) {
         const waitTime = Math.ceil((CONNECTION_COOLDOWN - (now - lastConnectionTime)) / 1000);
-        sendToUI('log', { level: 'warning', message: `â³ Please wait ${waitTime} seconds before reconnecting` });
+        sendToUI('log', { level: 'warning', message: `ï¿½ Please wait ${waitTime} seconds before reconnecting` });
         return;
     }
     lastConnectionTime = now;
@@ -303,8 +301,8 @@ function initWhatsAppClient(bypassCooldown = false) {
         if (!ensureDirectoryExists(cacheDir)) {
             throw new Error(`Cannot create or access cache directory: ${cacheDir}`);
         }
-        sendToUI('log', { level: 'info', message: `ðŸ“ Auth directory: ${authDir}` });
-        sendToUI('log', { level: 'info', message: `ðŸ“ Cache directory: ${cacheDir}` });
+        sendToUI('log', { level: 'info', message: `ï¿½ Auth directory: ${authDir}` });
+        sendToUI('log', { level: 'info', message: `ï¿½ Cache directory: ${cacheDir}` });
         // Enhanced puppeteer config with better error handling
         // Note: Cannot use userDataDir with LocalAuth, it manages its own data directory
         const enhancedPuppeteerConfig = {
@@ -327,7 +325,7 @@ function initWhatsAppClient(bypassCooldown = false) {
         setupWhatsAppEventHandlers();
         // Initialize with timeout
         const initTimeout = setTimeout(() => {
-            sendToUI('log', { level: 'error', message: 'â° WhatsApp initialization timeout' });
+            sendToUI('log', { level: 'error', message: 'ï¿½ WhatsApp initialization timeout' });
             restartWhatsAppClient();
         }, 120000);
         waClient.initialize().then(() => {
@@ -335,7 +333,7 @@ function initWhatsAppClient(bypassCooldown = false) {
             sendToUI('log', { level: 'info', message: 'ðŸš€ WhatsApp client initialization started' });
         }).catch((error) => {
             clearTimeout(initTimeout);
-            sendToUI('log', { level: 'error', message: `âŒ WhatsApp initialization failed: ${error.message}` });
+            sendToUI('log', { level: 'error', message: `ï¿½ WhatsApp initialization failed: ${error.message}` });
             handleConnectionError(error);
         });
     } catch (error) {
@@ -354,16 +352,16 @@ function setupWhatsAppEventHandlers() {
         sendToUI('qr', { qr, attempt: qrRetryCount });
         qrTimeout = setTimeout(() => {
             if (qrRetryCount >= MAX_QR_RETRIES) {
-                sendToUI('log', { level: 'error', message: 'âŒ Maximum QR retry attempts reached. Clearing auth and restarting...' });
+                sendToUI('log', { level: 'error', message: 'ï¿½ Maximum QR retry attempts reached. Clearing auth and restarting...' });
                 clearAuthData();
                 setTimeout(() => restartWhatsAppClient(), 2000);
             } else {
-                sendToUI('log', { level: 'warning', message: 'â° QR Code expired, generating new one...' });
+                sendToUI('log', { level: 'warning', message: 'ï¿½ QR Code expired, generating new one...' });
             }
         }, QR_TIMEOUT);
     });
     waClient.on('authenticated', () => {
-        sendToUI('log', { level: 'success', message: 'ðŸ” WhatsApp authenticated successfully!' });
+        sendToUI('log', { level: 'success', message: 'ï¿½ WhatsApp authenticated successfully!' });
         qrRetryCount = 0;
         connectionAttempts = 0;
     });
@@ -403,7 +401,7 @@ function setupWhatsAppEventHandlers() {
         console.log('[WA] State changed:', state);
         sendToUI('whatsapp-state-change', { state });
         if (state === 'CONFLICT' || state === 'UNLAUNCHED') {
-            sendToUI('log', { level: 'warning', message: `âš ï¸ WhatsApp state: ${state}` });
+            sendToUI('log', { level: 'warning', message: `âš ï¿½ WhatsApp state: ${state}` });
             setTimeout(() => restartWhatsAppClient(), 5000);
         }
     });
@@ -428,7 +426,7 @@ function handleConnectionError(error) {
         clearBrowserCache();
         setTimeout(() => restartWhatsAppClient(), 5000);
     } else if (errorMessage.includes('timeout') || errorMessage.includes('navigation')) {
-        sendToUI('log', { level: 'warning', message: 'â° Connection timeout, clearing cache and retrying...' });
+        sendToUI('log', { level: 'warning', message: 'ï¿½ Connection timeout, clearing cache and retrying...' });
         clearBrowserCache();
         setTimeout(() => restartWhatsAppClient(), 5000);
     } else if (errorMessage.includes('protocol error') || errorMessage.includes('target closed')) {
@@ -466,7 +464,7 @@ function cleanupWhatsAppClient() {
             waClient.destroy();
             sendToUI('log', { level: 'info', message: 'âœ… WhatsApp client cleaned up' });
         } catch (error) {
-            sendToUI('log', { level: 'warning', message: `âš ï¸ Cleanup warning: ${error.message}` });
+            sendToUI('log', { level: 'warning', message: `âš ï¿½ Cleanup warning: ${error.message}` });
         }
         waClient = null;
     }
@@ -476,7 +474,7 @@ function cleanupWhatsAppClient() {
 }
 // Anti-ban features initialization
 function initializeAntiBanFeatures() {
-    sendToUI('log', { level: 'info', message: 'ðŸ›¡ï¸ Initializing anti-ban features...' });
+    sendToUI('log', { level: 'info', message: 'ðŸ›¡ï¿½ Initializing anti-ban features...' });
     cleanMessageTracker();
     setInterval(cleanMessageTracker, 3600000);
     // Initialize connection monitoring
@@ -486,7 +484,7 @@ function initializeAntiBanFeatures() {
 // Connection monitoring system
 let connectionMonitorInterval = null;
 function initializeConnectionMonitoring() {
-    sendToUI('log', { level: 'info', message: 'ðŸ” Starting WhatsApp connection monitoring (every 2 seconds)...' });
+    sendToUI('log', { level: 'info', message: 'ï¿½ Starting WhatsApp connection monitoring (every 2 seconds)...' });
     // Clear any existing interval
     if (connectionMonitorInterval) {
         clearInterval(connectionMonitorInterval);
@@ -500,7 +498,7 @@ function stopConnectionMonitoring() {
     if (connectionMonitorInterval) {
         clearInterval(connectionMonitorInterval);
         connectionMonitorInterval = null;
-        sendToUI('log', { level: 'info', message: 'ðŸ” Connection monitoring stopped' });
+        sendToUI('log', { level: 'info', message: 'ï¿½ Connection monitoring stopped' });
     }
 }
 async function checkWhatsAppClientConnection() {
@@ -755,30 +753,30 @@ function createWhatsAppWindow() {
     loadWhatsAppWebWithRetry();
     function loadWhatsAppWebWithRetry(retryCount = 0) {
         const maxRetries = 3;
-        sendToUI('log', { level: 'info', message: `ðŸŒ Loading WhatsApp Web (attempt ${retryCount + 1}/${maxRetries + 1})` });
+        sendToUI('log', { level: 'info', message: `ï¿½ Loading WhatsApp Web (attempt ${retryCount + 1}/${maxRetries + 1})` });
         whatsappWindow.loadURL('https://web.whatsapp.com', {
             userAgent: modernUserAgent,
             extraHeaders: 'Accept-Language: en-US,en;q=0.9\r\n'
         }).catch((error) => {
-            sendToUI('log', { level: 'error', message: `âŒ Failed to load WhatsApp Web: ${error.message}` });
+            sendToUI('log', { level: 'error', message: `ï¿½ Failed to load WhatsApp Web: ${error.message}` });
             if (retryCount < maxRetries) {
                 setTimeout(() => {
                     loadWhatsAppWebWithRetry(retryCount + 1);
                 }, 3000);
             } else {
-                sendToUI('log', { level: 'error', message: 'âŒ Failed to load WhatsApp Web after multiple attempts' });
+                sendToUI('log', { level: 'error', message: 'ï¿½ Failed to load WhatsApp Web after multiple attempts' });
             }
         });
     }
     whatsappWindow.once('ready-to-show', () => {
         whatsappWindow.show();
-        sendToUI('log', { level: 'info', message: 'ðŸŒ WhatsApp Web opened in browser window' });
+        sendToUI('log', { level: 'info', message: 'ï¿½ WhatsApp Web opened in browser window' });
         sendToUI('log', { level: 'info', message: 'ðŸ“± Please scan the QR code with your phone to connect' });
     });
     whatsappWindow.on('closed', () => {
         whatsappWindow = null;
         isReady = false;
-        sendToUI('log', { level: 'info', message: 'ðŸŒ WhatsApp Web window closed - Status changed to disconnected' });
+        sendToUI('log', { level: 'info', message: 'ï¿½ WhatsApp Web window closed - Status changed to disconnected' });
         sendToUI('whatsapp-disconnected', { reason: 'window_closed', message: 'WhatsApp Web window was closed' });
     });
     whatsappWindow.webContents.on('did-finish-load', () => {
@@ -795,7 +793,7 @@ function createWhatsAppWindow() {
         }
     });
     whatsappWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
-        sendToUI('log', { level: 'error', message: `âŒ Page failed to load: ${errorDescription} (${errorCode})` });
+        sendToUI('log', { level: 'error', message: `ï¿½ Page failed to load: ${errorDescription} (${errorCode})` });
         if (errorCode === -106 || errorCode === -105) {
             setTimeout(() => {
                 loadWhatsAppWebWithRetry();
@@ -807,7 +805,7 @@ function createWhatsAppWindow() {
         if (!whatsappWindow || whatsappWindow.isDestroyed()) {
             if (isReady) {
                 isReady = false;
-                sendToUI('log', { level: 'warning', message: 'ðŸŒ WhatsApp window destroyed - Status changed to disconnected' });
+                sendToUI('log', { level: 'warning', message: 'ï¿½ WhatsApp window destroyed - Status changed to disconnected' });
                 sendToUI('whatsapp-disconnected', { reason: 'window_destroyed', message: 'WhatsApp window was destroyed' });
             }
             return;
@@ -879,7 +877,7 @@ function createWhatsAppWindow() {
             // If we can't execute JavaScript, assume disconnected
             if (isReady) {
                 isReady = false;
-                sendToUI('log', { level: 'error', message: `âŒ WhatsApp status check failed - assuming disconnected: ${error.message}` });
+                sendToUI('log', { level: 'error', message: `ï¿½ WhatsApp status check failed - assuming disconnected: ${error.message}` });
                 sendToUI('whatsapp-disconnected', { reason: 'status_check_failed', message: 'Cannot communicate with WhatsApp Web' });
             }
         });
@@ -888,7 +886,7 @@ function createWhatsAppWindow() {
         if (!result) return;
         switch (result.status) {
             case 'chrome_error':
-                sendToUI('log', { level: 'error', message: 'âŒ Chrome compatibility error detected' });
+                sendToUI('log', { level: 'error', message: 'ï¿½ Chrome compatibility error detected' });
                 sendToUI('log', { level: 'info', message: 'ðŸ”§ Attempting to fix Chrome compatibility...' });
                 whatsappWindow.webContents.executeJavaScript(`
                     Object.defineProperty(navigator, 'userAgent', {
@@ -898,7 +896,7 @@ function createWhatsAppWindow() {
                         window.location.reload();
                     }, 1000);
                 `).catch(() => {
-                    sendToUI('log', { level: 'error', message: 'âŒ Failed to fix Chrome compatibility' });
+                    sendToUI('log', { level: 'error', message: 'ï¿½ Failed to fix Chrome compatibility' });
                 });
                 break;
             case 'disconnected':
@@ -928,19 +926,19 @@ function createWhatsAppWindow() {
                 sendToUI('log', { level: 'info', message: 'ðŸ“± QR code is ready for scanning' });
                 break;
             case 'loading':
-                sendToUI('log', { level: 'info', message: 'â³ WhatsApp Web is loading...' });
+                sendToUI('log', { level: 'info', message: 'ï¿½ WhatsApp Web is loading...' });
                 setTimeout(() => {
                     checkWhatsAppStatus();
                 }, 5000);
                 break;
             case 'error':
-                sendToUI('log', { level: 'error', message: 'âŒ WhatsApp Web error detected, attempting reload...' });
+                sendToUI('log', { level: 'error', message: 'ï¿½ WhatsApp Web error detected, attempting reload...' });
                 setTimeout(() => {
                     loadWhatsAppWebWithRetry();
                 }, 3000);
                 break;
             default:
-                sendToUI('log', { level: 'info', message: `â„¹ï¸ WhatsApp status: ${result.message}` });
+                sendToUI('log', { level: 'info', message: `â„¹ï¿½ WhatsApp status: ${result.message}` });
                 break;
         }
     }
@@ -964,7 +962,7 @@ ipcMain.handle('connect-whatsapp', async () => {
         initWhatsAppClient();
         return { success: true, message: 'WhatsApp client started. Please scan the QR code when it appears.' };
     } catch (error) {
-        sendToUI('log', { level: 'error', message: `âŒ Failed to initialize WhatsApp client: ${error.message}` });
+        sendToUI('log', { level: 'error', message: `ï¿½ Failed to initialize WhatsApp client: ${error.message}` });
         return { success: false, message: 'WhatsApp connection failed: ' + error.message };
     }
 });
@@ -978,7 +976,7 @@ ipcMain.handle('connect-whatsapp-fallback', async () => {
         initWhatsAppClient(true); // Use bypass flag
         return { success: true, message: 'Fallback WhatsApp client started. Please scan the QR code in the terminal or wait for it to appear in the app.' };
     } catch (error) {
-        sendToUI('log', { level: 'error', message: `âŒ Fallback connection failed: ${error.message}` });
+        sendToUI('log', { level: 'error', message: `ï¿½ Fallback connection failed: ${error.message}` });
         return { success: false, message: 'Fallback connection failed.' };
     }
 });
@@ -994,7 +992,7 @@ ipcMain.handle('force-init-client', async () => {
         }, 1000);
         return { success: true, message: 'WhatsApp client initialization forced.' };
     } catch (error) {
-        sendToUI('log', { level: 'error', message: `âŒ Force initialization failed: ${error.message}` });
+        sendToUI('log', { level: 'error', message: `ï¿½ Force initialization failed: ${error.message}` });
         return { success: false, message: 'Force initialization failed.' };
     }
 });
@@ -1030,7 +1028,7 @@ ipcMain.handle('pause-session', async () => {
         return { success: false, message: 'No active session to pause.' };
     }
     sessionControl.paused = true;
-    sendToUI('log', { level: 'info', message: 'â¸ï¸ Campaign paused by user.' });
+    sendToUI('log', { level: 'info', message: 'ï¿½ï¿½ Campaign paused by user.' });
     sendToUI('campaign-paused', { paused: true });
     return { success: true };
 });
@@ -1039,7 +1037,7 @@ ipcMain.handle('continue-session', async () => {
         return { success: false, message: 'No active session to resume.' };
     }
     sessionControl.paused = false;
-    sendToUI('log', { level: 'info', message: 'â–¶ï¸ Campaign resumed by user.' });
+    sendToUI('log', { level: 'info', message: 'â–¶ï¿½ Campaign resumed by user.' });
     sendToUI('campaign-resumed', { paused: false });
     if (sessionControl.currentSession && typeof sessionControl.currentSession.resume === 'function') {
         sessionControl.currentSession.resume();
@@ -1051,7 +1049,7 @@ ipcMain.handle('stop-session', async () => {
         return { success: false, message: 'No active session to stop.' };
     }
     sessionControl.stopped = true;
-    sendToUI('log', { level: 'warning', message: 'â¹ï¸ Campaign stop requested by user.' });
+    sendToUI('log', { level: 'warning', message: 'ï¿½ï¿½ Campaign stop requested by user.' });
     sendToUI('campaign-stop-requested', { stopped: true });
     if (sessionControl.currentSession && typeof sessionControl.currentSession.resume === 'function') {
         sessionControl.currentSession.resume();
@@ -1067,7 +1065,7 @@ ipcMain.handle('start-session', async (event, data) => {
     }
     // CRITICAL FIX: Better client validation and auto-initialization
     if (!waClient) {
-        sendToUI('log', { level: 'warning', message: 'âš ï¸ WhatsApp client not initialized. Attempting to initialize...' });
+        sendToUI('log', { level: 'warning', message: 'âš ï¿½ WhatsApp client not initialized. Attempting to initialize...' });
         // Try to initialize the client
         try {
             initWhatsAppClient(true); // Use bypass flag
@@ -1077,15 +1075,15 @@ ipcMain.handle('start-session', async (event, data) => {
             while (!waClient && attempts < maxAttempts) {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 attempts++;
-                sendToUI('log', { level: 'info', message: `â³ Waiting for client initialization... (${attempts}/${maxAttempts})` });
+                sendToUI('log', { level: 'info', message: `ï¿½ Waiting for client initialization... (${attempts}/${maxAttempts})` });
             }
             if (!waClient) {
-                sendToUI('log', { level: 'error', message: 'âŒ Failed to initialize WhatsApp client within timeout.' });
+                sendToUI('log', { level: 'error', message: 'ï¿½ Failed to initialize WhatsApp client within timeout.' });
                 sendToUI('campaign-error', { error: 'WhatsApp client initialization timeout' });
                 return { success: false, message: 'WhatsApp client initialization timeout.' };
             }
         } catch (initError) {
-            sendToUI('log', { level: 'error', message: `âŒ Failed to initialize WhatsApp client: ${initError.message}` });
+            sendToUI('log', { level: 'error', message: `ï¿½ Failed to initialize WhatsApp client: ${initError.message}` });
             sendToUI('campaign-error', { error: 'WhatsApp client initialization failed' });
             return { success: false, message: 'WhatsApp client initialization failed.' };
         }
@@ -1142,7 +1140,7 @@ ipcMain.handle('start-session', async (event, data) => {
         batchSize: ANTI_BAN_CONFIG.batchSize
     });
     sendToUI('log', { level: 'info', message: `ðŸš€ Anti-ban campaign started for ${numbers.length} numbers` });
-    sendToUI('log', { level: 'info', message: `ðŸ›¡ï¸ Batch size: ${ANTI_BAN_CONFIG.batchSize}, Delays: ${ANTI_BAN_CONFIG.minDelay}-${ANTI_BAN_CONFIG.maxDelay}ms` });
+    sendToUI('log', { level: 'info', message: `ðŸ›¡ï¿½ Batch size: ${ANTI_BAN_CONFIG.batchSize}, Delays: ${ANTI_BAN_CONFIG.minDelay}-${ANTI_BAN_CONFIG.maxDelay}ms` });
     let successCount = 0, errorCount = 0, errorNumbers = [];
     let processedCount = 0;
     // Handle image if provided
@@ -1154,25 +1152,25 @@ ipcMain.handle('start-session', async (event, data) => {
             media = MessageMedia.fromFilePath(absImagePath);
             sendToUI('log', { level: 'info', message: `âœ… Image loaded successfully.` });
         } catch (e) {
-            sendToUI('log', { level: 'error', message: `âŒ Failed to load image: ${e.message}` });
+            sendToUI('log', { level: 'error', message: `ï¿½ Failed to load image: ${e.message}` });
             sendToUI('campaign-error', { error: 'Failed to load image', details: e.message });
         }
     } else if (imagePath) {
-        sendToUI('log', { level: 'error', message: `âŒ Image file not found: ${absImagePath}` });
+        sendToUI('log', { level: 'error', message: `ï¿½ Image file not found: ${absImagePath}` });
         sendToUI('campaign-error', { error: 'Image file not found', details: absImagePath });
     }
     // Pause/Continue/Stop Logic
     let pausedPromiseResolve;
     function waitIfPaused() {
         if (sessionControl.stopped) {
-            sendToUI('log', { level: 'warning', message: 'â¹ï¸ Campaign stopped by user.' });
+            sendToUI('log', { level: 'warning', message: 'ï¿½ï¿½ Campaign stopped by user.' });
             return Promise.resolve(false);
         }
         if (!sessionControl.paused) return Promise.resolve(true);
-        sendToUI('log', { level: 'info', message: 'â¸ï¸ Campaign paused. Waiting for resume...' });
+        sendToUI('log', { level: 'info', message: 'ï¿½ï¿½ Campaign paused. Waiting for resume...' });
         return new Promise(resolve => {
             pausedPromiseResolve = () => {
-                sendToUI('log', { level: 'info', message: 'â–¶ï¸ Campaign resumed.' });
+                sendToUI('log', { level: 'info', message: 'â–¶ï¿½ Campaign resumed.' });
                 resolve(true);
             };
         });
@@ -1191,12 +1189,12 @@ ipcMain.handle('start-session', async (event, data) => {
             // Check pause/stop before processing
             const canProceed = await waitIfPaused();
             if (!canProceed || sessionControl.stopped) {
-                sendToUI('log', { level: 'warning', message: `â¹ï¸ Campaign stopped at ${i}/${numbers.length} numbers.` });
+                sendToUI('log', { level: 'warning', message: `ï¿½ï¿½ Campaign stopped at ${i}/${numbers.length} numbers.` });
                 break;
             }
             // CRITICAL FIX: Double-check waClient before each message
             if (!waClient) {
-                sendToUI('log', { level: 'error', message: 'âŒ WhatsApp client became null during campaign. Stopping.' });
+                sendToUI('log', { level: 'error', message: 'ï¿½ WhatsApp client became null during campaign. Stopping.' });
                 break;
             }
             // Check if we need a batch break
@@ -1205,17 +1203,17 @@ ipcMain.handle('start-session', async (event, data) => {
                 sendToUI('log', { level: 'info', message: `ðŸ“¦ Batch ${sessionControl.batchCount} completed. Taking ${ANTI_BAN_CONFIG.batchDelay / 60000} minute break...` });
                 await new Promise(resolve => setTimeout(resolve, ANTI_BAN_CONFIG.batchDelay));
                 if (sessionControl.stopped) {
-                    sendToUI('log', { level: 'warning', message: `â¹ï¸ Campaign stopped during batch break.` });
+                    sendToUI('log', { level: 'warning', message: `ï¿½ï¿½ Campaign stopped during batch break.` });
                     break;
                 }
             }
             // Calculate anti-ban delay
             const delay = calculateAntiBanDelay(sessionControl.messageCount, i === 0);
             if (delay > 0) {
-                sendToUI('log', { level: 'info', message: `â³ Anti-ban delay: ${(delay / 1000).toFixed(1)}s` });
+                sendToUI('log', { level: 'info', message: `ï¿½ Anti-ban delay: ${(delay / 1000).toFixed(1)}s` });
                 await new Promise(resolve => setTimeout(resolve, delay));
                 if (sessionControl.stopped) {
-                    sendToUI('log', { level: 'warning', message: `â¹ï¸ Campaign stopped during delay.` });
+                    sendToUI('log', { level: 'warning', message: `ï¿½ï¿½ Campaign stopped during delay.` });
                     break;
                 }
             }
@@ -1265,7 +1263,7 @@ ipcMain.handle('start-session', async (event, data) => {
             } catch (err) {
                 errorCount++;
                 errorNumbers.push(numberRaw);
-                sendToUI('log', { level: 'error', message: `âŒ Failed to send to ${numberRaw}: ${err.message}` });
+                sendToUI('log', { level: 'error', message: `ï¿½ Failed to send to ${numberRaw}: ${err.message}` });
                 sendToUI('campaign-failure', { 
                     number: numberRaw, 
                     error: err.message, 
@@ -1294,7 +1292,7 @@ ipcMain.handle('start-session', async (event, data) => {
     // Campaign completion
     const completionReason = sessionControl.stopped ? 'stopped' : 'completed';
     const totalProcessed = processedCount;
-    sendToUI('log', { level: 'info', message: `ðŸ Anti-ban campaign ${completionReason}. Processed: ${totalProcessed}/${numbers.length}, Success: ${successCount}, Failed: ${errorCount}` });
+    sendToUI('log', { level: 'info', message: `ï¿½ Anti-ban campaign ${completionReason}. Processed: ${totalProcessed}/${numbers.length}, Success: ${successCount}, Failed: ${errorCount}` });
     sendToUI('campaign-finished', { 
         reason: completionReason,
         summary: `Campaign ${completionReason}. Success: ${successCount}, Failed: ${errorCount}, Total: ${totalProcessed}/${numbers.length}`,

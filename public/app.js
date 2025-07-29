@@ -528,7 +528,8 @@ async function initializeActivationSystem() {
         return;
       }
       // Authenticate with backend
-      const res = await fetch('/api/admin-login', {
+      const API_BASE = "http://localhost:3000/api";
+      const res = await fetch(`${API_BASE}/admin-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -538,9 +539,95 @@ async function initializeActivationSystem() {
         return;
       }
       window.notifications.success('Admin login successful. You can now assign subscription.');
-      // Optionally, unlock admin features or show admin dashboard here
+      // Show admin actions modal
+      showAdminActionsWindow();
     });
   }
+
+// Show admin actions window/modal after successful login
+function showAdminActionsWindow() {
+  const modalHtml = `
+    <div style="padding: 16px; max-width: 400px;">
+      <h2 style="margin-bottom: 18px;">Admin Actions</h2>
+      <div class="form-group">
+        <label>Device ID</label>
+        <div id="device-id-chip" style="display:inline-block;padding:8px 16px;background:#f3f4f6;color:#222;border-radius:16px;font-weight:600;font-size:1rem;margin-bottom:8px;user-select:all;"></div>
+        <button id="register-device-btn" class="btn btn-primary" style="margin-top: 8px;">Register Device</button>
+        <button id="remove-device-btn" class="btn btn-danger" style="margin-top: 8px;">Remove Device</button>
+      </div>
+      <div class="form-group" style="margin-top: 18px;">
+        <label for="trial-days-input">Trial Activation Days</label>
+        <input id="trial-days-input" type="number" class="form-input" min="1" max="365" placeholder="Enter days" />
+        <button id="activate-trial-btn" class="btn btn-success" style="margin-top: 8px;">Activate Trial</button>
+      </div>
+      <div class="form-group" style="margin-top: 18px;">
+        <label for="perm-key-input">Permanent Activation Key</label>
+        <input id="perm-key-input" type="text" class="form-input" placeholder="Enter activation key" />
+        <button id="activate-perm-btn" class="btn btn-warning" style="margin-top: 8px;">Permanent Activate</button>
+      </div>
+      <div id="admin-action-result" style="margin-top: 16px; color: #059669;"></div>
+    </div>
+  `;
+  showModal('Admin Actions', modalHtml, { okText: 'Close', cancelText: '' });
+
+  // Register device
+  setTimeout(() => {
+    // Show device ID as a chip
+    let deviceId = '';
+    if (window.electronAPI) {
+      deviceId = window.electronAPI.getDeviceId();
+      console.log('Device ID from electronAPI:', deviceId);
+      const chip = document.getElementById('device-id-chip');
+      if (chip) chip.textContent = deviceId || 'Device ID not available';
+    } else {
+      console.log('window.electronAPI not available');
+    }
+    document.getElementById('register-device-btn').onclick = async () => {
+      // Gather device details
+      const version = (window.electronAPI && window.electronAPI.getAppVersion) ? (await window.electronAPI.getAppVersion()).version : 'unknown';
+      const platform = navigator.platform || 'unknown';
+      const hostname = window.location.hostname || 'unknown';
+      const payload = { machineId: deviceId, username: 'admin', version, platform, hostname };
+      console.log('Register device payload:', payload);
+      const res = await fetch('http://localhost:3000/api/devices?register=1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      document.getElementById('admin-action-result').textContent = res.ok ? 'Device registered.' : 'Failed to register device.';
+    };
+    // Remove device
+    document.getElementById('remove-device-btn').onclick = async () => {
+      // Remove device from DB
+      const res = await fetch(`http://localhost:3000/api/devices?remove=1&machineId=${encodeURIComponent(deviceId)}`, {
+        method: 'DELETE'
+      });
+      document.getElementById('admin-action-result').textContent = res.ok ? 'Device removed.' : 'Failed to remove device.';
+    };
+    // Activate trial
+    document.getElementById('activate-trial-btn').onclick = async () => {
+      const days = parseInt(document.getElementById('trial-days-input').value);
+      if (!days) return alert('Enter trial days');
+      const res = await fetch('http://localhost:3000/api/assign-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ machineId: deviceId, type: 'trial', days })
+      });
+      document.getElementById('admin-action-result').textContent = res.ok ? 'Trial activated.' : 'Failed to activate trial.';
+    };
+    // Permanent activation
+    document.getElementById('activate-perm-btn').onclick = async () => {
+      const key = document.getElementById('perm-key-input').value.trim();
+      if (!key) return alert('Enter activation key');
+      const res = await fetch('http://localhost:3000/api/assign-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ machineId: deviceId, type: 'subscription', days: 9999, key })
+      });
+      document.getElementById('admin-action-result').textContent = res.ok ? 'Permanent activation successful.' : 'Failed to activate permanently.';
+    };
+  }, 200);
+}
 
   // Device registration on first load (if username exists)
   const username = getUsername();

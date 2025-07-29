@@ -1,8 +1,8 @@
-import { MongoClient } from 'mongodb';
-
-const uri = process.env.MONGODB_URI;
-const client = new MongoClient(uri);
-const dbName = 'beesoft';
+// Simple admin login without database dependency for faster response
+const ADMIN_CREDENTIALS = {
+    'admin': 'beesoft@2025',
+    'ekthar': 'Ekthar@8302'
+};
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -22,16 +22,19 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Username and password required' });
     }
 
-    await client.connect();
-    const db = client.db(dbName);
-    const admins = db.collection('admins');
-
-    // Use email instead of username for authentication
-    const admin = await admins.findOne({ email: username, password });
-    if (!admin) {
-        return res.status(401).json({ error: 'Invalid credentials' });
+    // Fast credential check without database
+    if (ADMIN_CREDENTIALS[username] && ADMIN_CREDENTIALS[username] === password) {
+        return res.status(200).json({ 
+            success: true, 
+            admin: { 
+                username: username,
+                role: username === 'ekthar' ? 'super_admin' : 'admin',
+                loginTime: new Date().toISOString()
+            } 
+        });
     }
 
-    // Optionally, generate a session token here for further requests
-    return res.status(200).json({ success: true, admin: { email: admin.email } });
+    // Add a small delay to prevent brute force attacks
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return res.status(401).json({ error: 'Invalid credentials' });
 }
