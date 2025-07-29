@@ -4,7 +4,7 @@ const DeviceLogSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
   type: { 
     type: String, 
-    enum: ['heartbeat', 'registration', 'trial_activation', 'permanent_activation', 'subscription_change', 'ban', 'unban'],
+    enum: ['heartbeat', 'registration', 'trial_activation', 'permanent_activation', 'subscription_change', 'ban', 'unban', 'message_usage'],
     required: true 
   },
   ip: { type: String, default: 'unknown' },
@@ -33,7 +33,15 @@ const SubscriptionSchema = new mongoose.Schema({
   active: { type: Boolean, default: false },
   key: String,
   activatedAt: Date,
-  expiresAt: Date
+  expiresAt: Date,
+  
+  // Message limits for trial users
+  messageLimit: { type: Number, default: 0 }, // 0 = unlimited
+  messagesUsed: { type: Number, default: 0 },
+  lastMessageReset: { type: Date, default: Date.now },
+  dailyMessageLimit: { type: Number, default: 0 }, // 0 = unlimited
+  dailyMessagesUsed: { type: Number, default: 0 },
+  lastDailyReset: { type: Date, default: Date.now }
 });
 
 const DeviceSchema = new mongoose.Schema({
@@ -153,20 +161,31 @@ DeviceSchema.methods.unbanDevice = function(unbannedBy) {
 };
 
 // Method to activate trial
-DeviceSchema.methods.activateTrial = function(days, activatedBy) {
+DeviceSchema.methods.activateTrial = function(days, activatedBy, options = {}) {
   this.subscription = {
     type: 'trial',
     days: days,
     start: new Date(),
     active: true,
-    activatedAt: new Date()
+    activatedAt: new Date(),
+    messageLimit: options.messageLimit || 100, // Default 100 messages for trial
+    messagesUsed: 0,
+    lastMessageReset: new Date(),
+    dailyMessageLimit: options.dailyMessageLimit || 50, // Default 50 messages per day
+    dailyMessagesUsed: 0,
+    lastDailyReset: new Date()
   };
   
   this.addLog({
     type: 'trial_activation',
     days: days,
     activatedBy: activatedBy,
-    details: { days, activatedBy }
+    details: { 
+      days, 
+      activatedBy, 
+      messageLimit: this.subscription.messageLimit,
+      dailyMessageLimit: this.subscription.dailyMessageLimit
+    }
   });
 };
 
@@ -178,7 +197,11 @@ DeviceSchema.methods.activatePermanent = function(key, activatedBy) {
     start: new Date(),
     active: true,
     key: key,
-    activatedAt: new Date()
+    activatedAt: new Date(),
+    messageLimit: 0, // Unlimited for permanent
+    messagesUsed: 0,
+    dailyMessageLimit: 0, // Unlimited for permanent
+    dailyMessagesUsed: 0
   };
   
   this.addLog({
@@ -188,6 +211,122 @@ DeviceSchema.methods.activatePermanent = function(key, activatedBy) {
     details: { key, activatedBy }
   });
 };
+
+// Method to check if user can send messages
+DeviceSchema.methods.canSendMessages = function(messageCount = 1) {
+  if (!this.subscription || !this.subscription.active) return { allowed: false, reason: 'No active subscription' };
+  if (this.subscription.type === 'permanent') return { allowed: true };
+  if (this.subscription.type !== 'trial') return { allowed: false, reason: 'Invalid subscription type' };
+  
+  // Reset daily counter if it's a new day
+  this.resetDailyCounterIfNeeded();
+  
+  // Check total message limit
+  if (this.subscription.messageLimit > 0 && 
+      (this.subscription.messagesUsed + messageCount) > this.subscription.messageLimit) {
+    return { 
+      allowed: false, 
+      reason: 'Total message limit exceeded',
+      messagesRemaining: Math.max(0, this.subscription.messageLimit - this.subscription.messagesUsed)
+    };
+  }
+  
+  // Check daily message limit
+  if (this.subscription.dailyMessageLimit > 0 && 
+      (this.subscription.dailyMessagesUsed + messageCount) > this.subscription.dailyMessageLimit) {
+    return { 
+      allowed: false, 
+      reason: 'Daily message limit exceeded',
+      dailyMessagesRemaining: Math.max(0, this.subscription.dailyMessageLimit - this.subscription.dailyMessagesUsed)
+    };
+  }
+  
+  return { 
+    allowed: true,
+    messagesRemaining: this.subscription.messageLimit > 0 ? 
+      this.subscription.messageLimit - this.subscription.messagesUsed : -1,
+    dailyMessagesRemaining: this.subscription.dailyMessageLimit > 0 ? 
+      this.subscription.dailyMessageLimit - this.subscription.dailyMessagesUsed : -1
+  };
+};
+
+// Method to track message usage
+DeviceSchema.methods.trackMessageUsage = function(messageCount = 1) {
+  if (!this.subscription || this.subscription.type !== 'trial') return;
+  
+  // Reset daily counter if it's a new day
+  this.resetDailyCounterIfNeeded();
+  
+  // Update counters
+  this.subscription.messagesUsed += messageCount;
+  this.subscription.dailyMessagesUsed += messageCount;
+  
+  this.addLog({
+    type: 'message_usage',
+    details: { 
+      messageCount,
+      totalUsed: this.subscription.messagesUsed,
+      dailyUsed: this.subscription.dailyMessagesUsed,
+      totalLimit: this.subscription.messageLimit,
+      dailyLimit: this.subscription.dailyMessageLimit
+    }
+  });
+};
+
+// Method to reset daily counter if needed
+DeviceSchema.methods.resetDailyCounterIfNeeded = function() {
+  if (!this.subscription || !this.subscription.lastDailyReset) return;
+  
+  const now = new Date();
+  const lastReset = new Date(this.subscription.lastDailyReset);
+  
+  // Check if it's a new day (different date)
+  if (now.toDateString() !== lastReset.toDateString()) {
+    this.subscription.dailyMessagesUsed = 0;
+    this.subscription.lastDailyReset = now;
+  }
+};
+
+// Method to get message usage stats
+DeviceSchema.methods.getMessageStats = function() {
+  if (!this.subscription || this.subscription.type !== 'trial') {
+    return {
+      type: this.subscription?.type || 'none',
+      unlimited: true
+    };
+  }
+  
+  this.resetDailyCounterIfNeeded();
+  
+  return {
+    type: 'trial',
+    unlimited: false,
+    totalLimit: this.subscription.messageLimit,
+    totalUsed: this.subscription.messagesUsed,
+    totalRemaining: Math.max(0, this.subscription.messageLimit - this.subscription.messagesUsed),
+    dailyLimit: this.subscription.dailyMessageLimit,
+    dailyUsed: this.subscription.dailyMessagesUsed,
+    dailyRemaining: Math.max(0, this.subscription.dailyMessageLimit - this.subscription.dailyMessagesUsed),
+    lastDailyReset: this.subscription.lastDailyReset
+  };
+};
+
+// Virtual for message usage percentage
+DeviceSchema.virtual('messageUsagePercentage').get(function() {
+  if (!this.subscription || this.subscription.type !== 'trial' || this.subscription.messageLimit === 0) {
+    return 0;
+  }
+  return Math.round((this.subscription.messagesUsed / this.subscription.messageLimit) * 100);
+});
+
+// Virtual for daily message usage percentage
+DeviceSchema.virtual('dailyMessageUsagePercentage').get(function() {
+  if (!this.subscription || this.subscription.type !== 'trial' || this.subscription.dailyMessageLimit === 0) {
+    return 0;
+  }
+  this.resetDailyCounterIfNeeded();
+  return Math.round((this.subscription.dailyMessagesUsed / this.subscription.dailyMessageLimit) * 100);
+});
 
 // Ensure virtuals are included in JSON output
 DeviceSchema.set('toJSON', { virtuals: true });

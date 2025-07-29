@@ -265,10 +265,19 @@ router.get('/:machineId', verifyToken, async (req, res) => {
 // POST /api/admin/devices/:machineId/trial - Activate trial for device
 router.post('/:machineId/trial', verifyToken, async (req, res) => {
   try {
-    const { days } = req.body;
+    const { days, messageLimit, dailyMessageLimit } = req.body;
     
     if (!days || days < 1 || days > 365) {
       return res.status(400).json({ error: 'Days must be between 1 and 365' });
+    }
+    
+    // Validate message limits
+    if (messageLimit !== undefined && messageLimit < 0) {
+      return res.status(400).json({ error: 'Message limit cannot be negative' });
+    }
+    
+    if (dailyMessageLimit !== undefined && dailyMessageLimit < 0) {
+      return res.status(400).json({ error: 'Daily message limit cannot be negative' });
     }
     
     const device = await Device.findOne({ machineId: req.params.machineId });
@@ -277,13 +286,25 @@ router.post('/:machineId/trial', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Device not found' });
     }
     
-    device.activateTrial(days, req.admin.username);
+    // Prepare options for trial activation
+    const options = {};
+    if (messageLimit !== undefined) options.messageLimit = messageLimit;
+    if (dailyMessageLimit !== undefined) options.dailyMessageLimit = dailyMessageLimit;
+    
+    device.activateTrial(days, req.admin.username, options);
     await device.save();
+    
+    const limitInfo = [];
+    if (messageLimit > 0) limitInfo.push(`${messageLimit} total messages`);
+    if (dailyMessageLimit > 0) limitInfo.push(`${dailyMessageLimit} daily messages`);
+    
+    const limitText = limitInfo.length > 0 ? ` with limits: ${limitInfo.join(', ')}` : '';
     
     res.json({ 
       success: true, 
-      message: `Trial activated for ${days} days`,
-      device: device
+      message: `Trial activated for ${days} days${limitText}`,
+      device: device,
+      messageStats: device.getMessageStats()
     });
     
   } catch (error) {

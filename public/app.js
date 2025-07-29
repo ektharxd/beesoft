@@ -1525,6 +1525,47 @@ function initializeSessionControls() {
             return;
           }
 
+          // Check message limits before showing confirmation
+          if (window.messageLimitsWidget) {
+            try {
+              const limitCheck = await window.messageLimitsWidget.checkMessageLimits(uniqueNumbers.length);
+              
+              if (!limitCheck.allowed) {
+                // Show enhanced limit exceeded modal
+                window.messageLimitsWidget.showLimitExceededModal(
+                  limitCheck.reason,
+                  limitCheck.messagesRemaining,
+                  limitCheck.dailyMessagesRemaining,
+                  uniqueNumbers.length
+                );
+                
+                // Also show the widget warning
+                if (limitCheck.reason.includes('daily')) {
+                  window.messageLimitsWidget.showLimitWarning('daily', limitCheck.dailyMessagesRemaining || 0);
+                } else {
+                  window.messageLimitsWidget.showLimitWarning('total', limitCheck.messagesRemaining || 0);
+                }
+                
+                return;
+              }
+              
+              // Show warning if approaching limits
+              const totalRemaining = limitCheck.messagesRemaining;
+              const dailyRemaining = limitCheck.dailyMessagesRemaining;
+              
+              if ((totalRemaining > 0 && totalRemaining <= 10) || (dailyRemaining > 0 && dailyRemaining <= 10)) {
+                const warningType = (dailyRemaining > 0 && dailyRemaining <= totalRemaining) ? 'daily' : 'total';
+                const remaining = warningType === 'daily' ? dailyRemaining : totalRemaining;
+                
+                window.messageLimitsWidget.showLimitWarning(warningType, remaining);
+              }
+              
+            } catch (error) {
+              console.error('Error checking message limits:', error);
+              // Continue with campaign if limit check fails
+            }
+          }
+
           // Show confirmation dialog
           const confirmMessage = `Are you sure you want to start the campaign?\n\n` +
             `• ${uniqueNumbers.length} contacts will receive your message\n` +
@@ -1550,6 +1591,15 @@ function initializeSessionControls() {
                 const response = await window.electronAPI.startSession(sessionData);
                 window.logger.success(`Campaign started with ${uniqueNumbers.length} contacts`);
                 window.notifications.success('Campaign started successfully!');
+                
+                // Track message usage after successful start
+                if (window.messageLimitsWidget) {
+                  try {
+                    await window.messageLimitsWidget.trackMessageUsage(uniqueNumbers.length, 'campaign-' + Date.now(), uniqueNumbers.length);
+                  } catch (error) {
+                    console.error('Error tracking message usage:', error);
+                  }
+                }
               } else {
                 window.notifications.error('Session management not available');
               }

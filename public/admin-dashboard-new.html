@@ -1183,10 +1183,48 @@
           <input type="number" class="form-input" id="trialDays" min="1" max="365" value="30" placeholder="Enter days (1-365)">
           <small style="color: var(--vercel-secondary);">Enter the number of days for the trial license</small>
         </div>
+        
+        <div class="form-group">
+          <label class="form-label">Total Message Limit:</label>
+          <input type="number" class="form-input" id="messageLimit" min="0" value="100" placeholder="Total messages (0 = unlimited)">
+          <small style="color: var(--vercel-secondary);">Maximum total messages for the entire trial period</small>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Daily Message Limit:</label>
+          <input type="number" class="form-input" id="dailyMessageLimit" min="0" value="50" placeholder="Daily messages (0 = unlimited)">
+          <small style="color: var(--vercel-secondary);">Maximum messages per day</small>
+        </div>
+        
+        <div class="form-group">
+          <div style="background: var(--vercel-surface); padding: 1rem; border-radius: 8px; font-size: 0.875rem;">
+            <strong>Trial Limits Summary:</strong><br>
+            • Duration: <span id="durationSummary">30 days</span><br>
+            • Total Messages: <span id="totalMessagesSummary">100 messages</span><br>
+            • Daily Messages: <span id="dailyMessagesSummary">50 messages/day</span>
+          </div>
+        </div>
       `, `
         <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
         <button class="btn btn-success" onclick="activateTrial('${machineId}')">Activate Trial</button>
       `);
+      
+      // Add event listeners for real-time summary updates
+      setTimeout(() => {
+        function updateTrialSummary() {
+          const days = document.getElementById('trialDays').value || 30;
+          const totalMessages = document.getElementById('messageLimit').value || 100;
+          const dailyMessages = document.getElementById('dailyMessageLimit').value || 50;
+          
+          document.getElementById('durationSummary').textContent = days + ' days';
+          document.getElementById('totalMessagesSummary').textContent = totalMessages == 0 ? 'Unlimited' : totalMessages + ' messages';
+          document.getElementById('dailyMessagesSummary').textContent = dailyMessages == 0 ? 'Unlimited' : dailyMessages + ' messages/day';
+        }
+        
+        document.getElementById('trialDays').addEventListener('input', updateTrialSummary);
+        document.getElementById('messageLimit').addEventListener('input', updateTrialSummary);
+        document.getElementById('dailyMessageLimit').addEventListener('input', updateTrialSummary);
+      }, 100);
     }
     
     function activatePermanentModal(machineId) {
@@ -1204,6 +1242,8 @@
     
     async function activateTrial(machineId) {
       const days = parseInt(document.getElementById('trialDays').value);
+      const messageLimit = parseInt(document.getElementById('messageLimit').value) || 0;
+      const dailyMessageLimit = parseInt(document.getElementById('dailyMessageLimit').value) || 0;
       
       if (!days || days < 1 || days > 365) {
         alert('Please enter a valid number of days (1-365)');
@@ -1213,11 +1253,15 @@
       try {
         await apiRequest(`/devices/${machineId}/trial`, {
           method: 'POST',
-          body: JSON.stringify({ days })
+          body: JSON.stringify({ 
+            days,
+            messageLimit,
+            dailyMessageLimit
+          })
         });
         
         closeModal();
-        alert(`Trial activated for ${days} days`);
+        alert(`Trial activated for ${days} days with message limits: ${messageLimit || 'unlimited'} total, ${dailyMessageLimit || 'unlimited'} daily`);
         refreshDevices();
         
       } catch (error) {

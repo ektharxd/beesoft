@@ -22,7 +22,10 @@ fs.readdirSync(apiDir).forEach(file => {
     const handlerModule = require(path.join(apiDir, file));
     // Support both default export (ESM) and module.exports (CJS)
     const handler = handlerModule.default || handlerModule;
+    
+    // Handle both exact routes and sub-routes
     app.all(routePath, (req, res) => handler(req, res));
+    app.all(`${routePath}/*`, (req, res) => handler(req, res));
   }
 });
 
