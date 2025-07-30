@@ -498,4 +498,57 @@ router.put('/:machineId', verifyToken, async (req, res) => {
   }
 });
 
+// POST /api/admin/devices/:machineId/update-limits - Update message limits
+router.post('/:machineId/update-limits', verifyToken, async (req, res) => {
+  try {
+    const { totalMessageLimit, dailyMessageLimit } = req.body;
+    console.log('[update-limits] Request body:', req.body);
+
+    if (totalMessageLimit === undefined || dailyMessageLimit === undefined) {
+      return res.status(400).json({ error: 'Both totalMessageLimit and dailyMessageLimit are required' });
+    }
+
+    const device = await Device.findOne({ machineId: req.params.machineId });
+    if (!device) {
+      console.error('[update-limits] Device not found:', req.params.machineId);
+      return res.status(404).json({ error: 'Device not found' });
+    }
+
+    if (!device.subscription || !device.subscription.active) {
+      console.error('[update-limits] Device has no active subscription:', device.machineId);
+      return res.status(400).json({ error: 'Device has no active subscription' });
+    }
+
+    // Only allow for trial subscriptions (remove this check if you want to allow for permanent)
+    if (device.subscription.type !== 'trial') {
+      console.error('[update-limits] Not a trial subscription:', device.machineId, device.subscription.type);
+      return res.status(400).json({ error: 'Message limits can only be set for trial subscriptions' });
+    }
+
+    // Update message limits
+    device.subscription.messageLimit = parseInt(totalMessageLimit) || 0;
+    device.subscription.dailyMessageLimit = parseInt(dailyMessageLimit) || 0;
+
+    device.addLog({
+      type: 'message_limits_update',
+      activatedBy: req.admin.username,
+      details: { 
+        totalMessageLimit: parseInt(totalMessageLimit) || 0,
+        dailyMessageLimit: parseInt(dailyMessageLimit) || 0
+      }
+    });
+
+    await device.save();
+
+    res.json({ 
+      success: true, 
+      message: 'Message limits updated successfully',
+      device: device
+    });
+  } catch (error) {
+    console.error('[update-limits] Error updating message limits:', error);
+    res.status(500).json({ error: 'Failed to update message limits', details: error.message });
+  }
+});
+
 module.exports = router;

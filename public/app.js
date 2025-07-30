@@ -434,10 +434,26 @@ async function getTrustedTime() {
 
 async function initializeActivationSystem() {
   // Utility: get unique device ID (use localStorage or generate)
-  function getDeviceId() {
+  async function getDeviceId() {
     let id = localStorage.getItem('beesoft_device_id');
     if (!id) {
-      id = 'dev-' + Math.random().toString(36).substr(2, 12) + '-' + Date.now();
+      // Always use Electron UUID if available
+      if (window.electronAPI && window.electronAPI.getDeviceId) {
+        try {
+          id = await window.electronAPI.getDeviceId();
+        } catch (e) {
+          console.error('Failed to get device ID from main process:', e);
+          id = null;
+        }
+      }
+      // Fallback: use browser crypto UUID if available
+      if (!id && window.crypto && window.crypto.randomUUID) {
+        id = window.crypto.randomUUID();
+      }
+      // Final fallback: use a random string
+      if (!id) {
+        id = 'webapp-' + Math.random().toString(36).substr(2, 12) + '-' + Date.now();
+      }
       localStorage.setItem('beesoft_device_id', id);
     }
     return id;
@@ -453,7 +469,7 @@ async function initializeActivationSystem() {
 
   // Register device if not already
   async function registerDevice(username) {
-    const machineId = getDeviceId();
+    const machineId = await getDeviceId();
     setUsername(username);
     await fetch('http://localhost:3001/api/devices?register=1', {
       method: 'POST',
@@ -464,7 +480,7 @@ async function initializeActivationSystem() {
 
   // Fetch device status (subscription/trial)
   async function fetchDeviceStatus() {
-    const machineId = getDeviceId();
+    const machineId = await getDeviceId();
     try {
       const res = await fetch(`http://localhost:3001/api/device-status?machineId=${encodeURIComponent(machineId)}`);
       if (!res.ok) return null;
@@ -745,11 +761,11 @@ function showAdminActionsWindow() {
   showModal('Admin Actions', modalHtml, { okText: 'Close', cancelText: '' });
 
   // Register device
-  setTimeout(() => {
+  setTimeout(async () => {
     // Show device ID as a chip
     let deviceId = '';
     if (window.electronAPI) {
-      deviceId = window.electronAPI.getDeviceId();
+      deviceId = await window.electronAPI.getDeviceId();
       console.log('Device ID from electronAPI:', deviceId);
       const chip = document.getElementById('device-id-chip');
       if (chip) chip.textContent = deviceId || 'Device ID not available';

@@ -17,30 +17,21 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { machineId } = req.query;
-    if (!machineId) {
-        return res.status(400).json({ error: 'machineId is required' });
-    }
-
     await client.connect();
     const db = client.db(dbName);
     const devices = db.collection('devices');
-    const device = await devices.findOne({ machineId });
-    if (!device) {
-        return res.status(404).json({ error: 'Device not found' });
-    }
-    // Only return relevant status info
-    return res.status(200).json({
+    const all = await devices.find().toArray();
+    // Only show key fields for debug
+    const debugList = all.map(device => ({
         machineId: device.machineId,
         username: device.username,
-        subscription: device.subscription || null,
+        subscription: device.subscription,
         lastSeen: device.lastSeen,
-        whatsappConnected: device.whatsappConnected || false,
-        sessionActive: device.sessionActive || false,
-        version: device.version || 'unknown',
-        platform: device.platform || 'unknown',
-        hostname: device.hostname || 'unknown',
-        ip: device.ip || 'unknown',
-        createdAt: device.createdAt || null
+        createdAt: device.createdAt,
+        _id: device._id
+    }));
+    return res.status(200).json({
+        count: debugList.length,
+        devices: debugList
     });
 }

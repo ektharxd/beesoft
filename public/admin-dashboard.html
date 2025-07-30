@@ -1,373 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Beesoft Admin Dashboard</title>
-  <link href="https://fonts.cdnfonts.com/css/ntype82" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    :root {
-      --vercel-bg: #0a0a0a;
-      --vercel-surface: #18181b;
-      --vercel-card: #1c1c1f;
-      --vercel-primary: #fff;
-      --vercel-secondary: #888;
-      --vercel-accent: #6366f1;
-      --vercel-success: #22c55e;
-      --vercel-warning: #facc15;
-      --vercel-error: #ef4444;
-      --vercel-border: #232323;
-      --vercel-radius: 16px;
-      --vercel-shadow: 0 2px 16px 0 #000a;
-      --vercel-font: 'ntype82', 'Inter', sans-serif;
-    }
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      font-family: var(--vercel-font);
-      background: var(--vercel-bg);
-      color: var(--vercel-primary);
-      letter-spacing: 0.01em;
-    }
-    .vercel-container {
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 32px 20px;
-      background: var(--vercel-surface);
-      border-radius: var(--vercel-radius);
-      box-shadow: var(--vercel-shadow);
-    }
-    .vercel-header {
-      display: flex;
-      align-items: center;
-      gap: 1.2rem;
-      margin-bottom: 2.5rem;
-    }
-    .vercel-header .vercel-logo {
-      font-size: 2.2rem;
-      color: var(--vercel-accent);
-      font-weight: 700;
-      font-family: var(--vercel-font);
-    }
-    .vercel-header .vercel-title {
-      font-size: 1.7rem;
-      font-weight: 700;
-      color: var(--vercel-primary);
-      font-family: var(--vercel-font);
-      letter-spacing: 1px;
-    }
-    .vercel-card {
-      background: var(--vercel-card);
-      border-radius: var(--vercel-radius);
-      box-shadow: var(--vercel-shadow);
-      padding: 2.2rem 2rem 2rem 2rem;
-      margin-bottom: 2.5rem;
-      border: 1.5px solid var(--vercel-border);
-    }
-    .vercel-card-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-      color: var(--vercel-primary);
-      font-family: var(--vercel-font);
-      letter-spacing: 0.5px;
-    }
-    .vercel-form-group {
-      margin-bottom: 1.5rem;
-    }
-    .vercel-label {
-      display: block;
-      font-size: 1rem;
-      margin-bottom: 0.5rem;
-      color: var(--vercel-secondary);
-      font-family: var(--vercel-font);
-    }
-    .vercel-input {
-      width: 100%;
-      padding: 1rem 1.2rem;
-      border: 1.5px solid var(--vercel-border);
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-family: var(--vercel-font);
-      background: #101014;
-      color: var(--vercel-primary);
-      outline: none;
-      transition: border 0.2s;
-    }
-    .vercel-input:focus {
-      border-color: var(--vercel-accent);
-    }
-    .vercel-btn {
-      padding: 1rem 2.5rem;
-      border: none;
-      border-radius: 8px;
-      background: var(--vercel-accent);
-      color: #fff;
-      font-size: 1.1rem;
-      font-family: var(--vercel-font);
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-      box-shadow: 0 2px 8px #6366f133;
-      margin-top: 0.5rem;
-    }
-    .vercel-btn:hover {
-      background: #4f46e5;
-    }
-    .vercel-error {
-      color: var(--vercel-error);
-      font-size: 1rem;
-      margin-top: 0.7rem;
-      font-family: var(--vercel-font);
-    }
-    .vercel-stats {
-      display: flex;
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
-    .vercel-stat-card {
-      flex: 1;
-      background: #101014;
-      border-radius: 12px;
-      box-shadow: var(--vercel-shadow);
-      padding: 1.2rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      border: 1px solid var(--vercel-border);
-    }
-    .vercel-stat-title {
-      font-size: 1rem;
-      color: var(--vercel-secondary);
-      margin-bottom: 0.5rem;
-      font-family: var(--vercel-font);
-    }
-    .vercel-stat-value {
-      font-size: 2.2rem;
-      font-weight: 700;
-      color: var(--vercel-primary);
-      font-family: var(--vercel-font);
-    }
-    .vercel-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1.5rem;
-      font-family: var(--vercel-font);
-    }
-    .vercel-table th, .vercel-table td {
-      padding: 1rem 1.2rem;
-      border-bottom: 1px solid var(--vercel-border);
-      text-align: left;
-      font-size: 1rem;
-    }
-    .vercel-table th {
-      color: var(--vercel-accent);
-      background: #18181b;
-      font-weight: 700;
-      text-transform: uppercase;
-      font-size: 0.95rem;
-    }
-    .vercel-table tr:hover {
-      background: #18181b;
-    }
-    .vercel-status {
-      display: inline-block;
-      padding: 0.3em 1em;
-      border-radius: 20px;
-      font-size: 0.95em;
-      font-weight: 700;
-      color: #fff;
-    }
-    .vercel-status.online {
-      background: var(--vercel-success);
-    }
-    .vercel-status.offline {
-      background: var(--vercel-warning);
-      color: #fff;
-    }
-    .vercel-history-section {
-      margin-top: 2.5rem;
-    }
-    .vercel-history-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--vercel-accent);
-      margin-bottom: 1rem;
-      font-family: var(--vercel-font);
-    }
-    @media (max-width: 900px) {
-      .vercel-stats { flex-direction: column; gap: 1rem; }
-    }
-    @media (max-width: 600px) {
-      .vercel-container { padding: 8px; }
-      .vercel-card { padding: 1rem; }
-      .vercel-stats { gap: 0.5rem; }
-      .vercel-table th, .vercel-table td { padding: 0.5rem 0.5rem; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Beesoft</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .dashboard-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .card-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .header-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .header-card .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            border: none;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
-  <div class="vercel-container">
-    <div class="vercel-header">
-      <span class="vercel-logo"><i class="fas fa-bee"></i></span>
-      <span class="vercel-title">Beesoft Admin Dashboard</span>
+    <div class="container-fluid p-4">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card header-card">
+                    <div class="card-header text-center">
+                        <h1 class="mb-0">
+                            <i class="fas fa-cogs me-3"></i>
+                            Beesoft Admin Dashboard
+                        </h1>
+                        <p class="mb-0 mt-2">Comprehensive monitoring and management system</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="row">
+            <!-- Device Management -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card dashboard-card h-100" onclick="window.open('admin-login.html', '_blank')">
+                    <div class="card-body text-center p-4">
+                        <div class="card-icon text-primary">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="card-title">Device Management</h3>
+                        <p class="card-description">
+                            Manage registered devices, view subscriptions, and monitor online status based on device IDs
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary">User Management</span>
+                            <span class="badge bg-info">Subscriptions</span>
+                            <span class="badge bg-success">Online Status</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Heartbeats Management -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card dashboard-card h-100" onclick="window.open('admin-heartbeats.html', '_blank')">
+                    <div class="card-body text-center p-4">
+                        <div class="card-icon text-danger">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <h3 class="card-title">Heartbeats</h3>
+                        <p class="card-description">
+                            View all heartbeat records, device activity logs, and manage heartbeat data with IP tracking
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-danger">Heartbeats</span>
+                            <span class="badge bg-warning">IP Tracking</span>
+                            <span class="badge bg-info">Activity Logs</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Device Monitor -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card dashboard-card h-100" onclick="window.open('heartbeat-monitor.html', '_blank')">
+                    <div class="card-body text-center p-4">
+                        <div class="card-icon text-success">
+                            <i class="fas fa-desktop"></i>
+                        </div>
+                        <h3 class="card-title">Device Monitor</h3>
+                        <p class="card-description">
+                            Real-time device monitoring with system information, performance metrics, and status tracking
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-success">Real-time</span>
+                            <span class="badge bg-warning">System Info</span>
+                            <span class="badge bg-info">Performance</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Analytics -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card dashboard-card h-100" onclick="alert('Coming Soon!')">
+                    <div class="card-body text-center p-4">
+                        <div class="card-icon text-info">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="card-title">System Analytics</h3>
+                        <p class="card-description">
+                            Detailed analytics, usage statistics, and performance reports
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-secondary">Coming Soon</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Logs -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card dashboard-card h-100" onclick="alert('Coming Soon!')">
+                    <div class="card-body text-center p-4">
+                        <div class="card-icon text-warning">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h3 class="card-title">Message Logs</h3>
+                        <p class="card-description">
+                            View message history, delivery status, and campaign analytics
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-secondary">Coming Soon</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Settings -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card dashboard-card h-100" onclick="alert('Coming Soon!')">
+                    <div class="card-body text-center p-4">
+                        <div class="card-icon text-secondary">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <h3 class="card-title">System Settings</h3>
+                        <p class="card-description">
+                            Configure system parameters, API settings, and security options
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-secondary">Coming Soon</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Quick System Overview
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <div class="border-end">
+                                    <h4 class="text-primary" id="totalDevices">-</h4>
+                                    <small class="text-muted">Total Devices</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="border-end">
+                                    <h4 class="text-success" id="onlineDevices">-</h4>
+                                    <small class="text-muted">Online Now</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="border-end">
+                                    <h4 class="text-info" id="whatsappConnected">-</h4>
+                                    <small class="text-muted">WhatsApp Connected</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <h4 class="text-warning" id="activeSessions">-</h4>
+                                <small class="text-muted">Active Sessions</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="authCard" class="vercel-card">
-      <div class="vercel-card-title">Admin Access</div>
-      <form id="apiKeyForm">
-        <div class="vercel-form-group">
-          <label class="vercel-label" for="apiKeyInput">Enter Admin API Key</label>
-          <input type="password" id="apiKeyInput" class="vercel-input" placeholder="API Key" required />
-        </div>
-        <button type="submit" class="vercel-btn" id="apiKeyLoginBtn">Login</button>
-        <div id="apiKeyError" class="vercel-error" style="display:none;"></div>
-      </form>
-    </div>
-    <div id="dashboard" style="display:none;">
-      <div class="vercel-stats">
-        <div class="vercel-stat-card">
-          <div class="vercel-stat-title">Total Devices</div>
-          <div class="vercel-stat-value" id="totalDevices">0</div>
-        </div>
-        <div class="vercel-stat-card">
-          <div class="vercel-stat-title">Online</div>
-          <div class="vercel-stat-value" id="activeDevices">0</div>
-        </div>
-        <div class="vercel-stat-card">
-          <div class="vercel-stat-title">Offline</div>
-          <div class="vercel-stat-value" id="offlineDevices">0</div>
-        </div>
-      </div>
-      <div class="vercel-card">
-        <div class="vercel-card-title">Device Status</div>
-        <button class="vercel-btn" style="float:right;margin-top:-2.5rem;" onclick="loadDevices()"><i class="fas fa-refresh"></i> Refresh</button>
-        <div id="devicesContent">
-          <div style="padding:2rem;text-align:center;color:var(--vercel-secondary);">Loading devices...</div>
-        </div>
-      </div>
-      <div class="vercel-card vercel-history-section">
-        <div class="vercel-history-title"><i class="fas fa-history"></i> Device Connection History</div>
-        <div id="deviceHistoryContent">
-          <div style="padding:2rem;text-align:center;color:var(--vercel-secondary);">Loading history...</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <script>
-    let apiKey = null;
-    let refreshInterval;
-    document.getElementById('apiKeyForm').onsubmit = async function(e) {
-      e.preventDefault();
-      apiKey = document.getElementById('apiKeyInput').value.trim();
-      const errorDiv = document.getElementById('apiKeyError');
-      errorDiv.style.display = 'none';
-      if (!apiKey) {
-        errorDiv.textContent = 'API Key required.';
-        errorDiv.style.display = 'block';
-        return;
-      }
-      try {
-        const response = await fetch('/api/devices', {
-          headers: { 'x-api-key': apiKey }
-        });
-        if (!response.ok) throw new Error('Invalid API key or server error.');
-        document.getElementById('authCard').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
-        await loadDevices();
-        refreshInterval = setInterval(loadDevices, 30000);
-      } catch (err) {
-        errorDiv.textContent = err.message;
-        errorDiv.style.display = 'block';
-      }
-    };
-    async function loadDevices() {
-      try {
-        const response = await fetch('/api/devices', {
-          headers: { 'x-api-key': apiKey }
-        });
-        if (!response.ok) throw new Error('Failed to fetch device data');
-        const data = await response.json();
-        updateStats(data);
-        renderDevices(data.clients || []);
-        renderDeviceHistory(data.clients || []);
-      } catch (err) {
-        document.getElementById('devicesContent').innerHTML = `<div style='color:var(--vercel-error);padding:2rem;'>${err.message}</div>`;
-      }
-    }
-    function updateStats(data) {
-      document.getElementById('totalDevices').textContent = data.totalDevices || 0;
-      document.getElementById('activeDevices').textContent = data.activeClientCount || 0;
-      document.getElementById('offlineDevices').textContent = data.offlineClientCount || 0;
-    }
-    function renderDevices(devices) {
-      const container = document.getElementById('devicesContent');
-      if (!devices || devices.length === 0) {
-        container.innerHTML = `<div style='padding:2rem;text-align:center;color:var(--vercel-secondary);'>No devices found.</div>`;
-        return;
-      }
-      let html = `<table class='vercel-table'><thead><tr><th>Device</th><th>Status</th><th>Platform</th><th>IP</th><th>Version</th><th>Last Seen</th></tr></thead><tbody>`;
-      html += devices.map(device => `
-        <tr>
-          <td><b>${device.hostname || device.machineId}</b><br><span style='color:var(--vercel-secondary);font-size:0.95em;'>${device.machineId}</span></td>
-          <td><span class='vercel-status ${device.isOnline ? 'online' : 'offline'}'>${device.isOnline ? 'Online' : 'Offline'}</span></td>
-          <td><i class='fab fa-${getPlatformIcon(device.platform)}'></i> ${formatPlatform(device.platform)}</td>
-          <td><span style='font-family:monospace;'>${device.ip || 'unknown'}</span></td>
-          <td><span style='font-family:monospace;'>v${device.version}</span></td>
-          <td><span style='font-family:monospace;'>${formatTimeAgo(device.lastSeen)}</span></td>
-        </tr>
-      `).join('');
-      html += '</tbody></table>';
-      container.innerHTML = html;
-    }
-    function renderDeviceHistory(devices) {
-      const container = document.getElementById('deviceHistoryContent');
-      if (!devices || devices.length === 0) {
-        container.innerHTML = `<div style='padding:2rem;text-align:center;color:var(--vercel-secondary);'>No device history.</div>`;
-        return;
-      }
-      let html = '';
-      devices.forEach(device => {
-        if (!device.logs || device.logs.length === 0) return;
-        html += `<div style='margin-bottom:1.5rem;'><b>${device.hostname || device.machineId}</b> <span style='color:var(--vercel-secondary);font-size:0.95em;'>(${device.machineId})</span><table class='vercel-table' style='font-size:0.95em;margin-top:0.5rem;'><thead><tr><th>Timestamp</th><th>IP</th><th>Version</th><th>WhatsApp</th><th>Session</th></tr></thead><tbody>`;
-        html += device.logs.map(log => `
-          <tr>
-            <td><span style='font-family:monospace;'>${log.timestamp.replace('T',' ').replace('Z','')}</span></td>
-            <td>${log.ip || 'unknown'}</td>
-            <td>v${log.version || 'unknown'}</td>
-            <td>${log.whatsappConnected ? '<span style=\"color:var(--vercel-success);\">Connected</span>' : '<span style=\"color:var(--vercel-error);\">No</span>'}</td>
-            <td>${log.sessionActive ? '<span style=\"color:var(--vercel-success);\">Active</span>' : '<span style=\"color:var(--vercel-warning);\">Inactive</span>'}</td>
-          </tr>
-        `).join('');
-        html += '</tbody></table></div>';
-      });
-      if (!html) {
-        container.innerHTML = `<div style='padding:2rem;text-align:center;color:var(--vercel-secondary);'>No device history.</div>`;
-      } else {
-        container.innerHTML = html;
-      }
-    }
-    function getPlatformIcon(platform) {
-      const icons = { 'win32': 'windows', 'darwin': 'apple', 'linux': 'linux', 'android': 'android', 'ios': 'apple' };
-      return icons[platform] || 'desktop';
-    }
-    function formatPlatform(platform) {
-      const platforms = { 'win32': 'Windows', 'darwin': 'macOS', 'linux': 'Linux', 'android': 'Android', 'ios': 'iOS' };
-      return platforms[platform] || platform;
-    }
-    function formatTimeAgo(dateString) {
-      const now = new Date();
-      const date = new Date(dateString);
-      const diffMs = now - date;
-      const diffMinutes = Math.floor(diffMs / (1000 * 60));
-      const diffHours = Math.floor(diffMinutes / 60);
-      const diffDays = Math.floor(diffHours / 24);
-      if (diffMinutes < 1) return 'Just now';
-      if (diffMinutes < 60) return `${diffMinutes}m ago`;
-      if (diffHours < 24) return `${diffHours}h ago`;
-      return `${diffDays}d ago`;
-    }
-  </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load quick stats
+        async function loadQuickStats() {
+            try {
+                const response = await fetch('/api/heartbeat-monitor', {
+                    headers: {
+                        'x-api-key': 'Ekthar@8302'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        document.getElementById('totalDevices').textContent = data.overview.totalDevices;
+                        document.getElementById('onlineDevices').textContent = data.overview.onlineDevices;
+                        document.getElementById('whatsappConnected').textContent = data.overview.whatsappConnected;
+                        document.getElementById('activeSessions').textContent = data.overview.activeSessions;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading quick stats:', error);
+            }
+        }
+
+        // Load stats on page load
+        document.addEventListener('DOMContentLoaded', loadQuickStats);
+        
+        // Refresh stats every 30 seconds
+        setInterval(loadQuickStats, 30000);
+    </script>
 </body>
 </html>

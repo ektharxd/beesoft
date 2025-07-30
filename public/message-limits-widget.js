@@ -35,8 +35,31 @@ class MessageLimitsWidget {
   }
 
   createWidget() {
-    // Widget disabled - don't show the message limits widget
-    return;
+    if (!this.messageStats || this.messageStats.unlimited) return;
+    
+    // Create widget container
+    this.widget = document.createElement('div');
+    this.widget.className = 'message-limits-widget';
+    this.widget.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--vercel-card, #1c1c1f);
+      border: 1px solid var(--vercel-border, #232323);
+      border-radius: 12px;
+      padding: 16px;
+      width: 280px;
+      box-shadow: var(--vercel-shadow, 0 2px 16px 0 #000a);
+      z-index: 1000;
+      font-family: var(--vercel-font, 'Inter', sans-serif);
+      color: white;
+    `;
+    
+    // Update content
+    this.updateWidgetContent();
+    
+    // Add to document
+    document.body.appendChild(this.widget);
   }
 
   updateWidgetContent() {

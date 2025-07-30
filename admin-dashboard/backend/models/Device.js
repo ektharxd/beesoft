@@ -4,9 +4,9 @@ const DeviceLogSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
   type: { 
     type: String, 
-    enum: ['heartbeat', 'registration', 'trial_activation', 'permanent_activation', 'subscription_change', 'ban', 'unban', 'message_usage'],
-    required: true 
-  },
+    enum: ['heartbeat', 'registration', 'trial_activation', 'permanent_activation', 'subscription_change', 'ban', 'unban', 'message_usage', 'message_limits_update'],
+  required: true 
+},
   ip: { type: String, default: 'unknown' },
   version: { type: String, default: 'unknown' },
   whatsappConnected: { type: Boolean, default: false },

@@ -24,23 +24,10 @@ export default async function handler(req, res) {
 
     await client.connect();
     const db = client.db(dbName);
-    const devices = db.collection('devices');
-    const device = await devices.findOne({ machineId });
-    if (!device) {
-        return res.status(404).json({ error: 'Device not found' });
-    }
-    // Only return relevant status info
+    const heartbeats = db.collection('heartbeats');
+    const logs = await heartbeats.find({ machineId }).sort({ timestamp: -1 }).limit(100).toArray();
     return res.status(200).json({
-        machineId: device.machineId,
-        username: device.username,
-        subscription: device.subscription || null,
-        lastSeen: device.lastSeen,
-        whatsappConnected: device.whatsappConnected || false,
-        sessionActive: device.sessionActive || false,
-        version: device.version || 'unknown',
-        platform: device.platform || 'unknown',
-        hostname: device.hostname || 'unknown',
-        ip: device.ip || 'unknown',
-        createdAt: device.createdAt || null
+        count: logs.length,
+        heartbeats: logs
     });
 }

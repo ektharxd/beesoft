@@ -11,6 +11,7 @@ const os = require('os');
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const https = require('https');
+const http = require('http');
 const { v4: uuidv4 } = require('crypto').randomUUID ? require('crypto') : { randomUUID: () => require('os').hostname() + '-' + Date.now() };
 const UpdateManager = require('./update-manager');
 let mainWindow;
@@ -617,8 +618,10 @@ async function simulateTyping(chatId, message) {
 // Heartbeat system for live device monitoring
 let deviceId = null;
 let heartbeatInterval = null;
-const HEARTBEAT_URL = 'https://beesoft-one.vercel.app/api/devices';
+const HEARTBEAT_URL = 'http://localhost:3001/api/devices';
 const HEARTBEAT_INTERVAL = 2 * 60 * 1000; // 2 minutes
+let heartbeatFailureCount = 0;
+const MAX_HEARTBEAT_FAILURES = 5;
 function generateDeviceId() {
     try {
         // Try to use crypto.randomUUID if available
@@ -649,28 +652,100 @@ function getDeviceId() {
 }
 async function sendHeartbeat() {
     try {
+        // Get system information
+        const cpus = os.cpus();
+        const networkInterfaces = os.networkInterfaces();
+        
+        // Get primary network interface (first non-internal IPv4)
+        let primaryIP = 'unknown';
+        let macAddress = 'unknown';
+        for (const [name, interfaces] of Object.entries(networkInterfaces)) {
+            for (const iface of interfaces) {
+                if (iface.family === 'IPv4' && !iface.internal) {
+                    primaryIP = iface.address;
+                    macAddress = iface.mac;
+                    break;
+                }
+            }
+            if (primaryIP !== 'unknown') break;
+        }
+
         const heartbeatData = {
             machineId: getDeviceId(),
             version: require('./package.json').version || '1.0.0',
             platform: os.platform(),
             hostname: os.hostname(),
             whatsappConnected: isReady,
-            sessionActive: sessionControl.isRunning
+            sessionActive: sessionControl.isRunning,
+            // Enhanced system information
+            systemInfo: {
+                arch: os.arch(),
+                release: os.release(),
+                type: os.type(),
+                uptime: os.uptime(),
+                totalMemory: os.totalmem(),
+                freeMemory: os.freemem(),
+                usedMemory: os.totalmem() - os.freemem(),
+                memoryUsagePercent: Math.round(((os.totalmem() - os.freemem()) / os.totalmem()) * 100),
+                cpuCount: cpus.length,
+                cpuModel: cpus[0]?.model || 'unknown',
+                cpuSpeed: cpus[0]?.speed || 0,
+                loadAverage: os.loadavg(),
+                primaryIP: primaryIP,
+                macAddress: macAddress,
+                userInfo: {
+                    username: os.userInfo().username,
+                    homedir: os.userInfo().homedir,
+                    shell: os.userInfo().shell || 'unknown'
+                },
+                nodeVersion: process.version,
+                electronVersion: process.versions.electron || 'unknown',
+                chromeVersion: process.versions.chrome || 'unknown'
+            },
+            // Application specific info
+            appInfo: {
+                connectionAttempts: connectionAttempts,
+                lastConnectionTime: lastConnectionTime,
+                qrRetryCount: qrRetryCount,
+                heartbeatFailureCount: heartbeatFailureCount,
+                messageTracker: {
+                    hourlyCount: messageTracker.hourly.length,
+                    dailyCount: messageTracker.daily.length,
+                    lastMessageTime: messageTracker.lastMessageTime
+                }
+            },
+            // Performance metrics
+            performance: {
+                timestamp: Date.now(),
+                processUptime: process.uptime(),
+                memoryUsage: process.memoryUsage(),
+                cpuUsage: process.cpuUsage()
+            }
         };
         const data = JSON.stringify(heartbeatData);
         const url = new URL(HEARTBEAT_URL);
+        
+        // Determine if we should use HTTP or HTTPS based on the protocol
+        const isHttps = url.protocol === 'https:';
+        const defaultPort = isHttps ? 443 : 80;
+        
         const options = {
             hostname: url.hostname,
-            port: url.port || 443,
+            port: url.port || defaultPort,
             path: url.pathname,
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Content-Length': Buffer.byteLength(data),
                 'User-Agent': 'Beesoft-Desktop/1.0.0'
-            }
+            },
+            timeout: 10000 // 10 second timeout
         };
-        const req = https.request(options, (res) => {
+        
+        // Use the appropriate module based on protocol
+        const requestModule = isHttps ? https : http;
+        
+        const req = requestModule.request(options, (res) => {
             let responseData = '';
             res.on('data', (chunk) => {
                 responseData += chunk;
@@ -678,29 +753,126 @@ async function sendHeartbeat() {
             res.on('end', () => {
                 if (res.statusCode === 200) {
                     console.log(`[Heartbeat] Sent successfully to ${HEARTBEAT_URL}`);
+                    heartbeatFailureCount = 0; // Reset failure count on success
                 } else {
+                    heartbeatFailureCount++;
                     console.error(`[Heartbeat] Failed with status ${res.statusCode}: ${responseData}`);
+                    if (heartbeatFailureCount >= MAX_HEARTBEAT_FAILURES) {
+                        console.log(`[Heartbeat] Max failures reached (${MAX_HEARTBEAT_FAILURES}), disabling heartbeat temporarily`);
+                    }
                 }
             });
         });
+        
         req.on('error', (error) => {
-            console.error('[Heartbeat] Error:', error.message);
+            heartbeatFailureCount++;
+            if (error.code === 'ECONNREFUSED') {
+                console.log(`[Heartbeat] Server not available (${error.code}), attempt ${heartbeatFailureCount}/${MAX_HEARTBEAT_FAILURES}`);
+            } else if (error.code === 'EPROTO') {
+                console.log(`[Heartbeat] SSL/TLS protocol error (${error.code}), attempt ${heartbeatFailureCount}/${MAX_HEARTBEAT_FAILURES}`);
+            } else {
+                console.error(`[Heartbeat] Error: ${error.message}, attempt ${heartbeatFailureCount}/${MAX_HEARTBEAT_FAILURES}`);
+            }
+            
+            if (heartbeatFailureCount >= MAX_HEARTBEAT_FAILURES) {
+                console.log(`[Heartbeat] Max failures reached, disabling heartbeat temporarily`);
+            }
         });
+        
+        req.on('timeout', () => {
+            heartbeatFailureCount++;
+            console.log(`[Heartbeat] Request timeout, attempt ${heartbeatFailureCount}/${MAX_HEARTBEAT_FAILURES}`);
+            req.destroy();
+        });
+        
         req.write(data);
         req.end();
     } catch (error) {
-        console.error('[Heartbeat] Exception:', error.message);
+        heartbeatFailureCount++;
+        console.error(`[Heartbeat] Exception: ${error.message}, attempt ${heartbeatFailureCount}/${MAX_HEARTBEAT_FAILURES}`);
     }
 }
+async function registerDevice() {
+    try {
+        const registrationData = {
+            machineId: getDeviceId(),
+            username: os.hostname() || 'Unknown User',
+            email: `${os.hostname()}@beesoft.local`,
+            mobile: 'N/A',
+            name: `Beesoft Desktop - ${os.hostname()}`
+        };
+        
+        const data = JSON.stringify(registrationData);
+        const url = new URL('http://localhost:3001/api/devices?register=1');
+        
+        const options = {
+            hostname: url.hostname,
+            port: url.port || 80,
+            path: url.pathname + url.search,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(data),
+                'User-Agent': 'Beesoft-Desktop/1.0.0'
+            },
+            timeout: 10000
+        };
+        
+        const req = http.request(options, (res) => {
+            let responseData = '';
+            res.on('data', (chunk) => {
+                responseData += chunk;
+            });
+            res.on('end', () => {
+                if (res.statusCode === 200) {
+                    console.log(`[Registration] Device registered successfully`);
+                } else if (res.statusCode === 409) {
+                    console.log(`[Registration] Device already registered`);
+                } else {
+                    console.error(`[Registration] Failed with status ${res.statusCode}: ${responseData}`);
+                }
+            });
+        });
+        
+        req.on('error', (error) => {
+            console.log(`[Registration] Error: ${error.message}`);
+        });
+        
+        req.on('timeout', () => {
+            console.log(`[Registration] Request timeout`);
+            req.destroy();
+        });
+        
+        req.write(data);
+        req.end();
+    } catch (error) {
+        console.error(`[Registration] Exception: ${error.message}`);
+    }
+}
+
 function initializeHeartbeat() {
     console.log(`[Heartbeat] Initializing with device ID: ${getDeviceId()}`);
-    // Send initial heartbeat
-    sendHeartbeat();
-    // Set up periodic heartbeats
+    
+    // First try to register the device
+    registerDevice();
+    
+    // Wait a moment then send initial heartbeat
+    setTimeout(() => {
+        sendHeartbeat();
+    }, 2000);
+    
+    // Set up periodic heartbeats with failure handling
     if (heartbeatInterval) {
         clearInterval(heartbeatInterval);
     }
-    heartbeatInterval = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
+    heartbeatInterval = setInterval(() => {
+        // Only send heartbeat if we haven't exceeded max failures
+        if (heartbeatFailureCount < MAX_HEARTBEAT_FAILURES) {
+            sendHeartbeat();
+        } else {
+            console.log(`[Heartbeat] Skipping heartbeat due to max failures (${MAX_HEARTBEAT_FAILURES})`);
+        }
+    }, HEARTBEAT_INTERVAL);
     console.log(`[Heartbeat] Scheduled every ${HEARTBEAT_INTERVAL / 1000} seconds`);
 }
 function stopHeartbeat() {
@@ -1419,7 +1591,8 @@ ipcMain.handle('get-platform-asset', async (event, assets) => {
     } catch (error) {
         return { success: false, asset: null, error: error.message };
     }
-});// Test Sentry error reporting
+});
+// Test Sentry error reporting
 ipcMain.handle('test-sentry-error', async () => {
     try {
         sendToUI('log', { level: 'info', message: '🧪 Testing Sentry error reporting...' });
@@ -1454,4 +1627,9 @@ ipcMain.handle('test-sentry-error', async () => {
         sendToUI('log', { level: 'error', message: `❌ Failed to send test error to Sentry: ${error.message}` });
         return { success: false, message: 'Failed to send test error to Sentry' };
     }
+});
+
+// Device ID handler
+ipcMain.handle('get-device-id', async () => {
+    return getDeviceId();
 });

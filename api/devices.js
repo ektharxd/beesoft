@@ -83,13 +83,26 @@ export default async function handler(req, res) {
 
     // Handle heartbeat (POST)
     if (req.method === 'POST') {
-        const { machineId, version, platform, hostname, whatsappConnected, sessionActive } = req.body;
+        const { 
+            machineId, 
+            version, 
+            platform, 
+            hostname, 
+            whatsappConnected, 
+            sessionActive,
+            systemInfo,
+            appInfo,
+            performance
+        } = req.body;
+        
         if (!machineId) {
             return res.status(400).send('machineId is required');
         }
+        
         const now = new Date();
         const deviceIP = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
-        // Upsert device and add log, preserve username/subscription if already set
+        
+        // Upsert device (update lastSeen and status fields only)
         await devices.updateOne(
             { machineId },
             {
@@ -108,14 +121,36 @@ export default async function handler(req, res) {
                         timestamp: now,
                         type: 'heartbeat',
                         ip: deviceIP,
+                        version: version || 'unknown',
+                        platform: platform || 'unknown',
+                        hostname: hostname || machineId,
                         whatsappConnected: whatsappConnected || false,
                         sessionActive: sessionActive || false,
-                        version: version || 'unknown',
+                        systemInfo: systemInfo || null,
+                        appInfo: appInfo || null,
+                        performance: performance || null
                     }
                 }
             },
             { upsert: true }
         );
+        
+        // Insert enhanced heartbeat into separate collection
+        const heartbeats = db.collection('heartbeats');
+        await heartbeats.insertOne({
+            machineId,
+            timestamp: now,
+            ip: deviceIP,
+            version: version || 'unknown',
+            platform: platform || 'unknown',
+            hostname: hostname || machineId,
+            whatsappConnected: whatsappConnected || false,
+            sessionActive: sessionActive || false,
+            systemInfo: systemInfo || null,
+            appInfo: appInfo || null,
+            performance: performance || null
+        });
+        
         return res.status(200).send('OK');
     }
 
@@ -158,7 +193,8 @@ export default async function handler(req, res) {
             const deviceData = {
                 ...device,
                 isOnline,
-                logs: device.logs || []
+                // Filter out logs of type 'heartbeat' from the logs array
+                logs: (device.logs || []).filter(log => log.type !== 'heartbeat')
             };
             allDevicesList.push(deviceData);
             if (isOnline) {

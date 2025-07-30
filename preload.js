@@ -42,28 +42,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
 
   // Device info (for compatibility)
-  getDeviceId: () => {
-    // Generate a persistent device ID
-    let deviceId = localStorage.getItem('beesoft_device_id');
-    if (!deviceId) {
-      // Create a more stable device ID based on system info
-      const userAgent = navigator.userAgent;
-      const platform = navigator.platform;
-      const language = navigator.language;
-      const screenRes = `${screen.width}x${screen.height}`;
-      
-      // Create a hash-like ID from system properties
-      const systemInfo = `${userAgent}-${platform}-${language}-${screenRes}`;
-      const hash = systemInfo.split('').reduce((a, b) => {
-        a = ((a << 5) - a) + b.charCodeAt(0);
-        return a & a;
-      }, 0);
-      
-      deviceId = `beesoft-${Math.abs(hash)}-${Date.now()}`;
-      localStorage.setItem('beesoft_device_id', deviceId);
-    }
-    return deviceId;
-  }
+  getDeviceId: () => ipcRenderer.invoke('get-device-id')
 });
 
 console.log('electronAPI bridge exposed successfully');

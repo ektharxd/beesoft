@@ -499,6 +499,53 @@
       text-align: center;
     }
     
+    /* Message Analytics Styles */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .analytics-card {
+      background-color: var(--vercel-surface);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .analytics-card h4 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: var(--vercel-primary);
+      font-size: 1rem;
+    }
+    
+    .progress-container {
+      margin-bottom: 0.5rem;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background-color: var(--vercel-border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background-color: var(--vercel-accent);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      color: var(--vercel-secondary);
+    }
+    
     .text-right {
       text-align: right;
     }
@@ -705,9 +752,10 @@
       
       try {
         // Fetch dashboard stats
-        const [deviceStats, licenseStats] = await Promise.all([
+        const [deviceStats, licenseStats, messageStats] = await Promise.all([
           apiRequest('/devices/stats'),
-          apiRequest('/licenses/stats')
+          apiRequest('/licenses/stats'),
+          fetch('http://localhost:3001/api/message-limits').then(res => res.json()).catch(() => ({}))
         ]);
         
         mainBody.innerHTML = `
@@ -763,8 +811,57 @@
                 <span>${licenseStats.usedKeys || 0} used</span>
               </div>
             </div>
+
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Messages Sent</span>
+                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--vercel-accent);">
+                  <i class="fas fa-comment"></i>
+                </div>
+              </div>
+              <div class="stat-value">${messageStats.totalUsed || 0}</div>
+              <div class="stat-change">
+                <span>${messageStats.dailyUsed || 0} today</span>
+              </div>
+            </div>
           </div>
           
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">Message Analytics</h3>
+            </div>
+            <div class="card-body">
+              <div id="messageAnalytics">
+                <div class="analytics-grid">
+                  <div class="analytics-card">
+                    <h4>Total Message Usage</h4>
+                    <div class="progress-container">
+                      <div id="totalProgressBar" class="progress-bar">
+                        <div class="progress-fill" style="width: 0%;"></div>
+                      </div>
+                      <div class="progress-labels">
+                        <span id="totalUsedMessages">0</span>
+                        <span id="totalMessageLimit">0</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="analytics-card">
+                    <h4>Daily Message Usage</h4>
+                    <div class="progress-container">
+                      <div id="dailyProgressBar" class="progress-bar">
+                        <div class="progress-fill" style="width: 0%;"></div>
+                      </div>
+                      <div class="progress-labels">
+                        <span id="dailyUsedMessages">0</span>
+                        <span id="dailyMessageLimit">0</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="content-card">
             <div class="card-header">
               <h3 class="card-title">Recent Activity</h3>
@@ -779,12 +876,59 @@
           </div>
         `;
         
+        // Update message analytics
+        updateMessageAnalytics(messageStats);
+        
         // Load recent devices
         loadRecentActivity();
         
       } catch (error) {
         console.error('Error loading dashboard:', error);
         mainBody.innerHTML = '<div class="text-center">Error loading dashboard data</div>';
+      }
+    }
+    
+    function updateMessageAnalytics(messageStats) {
+      // Default values if no data is available
+      const stats = messageStats || {
+        totalLimit: 1000,
+        totalUsed: 0,
+        dailyLimit: 100,
+        dailyUsed: 0
+      };
+      
+      // Calculate percentages
+      const totalPercentage = stats.totalLimit ? Math.min(100, (stats.totalUsed / stats.totalLimit) * 100) : 0;
+      const dailyPercentage = stats.dailyLimit ? Math.min(100, (stats.dailyUsed / stats.dailyLimit) * 100) : 0;
+      
+      // Update the progress bars
+      document.getElementById('totalProgressBar').querySelector('.progress-fill').style.width = `${totalPercentage}%`;
+      document.getElementById('dailyProgressBar').querySelector('.progress-fill').style.width = `${dailyPercentage}%`;
+      
+      // Update the labels
+      document.getElementById('totalUsedMessages').textContent = `${stats.totalUsed || 0} used`;
+      document.getElementById('totalMessageLimit').textContent = `${stats.totalLimit || 0} limit`;
+      document.getElementById('dailyUsedMessages').textContent = `${stats.dailyUsed || 0} used today`;
+      document.getElementById('dailyMessageLimit').textContent = `${stats.dailyLimit || 0} daily limit`;
+      
+      // Set colors based on usage
+      const totalFill = document.getElementById('totalProgressBar').querySelector('.progress-fill');
+      const dailyFill = document.getElementById('dailyProgressBar').querySelector('.progress-fill');
+      
+      if (totalPercentage > 90) {
+        totalFill.style.backgroundColor = 'var(--vercel-error)';
+      } else if (totalPercentage > 70) {
+        totalFill.style.backgroundColor = 'var(--vercel-warning)';
+      } else {
+        totalFill.style.backgroundColor = 'var(--vercel-accent)';
+      }
+      
+      if (dailyPercentage > 90) {
+        dailyFill.style.backgroundColor = 'var(--vercel-error)';
+      } else if (dailyPercentage > 70) {
+        dailyFill.style.backgroundColor = 'var(--vercel-warning)';
+      } else {
+        dailyFill.style.backgroundColor = 'var(--vercel-accent)';
       }
     }
     
@@ -1069,6 +1213,12 @@
             <span class="status-badge status-${getSubscriptionStatusClass(device.subscriptionStatus)}">
               ${getSubscriptionStatusText(device.subscriptionStatus)}
             </span>
+            ${device.subscription && device.subscription.type === 'trial' ? `
+              <div style="margin-top: 0.5rem; font-size: 0.75rem;">
+                <div>Messages: <span style="font-weight: bold; color: var(--vercel-accent);">${device.subscription.messageLimit !== undefined ? device.subscription.messageLimit : 'Unlimited'}</span></div>
+                <div>Daily: <span style="font-weight: bold; color: var(--vercel-accent);">${device.subscription.dailyMessageLimit !== undefined ? device.subscription.dailyMessageLimit : 'Unlimited'}</span></div>
+              </div>
+            ` : ''}
             ${device.daysRemaining > 0 && device.daysRemaining < 9999 ? 
               `<br><small>${device.daysRemaining} days left</small>` : ''}
           </td>
@@ -1081,6 +1231,9 @@
               </button>
               <button class="btn btn-outline" onclick="editDevice('${device.machineId}')" title="Edit">
                 <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-outline" onclick="viewDeviceLogsAndHeartbeats('${device.machineId}')" title="Logs/Heartbeats">
+                <i class="fas fa-history"></i>
               </button>
               ${device.isBanned ? 
                 `<button class="btn btn-success" onclick="unbanDevice('${device.machineId}')" title="Unban">
@@ -1166,6 +1319,10 @@
             <button class="btn btn-primary" onclick="closeModal(); activatePermanentModal('${machineId}')">
               <i class="fas fa-key"></i>
               Activate Permanent License
+            </button>
+            <button class="btn btn-warning" onclick="closeModal(); updateMessageLimitsModal('${machineId}')">
+              <i class="fas fa-comment"></i>
+              Update Message Limits
             </button>
             <button class="btn btn-outline" onclick="closeModal(); viewDeviceLogs('${machineId}')">
               <i class="fas fa-history"></i>
@@ -1297,6 +1454,72 @@
       } catch (error) {
         console.error('Error activating permanent license:', error);
         alert(error.message || 'Failed to activate permanent license');
+      }
+    }
+    
+    function updateMessageLimitsModal(machineId) {
+      showModal('Update Message Limits', `
+        <div class="form-group">
+          <label class="form-label">Total Message Limit:</label>
+          <input type="number" class="form-input" id="messageLimit" min="0" placeholder="Total messages (0 = unlimited)">
+          <small style="color: var(--vercel-secondary);">Maximum total messages for the entire subscription period</small>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Daily Message Limit:</label>
+          <input type="number" class="form-input" id="dailyMessageLimit" min="0" placeholder="Daily messages (0 = unlimited)">
+          <small style="color: var(--vercel-secondary);">Maximum messages per day</small>
+        </div>
+        
+        <div class="form-group">
+          <div style="background: var(--vercel-surface); padding: 1rem; border-radius: 8px; font-size: 0.875rem;">
+            <strong>Message Limits Summary:</strong><br>
+            • Total Messages: <span id="totalMessagesSummary">Not set</span><br>
+            • Daily Messages: <span id="dailyMessagesSummary">Not set</span>
+          </div>
+        </div>
+      `, `
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-warning" onclick="updateMessageLimits('${machineId}')">Update Limits</button>
+      `);
+      
+      // Add event listeners for real-time summary updates
+      setTimeout(() => {
+        function updateLimitsSummary() {
+          const totalMessages = document.getElementById('messageLimit').value;
+          const dailyMessages = document.getElementById('dailyMessageLimit').value;
+          
+          document.getElementById('totalMessagesSummary').textContent = !totalMessages ? 'Not set' : 
+            (totalMessages == 0 ? 'Unlimited' : totalMessages + ' messages');
+          document.getElementById('dailyMessagesSummary').textContent = !dailyMessages ? 'Not set' : 
+            (dailyMessages == 0 ? 'Unlimited' : dailyMessages + ' messages/day');
+        }
+        
+        document.getElementById('messageLimit').addEventListener('input', updateLimitsSummary);
+        document.getElementById('dailyMessageLimit').addEventListener('input', updateLimitsSummary);
+      }, 100);
+    }
+    
+    async function updateMessageLimits(machineId) {
+      const messageLimit = parseInt(document.getElementById('messageLimit').value) || 0;
+      const dailyMessageLimit = parseInt(document.getElementById('dailyMessageLimit').value) || 0;
+      
+      try {
+        await apiRequest(`/devices/${machineId}/update-limits`, {
+          method: 'POST',
+          body: JSON.stringify({ 
+            totalMessageLimit: messageLimit,
+            dailyMessageLimit
+          })
+        });
+        
+        closeModal();
+        alert(`Message limits updated: ${messageLimit || 'unlimited'} total, ${dailyMessageLimit || 'unlimited'} daily`);
+        refreshDevices();
+        
+      } catch (error) {
+        console.error('Error updating message limits:', error);
+        alert(error.message || 'Failed to update message limits');
       }
     }
     
@@ -1999,6 +2222,48 @@
           clearInterval(window.deviceRefreshInterval);
           window.deviceRefreshInterval = null;
         }
+      }
+    }
+
+    // Add this function globally for the logs/heartbeats button
+    async function viewDeviceLogsAndHeartbeats(machineId) {
+      try {
+        // Fetch device logs
+        const device = await apiRequest(`/devices/${machineId}`);
+        // Fetch heartbeats from the backend
+        const heartbeatsRes = await fetch(`http://localhost:3001/api/device-heartbeats?machineId=${encodeURIComponent(machineId)}`);
+        const heartbeatsData = await heartbeatsRes.json();
+
+        let html = '<div style="max-height: 400px; overflow-y: auto;">';
+        html += '<h4>Device Logs</h4>';
+        if (device.logs && device.logs.length > 0) {
+          html += device.logs.map(log => `
+            <div style="border-bottom: 1px solid var(--vercel-border); padding: 0.5rem 0;">
+              <div style="font-weight: 600;">${log.type}</div>
+              <div style="font-size: 0.85rem; color: var(--vercel-secondary);">${new Date(log.timestamp).toLocaleString()}</div>
+              ${log.details ? `<div style="font-size: 0.85rem;">${JSON.stringify(log.details, null, 2)}</div>` : ''}
+            </div>
+          `).join('');
+        } else {
+          html += '<div class="text-center">No logs found for this device</div>';
+        }
+
+        html += '<h4 style="margin-top:1rem;">Heartbeats</h4>';
+        if (heartbeatsData.heartbeats && heartbeatsData.heartbeats.length > 0) {
+          html += heartbeatsData.heartbeats.map(hb => `
+            <div style="border-bottom: 1px solid var(--vercel-border); padding: 0.5rem 0;">
+              <div style="font-size: 0.85rem; color: var(--vercel-secondary);">${new Date(hb.timestamp).toLocaleString()}</div>
+              <div style="font-size: 0.85rem;">IP: ${hb.ip}, Version: ${hb.version}, Platform: ${hb.platform}</div>
+            </div>
+          `).join('');
+        } else {
+          html += '<div class="text-center">No heartbeats found for this device</div>';
+        }
+        html += '</div>';
+
+        showModal('Device Logs & Heartbeats', html, '<button class="btn btn-outline" onclick="closeModal()">Close</button>');
+      } catch (error) {
+        alert('Failed to load logs/heartbeats');
       }
     }
   </script>
