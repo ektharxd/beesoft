@@ -1,6 +1,9 @@
-// Message limits API - proxy to admin dashboard backend
-const fetch = require('node-fetch');
-const ADMIN_API_BASE = 'http://localhost:4000/api/admin';
+// Message limits API - Direct MongoDB connection for real-time license data
+const { MongoClient } = require('mongodb');
+
+// MongoDB connection - use environment variable
+const uri = process.env.MONGODB_URI;
+const client = new MongoClient(uri);
 
 module.exports = async (req, res) => {
   // Set CORS headers
@@ -19,40 +22,60 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Machine ID is required' });
     }
 
+    console.log(`[MessageLimits] Processing request for device: ${machineId}`);
+
+    // Connect to MongoDB
+    await client.connect();
+    const db = client.db('beesoft');
+    const devices = db.collection('devices');
+
     // GET: Check message limits and usage
     if (req.method === 'GET') {
       try {
-        // Try to get device info from admin API
-        const deviceResponse = await fetch(`http://localhost:4000/api/admin/devices/${machineId}`, {
-          headers: {
-            'Authorization': 'Bearer admin_internal_token'
-          },
-          timeout: 5000 // 5 second timeout
-        });
+        // Get device directly from MongoDB
+        const device = await devices.findOne({ machineId });
 
-        if (!deviceResponse.ok) {
-          if (deviceResponse.status === 404) {
-            // Device not found, return unlimited access for now
-            return res.json({
-              success: true,
-              messageStats: {
-                type: 'none',
-                unlimited: true
-              },
-              canSendMessages: true,
-              reason: null,
-              messagesRemaining: -1,
-              dailyMessagesRemaining: -1
-            });
-          }
-          throw new Error('Failed to fetch device');
+        if (!device) {
+          console.log(`[MessageLimits] Device ${machineId} not found in database`);
+          return res.json({
+            success: true,
+            messageStats: {
+              type: 'none',
+              unlimited: true
+            },
+            canSendMessages: true,
+            reason: 'Device not registered',
+            messagesRemaining: -1,
+            dailyMessagesRemaining: -1
+          });
         }
 
-        const device = await deviceResponse.json();
-        
-        // Calculate message stats
-        const messageStats = calculateMessageStats(device);
-        const canSend = checkCanSendMessages(device, 1);
+        console.log(`[MessageLimits] Found device ${machineId}:`, {
+          subscription: device.subscription,
+          isBanned: device.isBanned
+        });
+
+        // Check if device is banned
+        if (device.isBanned) {
+          return res.json({
+            success: false,
+            messageStats: {
+              type: 'banned',
+              unlimited: false
+            },
+            canSendMessages: false,
+            reason: 'Device is banned',
+            messagesRemaining: 0,
+            dailyMessagesRemaining: 0
+          });
+        }
+
+        // Calculate message stats from actual MongoDB data
+        const messageStats = calculateMessageStatsFromDevice(device);
+        const canSend = checkCanSendMessagesFromDevice(device, 1);
+
+        console.log(`[MessageLimits] Calculated stats for ${machineId}:`, messageStats);
+        console.log(`[MessageLimits] Can send check for ${machineId}:`, canSend);
 
         return res.json({
           success: true,
@@ -64,26 +87,10 @@ module.exports = async (req, res) => {
         });
 
       } catch (error) {
-        console.error('Error fetching device:', error);
-        // If admin API is not available, simulate trial limits for testing
-        const simulatedStats = {
-          type: 'trial',
-          unlimited: false,
-          totalLimit: 100,
-          totalUsed: 85, // Simulate 85 messages used
-          totalRemaining: 15,
-          dailyLimit: 50,
-          dailyUsed: 45, // Simulate 45 daily messages used
-          dailyRemaining: 5
-        };
-        
-        return res.json({
-          success: true,
-          messageStats: simulatedStats,
-          canSendMessages: true,
-          reason: null,
-          messagesRemaining: simulatedStats.totalRemaining,
-          dailyMessagesRemaining: simulatedStats.dailyRemaining
+        console.error('[MessageLimits] Error fetching device from MongoDB:', error);
+        return res.status(500).json({ 
+          error: 'Database error',
+          details: error.message 
         });
       }
     }
@@ -93,19 +100,14 @@ module.exports = async (req, res) => {
       const { messageCount = 1 } = req.body;
       
       try {
-        const deviceResponse = await fetch(`http://localhost:4000/api/admin/devices/${machineId}`, {
-          headers: {
-            'Authorization': 'Bearer admin_internal_token'
-          }
-        });
+        const device = await devices.findOne({ machineId });
 
-        if (!deviceResponse.ok) {
+        if (!device) {
           return res.status(404).json({ error: 'Device not found' });
         }
 
-        const device = await deviceResponse.json();
-        const canSend = checkCanSendMessages(device, messageCount);
-        const messageStats = calculateMessageStats(device);
+        const canSend = checkCanSendMessagesFromDevice(device, messageCount);
+        const messageStats = calculateMessageStatsFromDevice(device);
 
         return res.json({
           success: true,
@@ -118,56 +120,8 @@ module.exports = async (req, res) => {
         });
 
       } catch (error) {
-        console.error('Error checking message limits:', error);
-        // If admin API is not available, simulate trial limits for testing
-        const simulatedStats = {
-          type: 'trial',
-          unlimited: false,
-          totalLimit: 100,
-          totalUsed: 85, // Simulate 85 messages used
-          totalRemaining: 15,
-          dailyLimit: 50,
-          dailyUsed: 45, // Simulate 45 daily messages used
-          dailyRemaining: 5
-        };
-        
-        // Check if the requested message count would exceed limits
-        const wouldExceedTotal = messageCount > simulatedStats.totalRemaining;
-        const wouldExceedDaily = messageCount > simulatedStats.dailyRemaining;
-        
-        if (wouldExceedTotal) {
-          return res.json({
-            success: true,
-            allowed: false,
-            reason: 'Total message limit exceeded',
-            messageCount,
-            messagesRemaining: simulatedStats.totalRemaining,
-            dailyMessagesRemaining: simulatedStats.dailyRemaining,
-            messageStats: simulatedStats
-          });
-        }
-        
-        if (wouldExceedDaily) {
-          return res.json({
-            success: true,
-            allowed: false,
-            reason: 'Daily message limit exceeded',
-            messageCount,
-            messagesRemaining: simulatedStats.totalRemaining,
-            dailyMessagesRemaining: simulatedStats.dailyRemaining,
-            messageStats: simulatedStats
-          });
-        }
-        
-        return res.json({
-          success: true,
-          allowed: true,
-          reason: null,
-          messageCount,
-          messagesRemaining: simulatedStats.totalRemaining,
-          dailyMessagesRemaining: simulatedStats.dailyRemaining,
-          messageStats: simulatedStats
-        });
+        console.error('[MessageLimits] Error checking message limits:', error);
+        return res.status(500).json({ error: 'Database error' });
       }
     }
 
@@ -176,102 +130,162 @@ module.exports = async (req, res) => {
       const { messageCount = 1, campaignId, contactCount } = req.body;
       
       try {
-        // For now, return success without actually tracking
-        // This would need to be implemented in the admin dashboard backend
-        return res.json({
-          success: true,
-          message: `Would track ${messageCount} messages`,
-          messageStats: {
-            type: 'trial',
-            unlimited: false,
-            totalLimit: 100,
-            totalUsed: 0,
-            totalRemaining: 100,
-            dailyLimit: 50,
-            dailyUsed: 0,
-            dailyRemaining: 50
+        const device = await devices.findOne({ machineId });
+
+        if (!device) {
+          return res.status(404).json({ error: 'Device not found' });
+        }
+
+        // Only track for trial subscriptions
+        if (device.subscription && device.subscription.type === 'trial' && device.subscription.active) {
+          // Reset daily counter if needed
+          const now = new Date();
+          const lastReset = device.subscription.lastDailyReset ? new Date(device.subscription.lastDailyReset) : now;
+          let dailyUsed = device.subscription.dailyMessagesUsed || 0;
+          
+          if (now.toDateString() !== lastReset.toDateString()) {
+            dailyUsed = 0;
           }
-        });
+
+          // Update message usage
+          const newTotalUsed = (device.subscription.messagesUsed || 0) + messageCount;
+          const newDailyUsed = dailyUsed + messageCount;
+
+          await devices.updateOne(
+            { machineId },
+            {
+              $set: {
+                'subscription.messagesUsed': newTotalUsed,
+                'subscription.dailyMessagesUsed': newDailyUsed,
+                'subscription.lastDailyReset': now
+              },
+              $push: {
+                logs: {
+                  timestamp: now,
+                  type: 'message_usage',
+                  details: {
+                    messageCount,
+                    totalUsed: newTotalUsed,
+                    dailyUsed: newDailyUsed,
+                    totalLimit: device.subscription.messageLimit,
+                    dailyLimit: device.subscription.dailyMessageLimit,
+                    campaignId,
+                    contactCount
+                  }
+                }
+              }
+            }
+          );
+
+          // Get updated device data
+          const updatedDevice = await devices.findOne({ machineId });
+          const messageStats = calculateMessageStatsFromDevice(updatedDevice);
+
+          console.log(`[MessageLimits] Tracked ${messageCount} messages for ${machineId}. New stats:`, messageStats);
+
+          return res.json({
+            success: true,
+            message: `Tracked ${messageCount} messages`,
+            messageStats
+          });
+        } else {
+          // For permanent or inactive subscriptions, just return current stats
+          const messageStats = calculateMessageStatsFromDevice(device);
+          return res.json({
+            success: true,
+            message: 'No tracking needed for this subscription type',
+            messageStats
+          });
+        }
 
       } catch (error) {
-        console.error('Error tracking message usage:', error);
+        console.error('[MessageLimits] Error tracking message usage:', error);
         return res.status(500).json({ error: 'Failed to track message usage' });
       }
     }
     
-    // POST: Update message limits
+    // POST: Update message limits (admin function)
     if (req.method === 'POST' && (req.url.includes('/update-limits') || req.originalUrl.includes('/update-limits'))) {
-      const { machineId, totalMessageLimit, dailyMessageLimit } = req.body;
-      
-      if (!machineId) {
-        return res.status(400).json({ error: 'Machine ID is required' });
-      }
+      const { totalMessageLimit, dailyMessageLimit } = req.body;
       
       try {
-        // Call admin API to update the device's message limits
-        const adminApiUrl = process.env.ADMIN_API_URL || 'http://localhost:4000';
-        const updateResponse = await fetch(`${adminApiUrl}/api/admin/devices/${machineId}/update-limits`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer admin_internal_token'
-          },
-          body: JSON.stringify({
-            totalMessageLimit: parseInt(totalMessageLimit) || 0,
-            dailyMessageLimit: parseInt(dailyMessageLimit) || 0
-          })
-        });
+        const device = await devices.findOne({ machineId });
 
-        if (!updateResponse.ok) {
-          const errorData = await updateResponse.json();
-          return res.status(updateResponse.status).json({ 
-            error: 'Failed to update message limits', 
-            details: errorData.error || 'Unknown error' 
-          });
+        if (!device) {
+          return res.status(404).json({ error: 'Device not found' });
         }
 
-        const result = await updateResponse.json();
+        if (!device.subscription || device.subscription.type !== 'trial') {
+          return res.status(400).json({ error: 'Message limits can only be set for trial subscriptions' });
+        }
+
+        // Update message limits
+        await devices.updateOne(
+          { machineId },
+          {
+            $set: {
+              'subscription.messageLimit': parseInt(totalMessageLimit) || 0,
+              'subscription.dailyMessageLimit': parseInt(dailyMessageLimit) || 0
+            },
+            $push: {
+              logs: {
+                timestamp: new Date(),
+                type: 'message_limits_update',
+                details: {
+                  totalMessageLimit: parseInt(totalMessageLimit) || 0,
+                  dailyMessageLimit: parseInt(dailyMessageLimit) || 0
+                }
+              }
+            }
+          }
+        );
+
+        const updatedDevice = await devices.findOne({ machineId });
+
         return res.json({
           success: true,
           message: 'Message limits updated successfully',
-          device: result.device
+          device: updatedDevice
         });
 
       } catch (error) {
-        console.error('Error updating message limits:', error);
-        // For testing, simulate a successful update
-        return res.json({
-          success: true,
-          message: 'Message limits updated successfully (simulated)',
-          device: {
-            machineId,
-            subscription: {
-              type: 'trial',
-              messageLimit: parseInt(totalMessageLimit) || 0,
-              dailyMessageLimit: parseInt(dailyMessageLimit) || 0
-            }
-          }
-        });
+        console.error('[MessageLimits] Error updating message limits:', error);
+        return res.status(500).json({ error: 'Failed to update message limits' });
       }
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
 
   } catch (error) {
-    console.error('Message limits API error:', error);
+    console.error('[MessageLimits] API error:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
       details: error.message 
     });
+  } finally {
+    // Close MongoDB connection
+    try {
+      await client.close();
+    } catch (closeError) {
+      console.error('[MessageLimits] Error closing MongoDB connection:', closeError);
+    }
   }
 };
 
-// Helper functions
-function calculateMessageStats(device) {
-  if (!device.subscription || device.subscription.type !== 'trial') {
+// Helper functions for MongoDB device data
+function calculateMessageStatsFromDevice(device) {
+  console.log('[MessageLimits] Calculating stats for device:', {
+    hasSubscription: !!device.subscription,
+    subscriptionType: device.subscription?.type,
+    subscriptionActive: device.subscription?.active
+  });
+
+  if (!device.subscription || device.subscription.type !== 'trial' || !device.subscription.active) {
     return {
       type: device.subscription?.type || 'none',
-      unlimited: true
+      unlimited: true,
+      subscriptionActive: device.subscription?.active || false,
+      subscriptionType: device.subscription?.type || 'none'
     };
   }
 
@@ -279,44 +293,66 @@ function calculateMessageStats(device) {
   
   // Reset daily counter if needed
   const now = new Date();
-  const lastReset = new Date(subscription.lastDailyReset || now);
+  const lastReset = subscription.lastDailyReset ? new Date(subscription.lastDailyReset) : now;
   let dailyUsed = subscription.dailyMessagesUsed || 0;
   
   if (now.toDateString() !== lastReset.toDateString()) {
     dailyUsed = 0;
   }
 
-  return {
+  const stats = {
     type: 'trial',
     unlimited: false,
+    subscriptionActive: true,
+    subscriptionType: 'trial',
     totalLimit: subscription.messageLimit || 0,
     totalUsed: subscription.messagesUsed || 0,
     totalRemaining: Math.max(0, (subscription.messageLimit || 0) - (subscription.messagesUsed || 0)),
     dailyLimit: subscription.dailyMessageLimit || 0,
     dailyUsed: dailyUsed,
     dailyRemaining: Math.max(0, (subscription.dailyMessageLimit || 0) - dailyUsed),
-    lastDailyReset: subscription.lastDailyReset
+    lastDailyReset: subscription.lastDailyReset,
+    // Additional subscription info
+    subscriptionStart: subscription.start,
+    subscriptionDays: subscription.days,
+    subscriptionKey: subscription.key
   };
+
+  console.log('[MessageLimits] Calculated trial stats:', stats);
+  return stats;
 }
 
-function checkCanSendMessages(device, messageCount = 1) {
+function checkCanSendMessagesFromDevice(device, messageCount = 1) {
   if (!device.subscription || !device.subscription.active) {
     return { allowed: false, reason: 'No active subscription' };
   }
   
+  if (device.isBanned) {
+    return { allowed: false, reason: 'Device is banned' };
+  }
+  
   if (device.subscription.type === 'permanent') {
-    return { allowed: true };
+    return { allowed: true, messagesRemaining: -1, dailyMessagesRemaining: -1 };
   }
   
   if (device.subscription.type !== 'trial') {
     return { allowed: false, reason: 'Invalid subscription type' };
   }
 
+  // Check if trial has expired
+  if (device.subscription.start && device.subscription.days) {
+    const now = new Date();
+    const expiryDate = new Date(device.subscription.start.getTime() + (device.subscription.days * 24 * 60 * 60 * 1000));
+    if (now > expiryDate) {
+      return { allowed: false, reason: 'Trial subscription has expired' };
+    }
+  }
+
   const subscription = device.subscription;
   
   // Reset daily counter if needed
   const now = new Date();
-  const lastReset = new Date(subscription.lastDailyReset || now);
+  const lastReset = subscription.lastDailyReset ? new Date(subscription.lastDailyReset) : now;
   let dailyUsed = subscription.dailyMessagesUsed || 0;
   
   if (now.toDateString() !== lastReset.toDateString()) {
@@ -329,7 +365,8 @@ function checkCanSendMessages(device, messageCount = 1) {
     return { 
       allowed: false, 
       reason: 'Total message limit exceeded',
-      messagesRemaining: Math.max(0, subscription.messageLimit - (subscription.messagesUsed || 0))
+      messagesRemaining: Math.max(0, subscription.messageLimit - (subscription.messagesUsed || 0)),
+      dailyMessagesRemaining: Math.max(0, (subscription.dailyMessageLimit || 0) - dailyUsed)
     };
   }
 
@@ -339,6 +376,8 @@ function checkCanSendMessages(device, messageCount = 1) {
     return { 
       allowed: false, 
       reason: 'Daily message limit exceeded',
+      messagesRemaining: subscription.messageLimit > 0 ? 
+        Math.max(0, subscription.messageLimit - (subscription.messagesUsed || 0)) : -1,
       dailyMessagesRemaining: Math.max(0, subscription.dailyMessageLimit - dailyUsed)
     };
   }
