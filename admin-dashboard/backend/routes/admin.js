@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const Admin = require('../models/Admin');
@@ -31,8 +32,8 @@ router.post('/login', async (req, res) => {
   const valid = await admin.comparePassword(password);
   if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
   // Issue JWT (for demo, secret is hardcoded)
-  const token = jwt.sign({ id: admin._id, username: admin.username }, 'beesoft_secret', { expiresIn: '1d' });
+  const token = jwt.sign({ id: admin._id, username: admin.username }, process.env.JWT_SECRET || 'beesoft_secret', { expiresIn: '1d' });
   res.json({ token, username: admin.username });
 });
 
-module.exports = { router, createSuperadmin };
+module.exports = router;

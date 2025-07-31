@@ -22,12 +22,39 @@ fs.readdirSync(apiDir).forEach(file => {
     const handlerModule = require(path.join(apiDir, file));
     // Support both default export (ESM) and module.exports (CJS)
     const handler = handlerModule.default || handlerModule;
-    
-    // Handle both exact routes and sub-routes
-    app.all(routePath, (req, res) => handler(req, res));
-    app.all(`${routePath}/*`, (req, res) => handler(req, res));
+
+    // If handler is an Express router, use app.use
+    if (typeof handler === 'function' && handler.name === 'router') {
+      app.use(routePath, handler);
+    } else if (typeof handler === 'function') {
+      // If handler is a plain function (req, res)
+      app.all([routePath, `${routePath}/*`], (req, res) => handler(req, res));
+    } else {
+      console.warn(`API handler for ${routePath} is not a function or router.`);
+    }
   }
 });
+
+
+// Mount admin routers from admin-dashboard/backend/routes under /api/admin
+const adminRoutesDir = path.join(__dirname, 'admin-dashboard', 'backend', 'routes');
+if (fs.existsSync(adminRoutesDir)) {
+  fs.readdirSync(adminRoutesDir).forEach(file => {
+    if (file.endsWith('.js')) {
+      const routeName = file.replace('.js', '');
+      const routePath = `/api/admin/${routeName}`;
+      const handlerModule = require(path.join(adminRoutesDir, file));
+      const handler = handlerModule.default || handlerModule;
+      if (typeof handler === 'function' && handler.name === 'router') {
+        app.use(routePath, handler);
+      } else if (typeof handler === 'function') {
+        app.all([routePath, `${routePath}/*`], (req, res) => handler(req, res));
+      } else {
+        console.warn(`Admin API handler for ${routePath} is not a function or router.`);
+      }
+    }
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`Local API server running at http://localhost:${PORT}`);

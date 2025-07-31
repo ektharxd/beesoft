@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Beesoft Admin Dashboard</title>
+  <link href="https://fonts.cdnfonts.com/css/ntype82" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
     :root {
       --vercel-bg: #0a0a0a;
       --vercel-surface: #18181b;
@@ -20,13 +20,15 @@
       --vercel-border: #232323;
       --vercel-radius: 16px;
       --vercel-shadow: 0 2px 16px 0 #000a;
-      --vercel-font: 'JetBrains Mono', 'Fira Mono', 'Consolas', monospace;
+      --vercel-font: 'ntype82', 'Inter', sans-serif;
     }
+    
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+    
     html, body {
       height: 100%;
       font-family: var(--vercel-font);
@@ -34,36 +36,571 @@
       color: var(--vercel-primary);
       letter-spacing: 0.01em;
     }
-    /* ...rest of CSS unchanged... */
-  /* ...rest of CSS unchanged... */
+    
+    .dashboard-container {
+      display: flex;
+      height: 100vh;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: var(--vercel-surface);
+      border-right: 1px solid var(--vercel-border);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-header {
+      padding: 2rem 1.5rem;
+      border-bottom: 1px solid var(--vercel-border);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    
+    .logo i {
+      color: var(--vercel-accent);
+      font-size: 1.5rem;
+    }
+    
+    .sidebar-nav {
+      flex: 1;
+      padding: 1rem 0;
+    }
+    
     .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
       padding: 0.75rem 1.5rem;
       color: var(--vercel-secondary);
       text-decoration: none;
       transition: all 0.2s;
       cursor: pointer;
     }
+    
     .nav-item:hover,
     .nav-item.active {
       background: var(--vercel-card);
       color: var(--vercel-primary);
     }
+    
     .nav-item.active {
       border-right: 2px solid var(--vercel-accent);
     }
+    
     .sidebar-footer {
       padding: 1.5rem;
       border-top: 1px solid var(--vercel-border);
     }
-  </style>
-
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--vercel-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    
+    .logout-btn {
+      width: 100%;
+      padding: 0.5rem;
+      background: var(--vercel-error);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: var(--vercel-font);
+      transition: background 0.2s;
+    }
+    
+    .logout-btn:hover {
+      background: #dc2626;
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .main-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--vercel-border);
+      background: var(--vercel-surface);
+    }
+    
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .page-subtitle {
+      color: var(--vercel-secondary);
+    }
+    
+    .main-body {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: var(--vercel-card);
+      border-radius: var(--vercel-radius);
+      padding: 1.5rem;
+      border: 1px solid var(--vercel-border);
+    }
+    
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    
+    .stat-title {
+      color: var(--vercel-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-change {
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .stat-change.positive {
+      color: var(--vercel-success);
+    }
+    
+    .stat-change.negative {
+      color: var(--vercel-error);
+    }
+    
+    /* Content Cards */
+    .content-card {
+      background: var(--vercel-card);
+      border-radius: var(--vercel-radius);
+      border: 1px solid var(--vercel-border);
+      margin-bottom: 2rem;
+    }
+    
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--vercel-border);
+      display: flex;
+      align-items: center;
+      justify-content: between;
+    }
+    
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      flex: 1;
+    }
+    
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--vercel-font);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-primary {
+      background: var(--vercel-accent);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #4f46e5;
+    }
+    
+    .btn-success {
+      background: var(--vercel-success);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #16a34a;
+    }
+    
+    .btn-warning {
+      background: var(--vercel-warning);
+      color: #000;
+    }
+    
+    .btn-warning:hover {
+      background: #eab308;
+    }
+    
+    .btn-danger {
+      background: var(--vercel-error);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--vercel-primary);
+      border: 1px solid var(--vercel-border);
+    }
+    
+    .btn-outline:hover {
+      background: var(--vercel-surface);
+    }
+    
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--vercel-border);
+    }
+    
+    .table th {
+      background: var(--vercel-surface);
+      font-weight: 600;
+      color: var(--vercel-secondary);
+      font-size: 0.875rem;
+    }
+    
+    .table tr:hover {
+      background: var(--vercel-surface);
+    }
+    
+    /* Status badges */
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-online {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--vercel-success);
+    }
+    
+    .status-offline {
+      background: rgba(156, 163, 175, 0.1);
+      color: var(--vercel-secondary);
+    }
+    
+    .status-banned {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--vercel-error);
+    }
+    
+    .status-active {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--vercel-success);
+    }
+    
+    .status-expired {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--vercel-error);
+    }
+    
+    .status-expiring {
+      background: rgba(250, 204, 21, 0.1);
+      color: var(--vercel-warning);
+    }
+    
+    .status-permanent {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--vercel-accent);
+    }
+    
+    /* Forms */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--vercel-secondary);
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--vercel-border);
+      border-radius: 8px;
+      background: var(--vercel-surface);
+      color: var(--vercel-primary);
+      font-family: var(--vercel-font);
+    }
+    
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--vercel-accent);
+    }
+    
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .modal {
+      background: var(--vercel-card);
+      border-radius: var(--vercel-radius);
+      border: 1px solid var(--vercel-border);
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--vercel-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .modal-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--vercel-secondary);
+      cursor: pointer;
+      font-size: 1.25rem;
+    }
+    
+    .modal-body {
+      padding: 1.5rem;
+    }
+    
+    .modal-footer {
+      padding: 1.5rem;
+      border-top: 1px solid var(--vercel-border);
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+    
+    /* Loading */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--vercel-border);
+      border-radius: 50%;
+      border-top-color: var(--vercel-accent);
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Utilities */
+    .hidden {
+      display: none !important;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    /* Message Analytics Styles */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .analytics-card {
+      background-color: var(--vercel-surface);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .analytics-card h4 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: var(--vercel-primary);
+      font-size: 1rem;
+    }
+    
+    .progress-container {
+      margin-bottom: 0.5rem;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background-color: var(--vercel-border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background-color: var(--vercel-accent);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      color: var(--vercel-secondary);
+    }
+    
+    .text-right {
+      text-align: right;
+    }
+    
+    .mb-4 {
+      margin-bottom: 1rem;
+    }
+    
+    .mt-4 {
+      margin-top: 1rem;
+    }
+    
+    .flex {
+      display: flex;
+    }
+    
+    .items-center {
+      align-items: center;
+    }
+    
+    .justify-between {
+      justify-content: space-between;
+    }
+    
+    .gap-2 {
+      gap: 0.5rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: -100%;
+        z-index: 999;
+        transition: left 0.3s;
+      }
+      
+      .sidebar.open {
+        left: 0;
+      }
+      
+      .main-content {
+        width: 100%;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
-
-
-  <div id="dashboardRoot">
-    <div class="dashboard-container">
+  <div class="dashboard-container">
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
       <div class="sidebar-header">
@@ -118,541 +655,42 @@
         <!-- Dashboard content will be loaded here -->
       </div>
     </div>
-
-    <!-- Modal -->
-    <div class="modal-overlay hidden" id="modalOverlay">
-      <div class="modal">
-        <div class="modal-header">
-          <h3 class="modal-title" id="modalTitle">Modal Title</h3>
-          <button class="modal-close" onclick="closeModal()">&times;</button>
-        </div>
-        <div class="modal-body" id="modalBody">
-          Modal content
-        </div>
-        <div class="modal-footer" id="modalFooter">
-          <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
-          <button class="btn btn-primary" id="modalConfirm">Confirm</button>
-        </div>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Modal Title</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        Modal content
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="modalConfirm">Confirm</button>
       </div>
     </div>
   </div>
-  <!-- Fallback error prompt if dashboard fails to load -->
-  <div id="dashboardError" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#181a20;color:#f7b731;z-index:9999;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:1.3rem;text-align:center;">
-    <div>
-      <i class="fas fa-exclamation-triangle" style="font-size:2.5rem;"></i><br>
-      UI failed to load.<br>
-      Please contact support or check the browser console.
-    </div>
-  </div>
 
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
-    html, body {
-      font-family: 'JetBrains Mono', 'Fira Mono', 'Consolas', monospace;
-      font-size: 15px;
-      background: #181a20;
-      color: #e5e7ef;
-      margin: 0;
-      padding: 0;
-      letter-spacing: -0.01em;
-      min-height: 100vh;
-    }
-    .dashboard-container {
-      display: flex;
-      min-height: 100vh;
-    }
-    .sidebar {
-      width: 250px;
-      background: linear-gradient(135deg, #23243a 60%, #23243a 100%);
-      border-right: 1.5px solid #23243a;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 0 0 1.5rem 0;
-      box-shadow: 2px 0 16px 0 #0000000a;
-    }
-    .sidebar-header {
-      padding: 2.2rem 1.5rem 1.2rem 1.5rem;
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: 0.01em;
-      display: flex;
-      align-items: center;
-      gap: 0.7rem;
-    }
-    .logo i {
-      color: #f7b731;
-      font-size: 1.5rem;
-      margin-right: 0.5rem;
-    }
-    .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-      margin-top: 1.5rem;
-    }
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      padding: 0.85rem 2rem;
-      color: #bfc2d4;
-      font-size: 1.05rem;
-      border-left: 3.5px solid transparent;
-      border-radius: 0 18px 18px 0;
-      text-decoration: none;
-      transition: background 0.13s, color 0.13s, border 0.13s;
-      font-weight: 600;
-    }
-    .nav-item.active, .nav-item:hover {
-      background: linear-gradient(90deg, #23243a 80%, #23243a 100%);
-      color: #fff;
-      border-left: 3.5px solid #f7b731;
-    }
-    .sidebar-footer {
-      padding: 1.2rem 1.5rem 0 1.5rem;
-      border-top: 1px solid #23243a;
-      display: flex;
-      flex-direction: column;
-      gap: 1.2rem;
-    }
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-    }
-    .user-avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #f7b731 60%, #f76d1a 100%);
-      color: #23243a;
-      font-weight: 700;
-      font-size: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 8px #00000018;
-    }
-    .logout-btn {
-      background: #23243a;
-      color: #f7b731;
-      border: none;
-      border-radius: 8px;
-      padding: 0.5em 1.2em;
-      font-size: 1rem;
-      font-family: inherit;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.13s, color 0.13s;
-      margin-top: 1.2rem;
-    }
-    .logout-btn:hover {
-      background: #f7b731;
-      color: #23243a;
-    }
-    .main-content {
-      flex: 1;
-      background: #181a20;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    .main-header {
-      padding: 2.2rem 2.5rem 0.5rem 2.5rem;
-      border-bottom: 1.5px solid #23243a;
-      background: #181a20;
-    }
-    .page-title {
-      font-size: 2.1rem;
-      font-weight: 700;
-      color: #f7b731;
-      margin: 0 0 0.2rem 0;
-      letter-spacing: 0.01em;
-    }
-    .page-subtitle {
-      font-size: 1.1rem;
-      color: #bfc2d4;
-      margin: 0 0 0.5rem 0;
-    }
-    .main-body {
-      padding: 2.2rem 2.5rem 2.5rem 2.5rem;
-      flex: 1;
-      background: #181a20;
-    }
-    .content-card, .stats-grid, .table-container, .modal {
-      background: #22232e;
-      border-radius: 18px;
-      box-shadow: 0 2px 16px rgba(30,34,90,0.13), 0 1.5px 4px rgba(30,34,90,0.07);
-      margin-bottom: 2.2rem;
-      border: 1.5px solid #23243a;
-    }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.5rem;
-      padding: 2rem 1.5rem 1.5rem 1.5rem;
-      background: #181a20;
-      border-radius: 18px;
-      margin-bottom: 2rem;
-    }
-    .stat-card {
-      background: #23243a;
-      border-radius: 14px;
-      box-shadow: 0 1px 8px rgba(30,34,90,0.13);
-      padding: 1.2rem 1rem 1rem 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      min-width: 0;
-      border: 1.5px solid #23243a;
-    }
-    .stat-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #f7b731;
-    }
-    .stat-title {
-      font-size: 0.98rem;
-      font-weight: 600;
-      color: #f7b731;
-      letter-spacing: 0.01em;
-    }
-    .stat-value {
-      font-size: 2.1rem;
-      font-weight: 700;
-      color: #fff;
-      margin-top: 0.2rem;
-      letter-spacing: 0.01em;
-    }
-    .stat-change {
-      font-size: 0.92rem;
-      color: #bfc2d4;
-    }
-    .stat-icon {
-      width: 38px;
-      height: 38px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      font-size: 1.3rem;
-      background: linear-gradient(135deg, #f7b731 60%, #f76d1a 100%);
-      color: #23243a;
-      box-shadow: 0 2px 8px #00000018;
-    }
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.2rem 1.5rem 0.5rem 1.5rem;
-      border-bottom: 1px solid #23243a;
-    }
-    .card-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #fff;
-    }
-    .card-actions {
-      display: flex;
-      gap: 0.5rem;
-    }
-    .card-body {
-      padding: 1.2rem 1.5rem 1.5rem 1.5rem;
-    }
-    .table-container {
-      overflow-x: auto;
-      margin-top: 1rem;
-      background: #23243a;
-      border-radius: 12px;
-      box-shadow: 0 1px 8px rgba(30,34,90,0.13);
-      border: 1.5px solid #23243a;
-    }
-    table.table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      font-size: 0.97rem;
-      background: #23243a;
-      color: #e5e7ef;
-    }
-    table.table th, table.table td {
-      padding: 0.65rem 0.9rem;
-      text-align: left;
-      border-bottom: 1px solid #23243a;
-    }
-    table.table th {
-      font-weight: 700;
-      color: #f7b731;
-      background: #181a20;
-      font-size: 0.98rem;
-      letter-spacing: 0.01em;
-    }
-    table.table tr:last-child td {
-      border-bottom: none;
-    }
-    .status-badge {
-      display: inline-block;
-      padding: 0.18em 0.7em;
-      border-radius: 999px;
-      font-size: 0.88em;
-      font-weight: 700;
-      margin-bottom: 2px;
-      background: #23243a;
-      color: #f7b731;
-      border: 1.5px solid #f7b731;
-      box-shadow: 0 1px 4px #00000018;
-    }
-    .status-online { background: #1a2e1a; color: #22c55e; border-color: #22c55e; }
-    .status-offline { background: #23243a; color: #bfc2d4; border-color: #bfc2d4; }
-    .status-banned { background: #2e1a1a; color: #ef4444; border-color: #ef4444; }
-    .status-active { background: #1a2e1a; color: #22c55e; border-color: #22c55e; }
-    .status-permanent { background: #1a1a2e; color: #6366f1; border-color: #6366f1; }
-    .status-expired { background: #2e261a; color: #f59e42; border-color: #f59e42; }
-    .status-warning { background: #2e261a; color: #f59e42; border-color: #f59e42; }
-    .btn {
-      font-family: inherit;
-      font-size: 0.97rem;
-      font-weight: 700;
-      border: none;
-      border-radius: 999px;
-      padding: 0.45em 1.3em;
-      margin: 0;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s, box-shadow 0.15s;
-      background: #23243a;
-      color: #f7b731;
-      box-shadow: 0 1px 4px #00000018;
-      border: 1.5px solid #23243a;
-    }
-    .btn-primary { background: linear-gradient(90deg, #f7b731 60%, #f76d1a 100%); color: #23243a; border-color: #f7b731; }
-    .btn-success { background: linear-gradient(90deg, #22c55e 60%, #16a34a 100%); color: #fff; border-color: #22c55e; }
-    .btn-warning { background: linear-gradient(90deg, #f59e42 60%, #f7b731 100%); color: #23243a; border-color: #f59e42; }
-    .btn-danger { background: linear-gradient(90deg, #ef4444 60%, #b91c1c 100%); color: #fff; border-color: #ef4444; }
-    .btn-outline {
-      background: #23243a;
-      color: #f7b731;
-      border: 1.5px solid #f7b731;
-    }
-    .btn:active, .btn:focus { outline: none; box-shadow: 0 0 0 2px #f7b73133; }
-    .btn:hover { filter: brightness(1.1); box-shadow: 0 2px 8px #f7b73133; }
-    .form-input, .form-select {
-      font-family: inherit;
-      font-size: 0.97rem;
-      border: 1.5px solid #23243a;
-      border-radius: 999px;
-      padding: 0.45em 1.1em;
-      background: #181a20;
-      color: #e5e7ef;
-      margin-bottom: 0.7em;
-      width: 100%;
-      box-sizing: border-box;
-      transition: border 0.15s, background 0.15s;
-    }
-    .form-input:focus, .form-select:focus {
-      border-color: #f7b731;
-      outline: none;
-      background: #23243a;
-    }
-    .form-label {
-      font-size: 0.97rem;
-      font-weight: 700;
-      color: #f7b731;
-      margin-bottom: 0.2em;
-      display: block;
-      letter-spacing: 0.01em;
-    }
-    .modal {
-      background: #23243a;
-      border-radius: 18px;
-      box-shadow: 0 4px 32px rgba(30,34,90,0.23);
-      padding: 2rem 2.2rem 1.5rem 2.2rem;
-      max-width: 540px;
-      margin: 4vh auto;
-      position: relative;
-      font-size: 1rem;
-      border: 1.5px solid #f7b731;
-    }
-    #modalOverlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(30,34,90,0.33);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #modalOverlay.hidden { display: none; }
-    #modalTitle {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 0.7rem;
-      color: #f7b731;
-    }
-    #modalBody {
-      margin-bottom: 1.2rem;
-      color: #e5e7ef;
-      font-size: 0.98rem;
-    }
-    #modalFooter {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.7rem;
-    }
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.2rem;
-    }
-    .modal-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #f7b731;
-    }
-    .modal-close {
-      background: none;
-      border: none;
-      color: #f7b731;
-      font-size: 1.5rem;
-      cursor: pointer;
-      transition: color 0.13s;
-    }
-    .modal-close:hover { color: #fff; }
-    .loading {
-      width: 36px; height: 36px;
-      border: 4px solid #23243a;
-      border-top: 4px solid #f7b731;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 2rem auto;
-      display: block;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .flex { display: flex; }
-    .gap-2 { gap: 0.5rem; }
-    .gap-4 { gap: 1rem; }
-    .items-center { align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .mb-4 { margin-bottom: 1.2rem; }
-    .mt-4 { margin-top: 1.2rem; }
-    .text-center { text-align: center; }
-    .hidden { display: none !important; }
-    .analytics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.2rem;
-    }
-    .analytics-card {
-      background: #23243a;
-      border-radius: 12px;
-      padding: 1rem;
-      box-shadow: 0 1px 8px rgba(30,34,90,0.13);
-      border: 1.5px solid #23243a;
-      color: #e5e7ef;
-    }
-    /* Instagram Threads-like chat/thread elements */
-    .thread-card {
-      background: #23243a;
-      border-radius: 18px;
-      box-shadow: 0 1px 8px rgba(30,34,90,0.13);
-      padding: 1.1rem 1.2rem;
-      margin-bottom: 1.2rem;
-      border: 1.5px solid #23243a;
-      color: #e5e7ef;
-      font-size: 1.01rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .thread-author {
-      font-weight: 700;
-      color: #f7b731;
-      font-size: 1.05rem;
-    }
-    .thread-meta {
-      font-size: 0.85rem;
-      color: #bfc2d4;
-    }
-    /* Progress bar for analytics */
-    .progress-container {
-      margin-top: 0.7rem;
-      margin-bottom: 0.3rem;
-    }
-    .progress-bar {
-      width: 100%;
-      height: 10px;
-      background: #181a20;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-bottom: 0.3rem;
-      border: 1.5px solid #23243a;
-    }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #f7b731 60%, #f76d1a 100%);
-      border-radius: 999px;
-      transition: width 0.3s;
-    }
-    .progress-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.92rem;
-      color: #bfc2d4;
-    }
-    /* Responsive tweaks */
-    @media (max-width: 900px) {
-      .main-header, .main-body { padding: 1.2rem !important; }
-      .sidebar { width: 70px; }
-      .sidebar-header span, .sidebar-nav span, .sidebar-footer { display: none; }
-      .sidebar-header, .sidebar-nav, .sidebar-footer { padding: 0.7rem !important; }
-    }
-    @media (max-width: 700px) {
-      .stats-grid, .analytics-grid { grid-template-columns: 1fr; }
-      .card-header, .card-body { padding: 1rem !important; }
-      .modal { padding: 1.2rem !important; }
-      .main-header, .main-body { padding: 0.5rem !important; }
-    }
-</style>
-<script>
-    // Show fallback error if dashboard fails to load
-    window.addEventListener('DOMContentLoaded', function() {
-      setTimeout(function() {
-        if (!document.querySelector('.dashboard-container')) {
-          document.getElementById('dashboardRoot').style.display = 'none';
-          document.getElementById('dashboardError').style.display = 'flex';
-        }
-      }, 800);
-    });
+  <script>
     // Global variables
     let currentPage = 'dashboard';
-
-
-const API_BASE = 'http://localhost:3001/api/admin';
-let authToken = localStorage.getItem('adminToken');
-let currentUser = localStorage.getItem('adminUsername');
-
-// Initialize dashboard
-document.addEventListener('DOMContentLoaded', function() {
-  authToken = localStorage.getItem('adminToken');
-  currentUser = localStorage.getItem('adminUsername');
-  console.log('Dashboard loading - Token present:', !!authToken);
-  console.log('Dashboard loading - User:', currentUser);
-  if (!authToken) {
-    console.log('No token found, redirecting to login');
-    window.location.href = '/admin-login-secure.html';
-    return;
-  }
-  initializeDashboard();
-  loadPage('dashboard');
-});
+    let authToken = localStorage.getItem('adminToken');
+    let currentUser = localStorage.getItem('adminUsername');
+    const API_BASE = 'http://localhost:4000/api/admin';
+    
+    // Check authentication
+    if (!authToken) {
+      window.location.href = '/admin-login.html';
+    }
+    
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeDashboard();
+      loadPage('dashboard');
+    });
     
     function initializeDashboard() {
       // Set user info
@@ -714,40 +752,12 @@ document.addEventListener('DOMContentLoaded', function() {
       
       try {
         // Fetch dashboard stats
-        const deviceStats = await apiRequest('/devices/stats');
-        const licenseStats = await apiRequest('/licenses/stats');
+        const [deviceStats, licenseStats, messageStats] = await Promise.all([
+          apiRequest('/devices/stats'),
+          apiRequest('/licenses/stats'),
+          fetch('http://localhost:3001/api/message-limits').then(res => res.json()).catch(() => ({}))
+        ]);
         
-        // Try to get a machineId from the most recently seen device
-        let machineId = null;
-        try {
-          const devicesResp = await apiRequest('/devices?limit=1&sortBy=lastSeen&sortOrder=desc');
-          if (devicesResp && devicesResp.devices && devicesResp.devices.length > 0) {
-            machineId = devicesResp.devices[0].machineId;
-          }
-        } catch (e) {
-          // fallback: no device found
-        }
-        // If no device, fallback to a dummy id (will return empty stats)
-        if (!machineId) machineId = 'default';
-        let messageStats = {};
-        try {
-        // Use the correct endpoint (no /admin prefix), and ensure correct backend port (3001)
-        const url = `http://localhost:3001/api/message-limits?machineId=${encodeURIComponent(machineId)}`;
-          const config = {
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${authToken}`
-            }
-          };
-          const response = await fetch(url, config);
-          if (response.ok) {
-            messageStats = await response.json();
-          } else {
-            messageStats = {};
-          }
-        } catch (e) {
-          messageStats = {};
-        }
         mainBody.innerHTML = `
           <div class="stats-grid">
             <div class="stat-card">
@@ -1020,8 +1030,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     async function apiRequest(endpoint, options = {}) {
       const url = `${API_BASE}${endpoint}`;
-      console.log('Making API request to:', url);
-      console.log('Auth token:', authToken ? 'Present' : 'Missing');
       const config = {
         headers: {
           'Content-Type': 'application/json',
@@ -1031,10 +1039,8 @@ document.addEventListener('DOMContentLoaded', function() {
       };
       
       const response = await fetch(url, config);
-      console.log('API response status:', response.status);
       
       if (response.status === 401) {
-        console.log('401 Unauthorized - logging out');
         logout();
         return;
       }
@@ -1049,7 +1055,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function logout() {
       localStorage.removeItem('adminToken');
       localStorage.removeItem('adminUsername');
-      window.location.href = '/admin-login-secure.html';
+      window.location.href = '/admin-login.html';
     }
     
     function showModal(title, body, footer) {
@@ -1577,7 +1583,6 @@ document.addEventListener('DOMContentLoaded', function() {
         showModal('Edit Device', `
           <div class="form-group">
             <label class="form-label">Username:</label>
-            <input type="text" class="form-input" id="editName" value="${device.name || ''}" placeholder="Full name">
             <input type="text" class="form-input" id="editUsername" value="${device.username || ''}" placeholder="Username">
           </div>
           <div class="form-group">
@@ -1629,39 +1634,23 @@ document.addEventListener('DOMContentLoaded', function() {
       try {
         const device = await apiRequest(`/devices/${machineId}`);
         
-        let html = '<div style="max-height: 400px; overflow-y: auto;">';
-        html += '<h4>Device Logs</h4>';
+        let logsHtml = '<div style="max-height: 400px; overflow-y: auto;">';
+        
         if (device.logs && device.logs.length > 0) {
-          html += device.logs.map(log => `
-            <div style="border-bottom: 1px solid var(--vercel-border); padding: 0.5rem 0;">
+          logsHtml += device.logs.map(log => `
+            <div style="border-bottom: 1px solid var(--vercel-border); padding: 1rem 0;">
               <div style="font-weight: 600; color: var(--vercel-primary);">${log.type}</div>
-              <div style="font-size: 0.85rem; color: var(--vercel-secondary);">${new Date(log.timestamp).toLocaleString()}</div>
-              <div style="font-size: 0.85rem; color: var(--vercel-secondary);">
-                IP: ${log.ip || ''} | Hostname: ${log.hostname || ''} | Platform: ${log.platform || ''} | OS Version: ${log.osVersion || ''} | OS Build: ${log.osBuild || ''}<br>
-                User Agent: <span style="word-break:break-all;">${log.userAgent || ''}</span>
+              <div style="font-size: 0.875rem; color: var(--vercel-secondary); margin: 0.5rem 0;">
+                ${new Date(log.timestamp).toLocaleString()}
+                ${log.activatedBy ? ` • by ${log.activatedBy}` : ''}
               </div>
-              ${log.details ? `<div style="font-size: 0.85rem;">${JSON.stringify(log.details, null, 2)}</div>` : ''}
+              ${log.details ? `<div style="font-size: 0.875rem;">${JSON.stringify(log.details, null, 2)}</div>` : ''}
             </div>
           `).join('');
         } else {
-          html += '<div class="text-center">No logs found for this device</div>';
+          logsHtml += '<div class="text-center">No logs found for this device</div>';
         }
-        html += '<h4 style="margin-top:1rem;">Heartbeats</h4>';
-        if (heartbeatsData.heartbeats && heartbeatsData.heartbeats.length > 0) {
-          html += heartbeatsData.heartbeats.map(hb => `
-            <div style="border-bottom: 1px solid var(--vercel-border); padding: 0.5rem 0;">
-              <div style="font-size: 0.85rem; color: var(--vercel-secondary);">${new Date(hb.timestamp).toLocaleString()}</div>
-              <div style="font-size: 0.85rem; color: var(--vercel-secondary);">
-                IP: ${hb.ip || ''} | Hostname: ${hb.hostname || ''} | Platform: ${hb.platform || ''} | OS Version: ${hb.osVersion || ''} | OS Build: ${hb.osBuild || ''}<br>
-                User Agent: <span style="word-break:break-all;">${hb.userAgent || ''}</span>
-              </div>
-            </div>
-          `).join('');
-        } else {
-          html += '<div class="text-center">No heartbeats found for this device</div>';
-        }
-        html += '</div>';
-        showModal('Device Logs & Heartbeats', html, '<button class="btn btn-outline" onclick="closeModal()">Close</button>');
+        
         logsHtml += '</div>';
         
         showModal('Device Logs', logsHtml, '<button class="btn btn-outline" onclick="closeModal()">Close</button>');
@@ -1681,7 +1670,6 @@ document.addEventListener('DOMContentLoaded', function() {
           ['Machine ID', 'Username', 'Name', 'Email', 'Mobile', 'Platform', 'Status', 'License', 'Last Seen'].join(','),
           ...devices.map(device => [
             device.machineId,
-            device.name || '',
             device.username || '',
             device.name || '',
             device.email || '',
@@ -1865,7 +1853,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div style="font-weight: 600;">${license.assignedTo}</div>
                 ${license.deviceInfo ? `
                   <div style="font-size: 0.75rem; color: var(--vercel-secondary);">
-                    ${license.deviceInfo.name || license.deviceInfo.username || license.deviceInfo.email || 'Unknown user'}
+                    ${license.deviceInfo.username || license.deviceInfo.email || 'Unknown user'}
                   </div>
                 ` : ''}
               ` : '<span style="color: var(--vercel-secondary);">Not assigned</span>'}
@@ -2253,10 +2241,6 @@ document.addEventListener('DOMContentLoaded', function() {
             <div style="border-bottom: 1px solid var(--vercel-border); padding: 0.5rem 0;">
               <div style="font-weight: 600;">${log.type}</div>
               <div style="font-size: 0.85rem; color: var(--vercel-secondary);">${new Date(log.timestamp).toLocaleString()}</div>
-              <div style="font-size: 0.85rem; color: var(--vercel-secondary);">
-                IP: ${log.ip || ''} | Hostname: ${log.hostname || ''} | Platform: ${log.platform || ''} | OS Version: ${log.osVersion || ''} | OS Build: ${log.osBuild || ''}<br>
-                User Agent: <span style="word-break:break-all;">${log.userAgent || ''}</span>
-              </div>
               ${log.details ? `<div style="font-size: 0.85rem;">${JSON.stringify(log.details, null, 2)}</div>` : ''}
             </div>
           `).join('');
@@ -2269,10 +2253,7 @@ document.addEventListener('DOMContentLoaded', function() {
           html += heartbeatsData.heartbeats.map(hb => `
             <div style="border-bottom: 1px solid var(--vercel-border); padding: 0.5rem 0;">
               <div style="font-size: 0.85rem; color: var(--vercel-secondary);">${new Date(hb.timestamp).toLocaleString()}</div>
-              <div style="font-size: 0.85rem; color: var(--vercel-secondary);">
-                IP: ${hb.ip || ''} | Hostname: ${hb.hostname || ''} | Platform: ${hb.platform || ''} | OS Version: ${hb.osVersion || ''} | OS Build: ${hb.osBuild || ''}<br>
-                User Agent: <span style="word-break:break-all;">${hb.userAgent || ''}</span>
-              </div>
+              <div style="font-size: 0.85rem;">IP: ${hb.ip}, Version: ${hb.version}, Platform: ${hb.platform}</div>
             </div>
           `).join('');
         } else {

@@ -1,40 +1,53 @@
-// Simple admin login without database dependency for faster response
-const ADMIN_CREDENTIALS = {
-    'admin': 'beesoft@2025',
-    'ekthar': 'Ekthar@8302'
-};
 
-export default async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
+// Secure admin login API for superadmin table
+require('dotenv').config();
+const express = require('express');
+const router = express.Router();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
-
-    const { username, password } = req.body;
-    if (!username || !password) {
-        return res.status(400).json({ error: 'Username and password required' });
-    }
-
-    // Fast credential check without database
-    if (ADMIN_CREDENTIALS[username] && ADMIN_CREDENTIALS[username] === password) {
-        return res.status(200).json({ 
-            success: true, 
-            admin: { 
-                username: username,
-                role: username === 'ekthar' ? 'super_admin' : 'admin',
-                loginTime: new Date().toISOString()
-            } 
-        });
-    }
-
-    // Add a small delay to prevent brute force attacks
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return res.status(401).json({ error: 'Invalid credentials' });
+// Connect to MongoDB using URI from environment variable
+if (!mongoose.connection.readyState) {
+  console.log('Connecting to MongoDB URI:', process.env.MONGODB_URI);
+  mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }).then(() => {
+    console.log('Connected to MongoDB (admin-login.js)');
+  }).catch((err) => {
+    console.error('MongoDB connection error (admin-login.js):', err.message);
+  });
 }
+
+// SuperAdmin schema
+const superAdminSchema = new mongoose.Schema({
+  userId: { type: String, required: true, unique: true },
+  password: { type: String, required: true }, // hashed
+  role: { type: String, default: 'superadmin' }
+}, { collection: 'superadmin' });
+const SuperAdmin = mongoose.models.SuperAdmin || mongoose.model('SuperAdmin', superAdminSchema);
+
+// POST /api/admin-login
+router.post('/', async (req, res) => {
+  const { username, password } = req.body;
+  console.log('Login attempt:', { username, passwordPresent: !!password });
+  if (!username || !password) return res.status(400).json({ error: 'Missing credentials' });
+  try {
+    const admin = await SuperAdmin.findOne({ userId: username });
+    console.log('Found admin:', admin ? { userId: admin.userId, role: admin.role, hashLength: admin.password.length } : null);
+    if (!admin) return res.status(401).json({ error: 'Invalid credentials' });
+    const valid = await bcrypt.compare(password, admin.password);
+    console.log('Password valid:', valid);
+    if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
+    // Issue JWT
+    const token = jwt.sign({ userId: admin.userId, username: admin.userId, role: admin.role }, process.env.JWT_SECRET || 'beesoft_secret', { expiresIn: '2h' });
+    res.json({ token });
+  } catch (e) {
+    console.error('Login error:', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+module.exports = router;

@@ -1,5 +1,20 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
+
+// Connect to MongoDB if not already connected
+if (!mongoose.connection.readyState) {
+  mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }).then(() => {
+    console.log('Connected to MongoDB (devices.js)');
+  }).catch((err) => {
+    console.error('MongoDB connection error (devices.js):', err.message);
+  });
+}
+
 const Device = require('../models/Device');
 const LicenseKey = require('../models/LicenseKey');
 
@@ -12,7 +27,7 @@ const verifyToken = (req, res, next) => {
   
   try {
     const jwt = require('jsonwebtoken');
-    const decoded = jwt.verify(token, 'beesoft_secret');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'beesoft_secret');
     req.admin = decoded;
     next();
   } catch (error) {

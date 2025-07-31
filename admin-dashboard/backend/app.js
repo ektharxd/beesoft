@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { router: adminRoutes, createSuperadmin } = require('./routes/admin');
+const adminCreateSuperadmin = require('../../api/admin-create-superadmin');
 const deviceRoutes = require('./routes/devices');
 const licenseRoutes = require('./routes/licenses');
 
@@ -44,6 +45,8 @@ mongoose.connection.on('disconnected', () => {
   console.log('Mongoose disconnected from MongoDB');
 });
 
+
+app.use('/api/admin-create-superadmin', adminCreateSuperadmin);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/devices', deviceRoutes);
 app.use('/api/admin/licenses', licenseRoutes);

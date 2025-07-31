@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - Beesoft Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --vercel-bg: #18181b;
+      --vercel-surface: #232329;
+      --vercel-primary: #fff;
+      --vercel-accent: #6366f1;
+      --vercel-success: #22c55e;
+      --vercel-error: #ef4444;
+      --vercel-warning: #facc15;
+      --vercel-border: #27272a;
+      --vercel-secondary: #a1a1aa;
+    }
+    body {
+      background: var(--vercel-bg);
+      color: var(--vercel-primary);
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
+    .login-container {
+      background: var(--vercel-surface);
+      border-radius: 12px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.25);
+      padding: 2.5rem 2rem 2rem 2rem;
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .login-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--vercel-accent);
+      letter-spacing: 1px;
+    }
+    .login-subtitle {
+      color: var(--vercel-secondary);
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .form-group {
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--vercel-secondary);
+      font-size: 0.95rem;
+    }
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--vercel-border);
+      background: var(--vercel-bg);
+      color: var(--vercel-primary);
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .form-input:focus {
+      border-color: var(--vercel-accent);
+    }
+    .login-btn {
+      width: 100%;
+      padding: 0.85rem 0;
+      background: var(--vercel-accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-bottom: 1rem;
+    }
+    .login-btn:hover {
+      background: #4f46e5;
+    }
+    .login-footer {
+      color: var(--vercel-secondary);
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .error-message {
+      color: var(--vercel-error);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .captcha-box {
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .captcha-img {
+      border-radius: 6px;
+      margin-right: 1rem;
+      border: 1px solid var(--vercel-border);
+      background: #fff;
+      height: 40px;
+      width: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.2rem;
+      color: #222;
+      letter-spacing: 2px;
+      user-select: none;
+    }
+    .refresh-captcha {
+      background: none;
+      border: none;
+      color: var(--vercel-accent);
+      font-size: 1.2rem;
+      cursor: pointer;
+      margin-left: 0.5rem;
+    }
+    .refresh-captcha:hover {
+      color: var(--vercel-success);
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-title"><i class="fas fa-terminal"></i> Admin Login</div>
+    <div class="login-subtitle">Sign in to access the Beesoft Admin Dashboard</div>
+    <form id="loginForm" autocomplete="off">
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input class="form-input" type="text" id="username" name="username" required autofocus autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-input" type="password" id="password" name="password" required autocomplete="current-password">
+      </div>
+      <div class="captcha-box">
+        <div class="captcha-img" id="captchaImg"></div>
+        <button type="button" class="refresh-captcha" id="refreshCaptcha" title="Refresh Captcha"><i class="fas fa-sync-alt"></i></button>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="captcha">Enter Captcha</label>
+        <input class="form-input" type="text" id="captcha" name="captcha" required autocomplete="off" maxlength="6">
+      </div>
+      <div class="error-message" id="errorMessage" style="display:none;"></div>
+      <button class="login-btn" type="submit">Login</button>
+    </form>
+    <div class="login-footer">
+      &copy; 2025 Beesoft. All rights reserved.
+    </div>
+  </div>
+  <script>
+    // --- High Security Features ---
+    // 1. Captcha (client-side, for demo; use server-side in production)
+    // 2. Rate limiting (should be enforced server-side)
+    // 3. Secure password handling (HTTPS, never log passwords)
+    // 4. Lockout after failed attempts (should be enforced server-side)
+    // 5. CSRF protection (for API, not shown here)
+    // 6. Secure cookies (set HttpOnly, Secure, SameSite on backend)
+    // 7. 2FA (optional, not shown here)
+
+    // Captcha logic (client-side demo)
+    function generateCaptcha() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = '';
+      for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+    let captchaCode = '';
+    function setCaptcha() {
+      captchaCode = generateCaptcha();
+      document.getElementById('captchaImg').textContent = captchaCode;
+    }
+    document.getElementById('refreshCaptcha').onclick = setCaptcha;
+    setCaptcha();
+
+    // Login logic
+    document.getElementById('loginForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const captcha = document.getElementById('captcha').value.trim().toUpperCase();
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.style.display = 'none';
+      errorDiv.textContent = '';
+      if (captcha !== captchaCode) {
+        errorDiv.textContent = 'Captcha incorrect. Please try again.';
+        errorDiv.style.display = 'block';
+        setCaptcha();
+        return;
+      }
+      // POST to backend login endpoint (should be HTTPS in production)
+      try {
+        // Use correct backend URL (http://localhost:3001)
+        const API_BASE = window.location.protocol + '//' + window.location.hostname + ':3001';
+        const resp = await fetch(API_BASE + '/api/admin-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        if (resp.ok) {
+          const data = await resp.json();
+          // Store token securely (HttpOnly cookie preferred, fallback to localStorage)
+          if (data.token) {
+            localStorage.setItem('adminToken', data.token);
+            localStorage.setItem('adminUsername', username);
+            // Try multiple redirect methods to bypass redirect blockers
+            try {
+              window.location.replace('/admin-dashboard-new.html');
+            } catch (e) {
+              window.open('/admin-dashboard-new.html', '_self');
+            }
+          } else {
+            errorDiv.textContent = 'Login failed: No token received.';
+            errorDiv.style.display = 'block';
+          }
+        } else if (resp.status === 429) {
+          errorDiv.textContent = 'Too many attempts. Please wait and try again.';
+          errorDiv.style.display = 'block';
+        } else if (resp.status === 401) {
+          errorDiv.textContent = 'Invalid username or password.';
+          errorDiv.style.display = 'block';
+        } else {
+          errorDiv.textContent = 'Login failed. Please try again.';
+          errorDiv.style.display = 'block';
+        }
+      } catch (err) {
+        errorDiv.textContent = 'Network error. Please try again.';
+        errorDiv.style.display = 'block';
+      }
+    };
+  </script>
+</body>
+</html>
