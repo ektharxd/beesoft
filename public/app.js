@@ -79,17 +79,19 @@ class AppState {
   updateConnectionStatus(connected) {
     this.isConnected = connected;
     const statusEl = document.getElementById('connection-status');
+    
     if (statusEl) {
       if (connected) {
         statusEl.className = 'status-indicator online';
-        statusEl.innerHTML = 'Connected';
+        statusEl.innerHTML = '<span class="status-dot"></span><span>Connected</span>';
         this.updateStep(Math.max(this.currentStep, 2));
       } else {
         statusEl.className = 'status-indicator offline';
-        statusEl.innerHTML = 'Disconnected';
+        statusEl.innerHTML = '<span class="status-dot"></span><span>Disconnected</span>';
         this.updateStep(1);
       }
     }
+
     this.updateWorkflowUI();
   }
 
@@ -417,10 +419,6 @@ function initializeTheme() {
 // TRIAL SYSTEM
 // ==========================================================================
 
-// Global variables for monitoring
-let deviceStatusMonitor = null;
-let lastKnownStatus = null;
-
 async function getTrustedTime() {
   try {
     const response = await fetch('https://worldtimeapi.org/api/ip');
@@ -434,26 +432,10 @@ async function getTrustedTime() {
 
 async function initializeActivationSystem() {
   // Utility: get unique device ID (use localStorage or generate)
-  async function getDeviceId() {
+  function getDeviceId() {
     let id = localStorage.getItem('beesoft_device_id');
     if (!id) {
-      // Always use Electron UUID if available
-      if (window.electronAPI && window.electronAPI.getDeviceId) {
-        try {
-          id = await window.electronAPI.getDeviceId();
-        } catch (e) {
-          console.error('Failed to get device ID from main process:', e);
-          id = null;
-        }
-      }
-      // Fallback: use browser crypto UUID if available
-      if (!id && window.crypto && window.crypto.randomUUID) {
-        id = window.crypto.randomUUID();
-      }
-      // Final fallback: use a random string
-      if (!id) {
-        id = 'webapp-' + Math.random().toString(36).substr(2, 12) + '-' + Date.now();
-      }
+      id = 'dev-' + Math.random().toString(36).substr(2, 12) + '-' + Date.now();
       localStorage.setItem('beesoft_device_id', id);
     }
     return id;
@@ -469,26 +451,30 @@ async function initializeActivationSystem() {
 
   // Register device if not already
   async function registerDevice(username) {
-    const machineId = await getDeviceId();
+    const machineId = getDeviceId();
     setUsername(username);
-    await fetch('http://localhost:3001/api/devices?register=1', {
+    // Platform detection
+    let platform = 'unknown';
+    const userAgent = navigator.userAgent || '';
+    if (/windows/i.test(userAgent)) platform = 'Windows';
+    else if (/macintosh|mac os x/i.test(userAgent)) platform = 'Mac';
+    else if (/linux/i.test(userAgent)) platform = 'Linux';
+    else if (/android/i.test(userAgent)) platform = 'Android';
+    else if (/iphone|ipad|ipod/i.test(userAgent)) platform = 'iOS';
+    else if (navigator.platform) platform = navigator.platform;
+    await fetch('http://localhost:3000/api/devices?register=1', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ machineId, username })
+      body: JSON.stringify({ machineId, username, platform })
     });
   }
 
   // Fetch device status (subscription/trial)
   async function fetchDeviceStatus() {
-    const machineId = await getDeviceId();
-    try {
-      const res = await fetch(`http://localhost:3001/api/device-status?machineId=${encodeURIComponent(machineId)}`);
-      if (!res.ok) return null;
-      return await res.json();
-    } catch (error) {
-      console.error('Error fetching device status:', error);
-      return null;
-    }
+    const machineId = getDeviceId();
+    const res = await fetch(`http://localhost:3000/api/device-status?machineId=${encodeURIComponent(machineId)}`);
+    if (!res.ok) return null;
+    return await res.json();
   }
 
   // Show page logic
@@ -502,105 +488,19 @@ async function initializeActivationSystem() {
     if (targetPage) targetPage.style.display = 'flex';
   }
 
-  // Start real-time device status monitoring
-  function startDeviceStatusMonitoring() {
-    // Clear any existing monitor
-    if (deviceStatusMonitor) {
-      clearInterval(deviceStatusMonitor);
-    }
-
-    console.log('Starting real-time device status monitoring...');
-    
-    // Check status every 2 seconds for real-time monitoring
-    deviceStatusMonitor = setInterval(async () => {
-      try {
-        const currentStatus = await fetchDeviceStatus();
-        
-        // Compare with last known status to detect changes
-        const statusChanged = JSON.stringify(currentStatus) !== JSON.stringify(lastKnownStatus);
-        
-        if (statusChanged) {
-          console.log('Device status changed:', { 
-            previous: lastKnownStatus, 
-            current: currentStatus 
-          });
-          
-          // Update last known status
-          lastKnownStatus = currentStatus;
-          
-          // Check if device was removed (status becomes null)
-          if (!currentStatus) {
-            console.log('Device removed from database - redirecting to lock page');
-            showPage('trial-lock-page');
-            const trialInfo = document.getElementById('trial-info');
-            if (trialInfo) {
-              trialInfo.textContent = 'Device has been removed from the system. Please contact an administrator.';
-            }
-            if (window.notifications) {
-              window.notifications.error('Device access revoked. Redirecting to lock screen.');
-            }
-            return;
-          }
-          
-          // Check if subscription was deactivated
-          if (currentStatus.subscription && !currentStatus.subscription.active) {
-            console.log('Subscription deactivated - redirecting to lock page');
-            showPage('trial-lock-page');
-            const trialInfo = document.getElementById('trial-info');
-            if (trialInfo) {
-              trialInfo.textContent = 'Subscription has been deactivated. Please contact an administrator.';
-            }
-            if (window.notifications) {
-              window.notifications.warning('Subscription deactivated. Redirecting to lock screen.');
-            }
-            return;
-          }
-          
-          // If status is valid and we're on lock page, redirect to welcome
-          if (currentStatus.subscription && currentStatus.subscription.active) {
-            const currentPage = document.querySelector('.page-wrapper[style*="flex"]');
-            if (currentPage && currentPage.id === 'trial-lock-page') {
-              console.log('Valid subscription detected while on lock page - redirecting to welcome');
-              await checkTrial(); // This will handle the proper redirect
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error in device status monitoring:', error);
-      }
-    }, 2000); // Check every 2 seconds
-  }
-
-  // Stop device status monitoring
-  function stopDeviceStatusMonitoring() {
-    if (deviceStatusMonitor) {
-      clearInterval(deviceStatusMonitor);
-      deviceStatusMonitor = null;
-      console.log('Device status monitoring stopped');
-    }
-  }
-
-  // Enhanced check activation/subscription status
-  window.checkTrial = async function(skipMonitoring = false) {
+  // Check activation/subscription status
+  window.checkTrial = async function() {
     console.log('checkTrial called');
     try {
       const status = await fetchDeviceStatus();
       console.log('Device status:', status);
-      
-      // Update last known status
-      lastKnownStatus = status;
       
       if (!status || !status.subscription) {
         console.log('No subscription found, showing trial lock page');
         showPage('trial-lock-page');
         const trialInfo = document.getElementById('trial-info');
         if (trialInfo) trialInfo.textContent = 'This software is not activated. Please contact an administrator.';
-        
-        // Start monitoring even on lock page to detect activation
-        if (!skipMonitoring) {
-          startDeviceStatusMonitoring();
-        }
-        return false;
+        return;
       }
       
       const { subscription } = status;
@@ -611,12 +511,7 @@ async function initializeActivationSystem() {
         showPage('trial-lock-page');
         const trialInfo = document.getElementById('trial-info');
         if (trialInfo) trialInfo.textContent = 'No active subscription. Please contact admin.';
-        
-        // Start monitoring to detect activation
-        if (!skipMonitoring) {
-          startDeviceStatusMonitoring();
-        }
-        return false;
+        return;
       }
       
       // Calculate expiry
@@ -631,18 +526,27 @@ async function initializeActivationSystem() {
         showPage('trial-lock-page');
         const trialInfo = document.getElementById('trial-info');
         if (trialInfo) trialInfo.textContent = `Subscription expired on ${new Date(expiry).toLocaleDateString()}.`;
-        
-        // Start monitoring to detect reactivation
-        if (!skipMonitoring) {
-          startDeviceStatusMonitoring();
-        }
-        return false;
+        return;
       }
       
       const daysLeft = Math.ceil((expiry - now) / (24 * 60 * 60 * 1000));
       console.log('Subscription active, showing welcome page. Days left:', daysLeft);
       
-      showPage('welcome-page');
+      // Ensure all pages are hidden first
+      document.querySelectorAll('.page-container').forEach(page => {
+        page.style.display = 'none';
+      });
+      
+      const welcomePage = document.getElementById('welcome-page');
+      if (welcomePage) {
+        welcomePage.style.display = 'flex';
+        welcomePage.scrollIntoView({ behavior: 'smooth' });
+        window.history.replaceState(null, '', '#welcome');
+      } else {
+        console.error('Welcome page element not found');
+        window.location.href = '/#welcome';
+      }
+      
       const statusAlert = document.getElementById('status-alert');
       if (statusAlert) {
         if (subscription.type === 'permanent') {
@@ -656,30 +560,13 @@ async function initializeActivationSystem() {
           if (statusAlert) statusAlert.style.display = 'none'; 
         }, 5000);
       }
-      
-      // Start monitoring for changes (deactivation, removal, etc.)
-      if (!skipMonitoring) {
-        startDeviceStatusMonitoring();
-      }
-      return true;
-      
     } catch (error) {
       console.error('Error in checkTrial:', error);
       showPage('trial-lock-page');
       const trialInfo = document.getElementById('trial-info');
       if (trialInfo) trialInfo.textContent = 'Error checking subscription status. Please contact admin.';
-      
-      // Start monitoring to detect when connection is restored
-      if (!skipMonitoring) {
-        startDeviceStatusMonitoring();
-      }
-      return false;
     }
   };
-
-  // Expose monitoring controls globally
-  window.startDeviceStatusMonitoring = startDeviceStatusMonitoring;
-  window.stopDeviceStatusMonitoring = stopDeviceStatusMonitoring;
 
   // Admin login handler (API-based)
   const adminAuthBtn = document.getElementById('admin-auth-btn');
@@ -693,7 +580,7 @@ async function initializeActivationSystem() {
         return;
       }
       // Authenticate with backend
-      const API_BASE = "http://localhost:3001/api";
+      const API_BASE = "http://localhost:3000/api";
       const res = await fetch(`${API_BASE}/admin-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -712,60 +599,35 @@ async function initializeActivationSystem() {
 // Show admin actions window/modal after successful login
 function showAdminActionsWindow() {
   const modalHtml = `
-    <div style="padding: 16px; max-width: 500px;">
-      <h2 style="margin-bottom: 18px;">Admin Actions - Device Activation</h2>
+    <div style="padding: 16px; max-width: 400px;">
+      <h2 style="margin-bottom: 18px;">Admin Actions</h2>
       <div class="form-group">
         <label>Device ID</label>
         <div id="device-id-chip" style="display:inline-block;padding:8px 16px;background:#f3f4f6;color:#222;border-radius:16px;font-weight:600;font-size:1rem;margin-bottom:8px;user-select:all;"></div>
+        <button id="register-device-btn" class="btn btn-primary" style="margin-top: 8px;">Register Device</button>
+        <button id="remove-device-btn" class="btn btn-danger" style="margin-top: 8px;">Remove Device</button>
       </div>
-      
       <div class="form-group" style="margin-top: 18px;">
-        <h3 style="margin-bottom: 12px; color: #4f46e5;">Device Registration Details</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div>
-            <label for="device-name-input" class="form-label required">Full Name</label>
-            <input id="device-name-input" type="text" class="form-input" placeholder="Enter full name" required />
-          </div>
-          <div>
-            <label for="device-email-input" class="form-label required">Email Address</label>
-            <input id="device-email-input" type="email" class="form-input" placeholder="Enter email" required />
-          </div>
-        </div>
-        <div style="margin-top: 12px;">
-          <label for="device-mobile-input" class="form-label required">Mobile Number</label>
-          <input id="device-mobile-input" type="tel" class="form-input" placeholder="Enter mobile number with country code" required />
-        </div>
-        <div style="display: flex; gap: 12px; margin-top: 12px;">
-          <button id="register-device-btn" class="btn btn-primary" style="flex: 1;">Register Device</button>
-          <button id="remove-device-btn" class="btn btn-danger" style="flex: 1;">Remove Device</button>
-        </div>
-      </div>
-      
-      <div class="form-group" style="margin-top: 18px;">
-        <h3 style="margin-bottom: 12px; color: #059669;">Trial Activation</h3>
-        <label for="trial-days-input">Trial Days</label>
+        <label for="trial-days-input">Trial Activation Days</label>
         <input id="trial-days-input" type="number" class="form-input" min="1" max="365" placeholder="Enter days" />
-        <button id="activate-trial-btn" class="btn btn-success" style="margin-top: 8px; width: 100%;">Activate Trial</button>
+        <button id="activate-trial-btn" class="btn btn-success" style="margin-top: 8px;">Activate Trial</button>
       </div>
-      
       <div class="form-group" style="margin-top: 18px;">
-        <h3 style="margin-bottom: 12px; color: #f59e0b;">Permanent Activation</h3>
-        <label for="perm-key-input">Activation Key</label>
+        <label for="perm-key-input">Permanent Activation Key</label>
         <input id="perm-key-input" type="text" class="form-input" placeholder="Enter activation key" />
-        <button id="activate-perm-btn" class="btn btn-warning" style="margin-top: 8px; width: 100%;">Permanent Activate</button>
+        <button id="activate-perm-btn" class="btn btn-warning" style="margin-top: 8px;">Permanent Activate</button>
       </div>
-      
-      <div id="admin-action-result" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none;"></div>
+      <div id="admin-action-result" style="margin-top: 16px; color: #059669;"></div>
     </div>
   `;
   showModal('Admin Actions', modalHtml, { okText: 'Close', cancelText: '' });
 
   // Register device
-  setTimeout(async () => {
+  setTimeout(() => {
     // Show device ID as a chip
     let deviceId = '';
     if (window.electronAPI) {
-      deviceId = await window.electronAPI.getDeviceId();
+      deviceId = window.electronAPI.getDeviceId();
       console.log('Device ID from electronAPI:', deviceId);
       const chip = document.getElementById('device-id-chip');
       if (chip) chip.textContent = deviceId || 'Device ID not available';
@@ -773,99 +635,23 @@ function showAdminActionsWindow() {
       console.log('window.electronAPI not available');
     }
     document.getElementById('register-device-btn').onclick = async () => {
-      // Get the required form values
-      const name = document.getElementById('device-name-input').value.trim();
-      const email = document.getElementById('device-email-input').value.trim();
-      const mobile = document.getElementById('device-mobile-input').value.trim();
-      const resultEl = document.getElementById('admin-action-result');
-      
-      // Validate required fields
-      if (!name || !email || !mobile) {
-        resultEl.style.display = 'block';
-        resultEl.style.background = '#fee2e2';
-        resultEl.style.color = '#dc2626';
-        resultEl.textContent = 'Please fill in all required fields: Name, Email, and Mobile Number.';
-        return;
-      }
-      
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        resultEl.style.display = 'block';
-        resultEl.style.background = '#fee2e2';
-        resultEl.style.color = '#dc2626';
-        resultEl.textContent = 'Please enter a valid email address.';
-        return;
-      }
-      
-      // Validate mobile number (basic check for digits and length)
-      const mobileRegex = /^[\+]?[1-9][\d]{7,14}$/;
-      if (!mobileRegex.test(mobile.replace(/[\s\-\(\)]/g, ''))) {
-        resultEl.style.display = 'block';
-        resultEl.style.background = '#fee2e2';
-        resultEl.style.color = '#dc2626';
-        resultEl.textContent = 'Please enter a valid mobile number with country code.';
-        return;
-      }
-      
-      try {
-        // Show loading state
-        resultEl.style.display = 'block';
-        resultEl.style.background = '#dbeafe';
-        resultEl.style.color = '#1d4ed8';
-        resultEl.textContent = 'Registering device...';
-        
-        // Gather device details
-        const version = (window.electronAPI && window.electronAPI.getAppVersion) ? (await window.electronAPI.getAppVersion()).version : 'unknown';
-        const platform = navigator.platform || 'unknown';
-        const hostname = window.location.hostname || 'unknown';
-        
-        const payload = { 
-          machineId: deviceId, 
-          username: 'admin', 
-          name: name,
-          email: email,
-          mobile: mobile,
-          version, 
-          platform, 
-          hostname 
-        };
-        
-        console.log('Register device payload:', payload);
-        
-        const res = await fetch('http://localhost:3001/api/devices?register=1', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        
-        const responseData = await res.json();
-        
-        if (res.ok) {
-          resultEl.style.background = '#dcfce7';
-          resultEl.style.color = '#166534';
-          resultEl.textContent = `Device registered successfully for ${name} (${email})`;
-          
-          // Clear the form
-          document.getElementById('device-name-input').value = '';
-          document.getElementById('device-email-input').value = '';
-          document.getElementById('device-mobile-input').value = '';
-        } else {
-          resultEl.style.background = '#fee2e2';
-          resultEl.style.color = '#dc2626';
-          resultEl.textContent = responseData.error || 'Failed to register device.';
-        }
-      } catch (error) {
-        resultEl.style.display = 'block';
-        resultEl.style.background = '#fee2e2';
-        resultEl.style.color = '#dc2626';
-        resultEl.textContent = 'Network error: ' + error.message;
-      }
+      // Gather device details
+      const version = (window.electronAPI && window.electronAPI.getAppVersion) ? (await window.electronAPI.getAppVersion()).version : 'unknown';
+      const platform = navigator.platform || 'unknown';
+      const hostname = window.location.hostname || 'unknown';
+      const payload = { machineId: deviceId, username: 'admin', version, platform, hostname };
+      console.log('Register device payload:', payload);
+      const res = await fetch('http://localhost:3000/api/devices?register=1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      document.getElementById('admin-action-result').textContent = res.ok ? 'Device registered.' : 'Failed to register device.';
     };
     // Remove device
     document.getElementById('remove-device-btn').onclick = async () => {
       // Remove device from DB
-      const res = await fetch(`http://localhost:3001/api/devices?remove=1&machineId=${encodeURIComponent(deviceId)}`, {
+      const res = await fetch(`http://localhost:3000/api/devices?remove=1&machineId=${encodeURIComponent(deviceId)}`, {
         method: 'DELETE'
       });
       document.getElementById('admin-action-result').textContent = res.ok ? 'Device removed.' : 'Failed to remove device.';
@@ -873,117 +659,24 @@ function showAdminActionsWindow() {
     // Activate trial
     document.getElementById('activate-trial-btn').onclick = async () => {
       const days = parseInt(document.getElementById('trial-days-input').value);
-      const resultEl = document.getElementById('admin-action-result');
-      
-      if (!days) {
-        resultEl.style.display = 'block';
-        resultEl.style.background = '#fee2e2';
-        resultEl.style.color = '#dc2626';
-        resultEl.textContent = 'Please enter trial days';
-        return;
-      }
-      
-      try {
-        resultEl.style.display = 'block';
-        resultEl.style.background = '#dbeafe';
-        resultEl.style.color = '#1d4ed8';
-        resultEl.textContent = 'Activating trial...';
-        
-        const res = await fetch('http://localhost:3001/api/assign-subscription', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ machineId: deviceId, type: 'trial', days })
-        });
-        
-        const responseData = await res.json();
-        
-        if (res.ok && responseData.success) {
-          resultEl.style.background = '#dcfce7';
-          resultEl.style.color = '#166534';
-          resultEl.textContent = `Trial activated for ${days} days!`;
-          
-          // Close modal and redirect to welcome page
-          setTimeout(() => {
-            const modal = document.getElementById('modal');
-            if (modal) modal.style.display = 'none';
-            
-            // Force check trial to redirect to welcome page
-            setTimeout(() => {
-              checkTrial();
-              if (window.notifications) {
-                window.notifications.success('Trial activated successfully! Welcome to the application.');
-              }
-            }, 500);
-          }, 1500);
-        } else {
-          resultEl.style.background = '#fee2e2';
-          resultEl.style.color = '#dc2626';
-          resultEl.textContent = responseData.error || 'Failed to activate trial.';
-        }
-      } catch (error) {
-        resultEl.style.display = 'block';
-        resultEl.style.background = '#fee2e2';
-        resultEl.style.color = '#dc2626';
-        resultEl.textContent = 'Network error: ' + error.message;
-      }
+      if (!days) return alert('Enter trial days');
+      const res = await fetch('http://localhost:3000/api/assign-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ machineId: deviceId, type: 'trial', days })
+      });
+      document.getElementById('admin-action-result').textContent = res.ok ? 'Trial activated.' : 'Failed to activate trial.';
     };
-    
     // Permanent activation
     document.getElementById('activate-perm-btn').onclick = async () => {
       const key = document.getElementById('perm-key-input').value.trim();
-      const resultEl = document.getElementById('admin-action-result');
-      
-      if (!key) {
-        resultEl.style.display = 'block';
-        resultEl.style.background = '#fee2e2';
-        resultEl.style.color = '#dc2626';
-        resultEl.textContent = 'Please enter activation key';
-        return;
-      }
-      
-      try {
-        resultEl.style.display = 'block';
-        resultEl.style.background = '#dbeafe';
-        resultEl.style.color = '#1d4ed8';
-        resultEl.textContent = 'Validating activation key...';
-        
-        const res = await fetch('http://localhost:3001/api/assign-subscription', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ machineId: deviceId, type: 'subscription', days: 9999, key })
-        });
-        
-        const responseData = await res.json();
-        
-        if (res.ok && responseData.success) {
-          resultEl.style.background = '#dcfce7';
-          resultEl.style.color = '#166534';
-          resultEl.textContent = 'Permanent activation successful!';
-          
-          // Close modal and redirect to welcome page
-          setTimeout(() => {
-            const modal = document.getElementById('modal');
-            if (modal) modal.style.display = 'none';
-            
-            // Force check trial to redirect to welcome page
-            setTimeout(() => {
-              checkTrial();
-              if (window.notifications) {
-                window.notifications.success('Permanent license activated! Welcome to the application.');
-              }
-            }, 500);
-          }, 1500);
-        } else {
-          resultEl.style.background = '#fee2e2';
-          resultEl.style.color = '#dc2626';
-          resultEl.textContent = responseData.error || 'Failed to activate permanently.';
-        }
-      } catch (error) {
-        resultEl.style.display = 'block';
-        resultEl.style.background = '#fee2e2';
-        resultEl.style.color = '#dc2626';
-        resultEl.textContent = 'Network error: ' + error.message;
-      }
+      if (!key) return alert('Enter activation key');
+      const res = await fetch('http://localhost:3000/api/assign-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ machineId: deviceId, type: 'subscription', days: 9999, key })
+      });
+      document.getElementById('admin-action-result').textContent = res.ok ? 'Permanent activation successful.' : 'Failed to activate permanently.';
     };
   }, 200);
 }
@@ -1345,10 +1038,6 @@ function initializeWhatsAppConnection() {
 // ==========================================================================
 
 function handleBackendUpdate(data) {
-    // Ignore messages that do not have a 'type' property
-    if (!data || typeof data !== 'object' || !data.type) {
-        return;
-    }
     const qrContainer = document.getElementById('qr-container');
     const qrCodeDisplay = document.getElementById('qr-code-display');
     const connectionPlaceholder = document.getElementById('connection-placeholder');
@@ -1541,47 +1230,6 @@ function initializeSessionControls() {
             return;
           }
 
-          // Check message limits before showing confirmation
-          if (window.messageLimitsWidget) {
-            try {
-              const limitCheck = await window.messageLimitsWidget.checkMessageLimits(uniqueNumbers.length);
-              
-              if (!limitCheck.allowed) {
-                // Show enhanced limit exceeded modal
-                window.messageLimitsWidget.showLimitExceededModal(
-                  limitCheck.reason,
-                  limitCheck.messagesRemaining,
-                  limitCheck.dailyMessagesRemaining,
-                  uniqueNumbers.length
-                );
-                
-                // Also show the widget warning
-                if (limitCheck.reason.includes('daily')) {
-                  window.messageLimitsWidget.showLimitWarning('daily', limitCheck.dailyMessagesRemaining || 0);
-                } else {
-                  window.messageLimitsWidget.showLimitWarning('total', limitCheck.messagesRemaining || 0);
-                }
-                
-                return;
-              }
-              
-              // Show warning if approaching limits
-              const totalRemaining = limitCheck.messagesRemaining;
-              const dailyRemaining = limitCheck.dailyMessagesRemaining;
-              
-              if ((totalRemaining > 0 && totalRemaining <= 10) || (dailyRemaining > 0 && dailyRemaining <= 10)) {
-                const warningType = (dailyRemaining > 0 && dailyRemaining <= totalRemaining) ? 'daily' : 'total';
-                const remaining = warningType === 'daily' ? dailyRemaining : totalRemaining;
-                
-                window.messageLimitsWidget.showLimitWarning(warningType, remaining);
-              }
-              
-            } catch (error) {
-              console.error('Error checking message limits:', error);
-              // Continue with campaign if limit check fails
-            }
-          }
-
           // Show confirmation dialog
           const confirmMessage = `Are you sure you want to start the campaign?\n\n` +
             `• ${uniqueNumbers.length} contacts will receive your message\n` +
@@ -1607,15 +1255,6 @@ function initializeSessionControls() {
                 const response = await window.electronAPI.startSession(sessionData);
                 window.logger.success(`Campaign started with ${uniqueNumbers.length} contacts`);
                 window.notifications.success('Campaign started successfully!');
-                
-                // Track message usage after successful start
-                if (window.messageLimitsWidget) {
-                  try {
-                    await window.messageLimitsWidget.trackMessageUsage(uniqueNumbers.length, 'campaign-' + Date.now(), uniqueNumbers.length);
-                  } catch (error) {
-                    console.error('Error tracking message usage:', error);
-                  }
-                }
               } else {
                 window.notifications.error('Session management not available');
               }

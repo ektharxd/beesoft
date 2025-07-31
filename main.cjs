@@ -1628,7 +1628,7 @@ ipcMain.handle('test-sentry-error', async () => {
         return { success: false, message: 'Failed to send test error to Sentry' };
     }
 });
-
+ive 
 // Device ID handler
 ipcMain.handle('get-device-id', async () => {
     return getDeviceId();
