@@ -42,11 +42,13 @@ if (fs.existsSync(adminRoutesDir)) {
   fs.readdirSync(adminRoutesDir).forEach(file => {
     if (file.endsWith('.js')) {
       const routeName = file.replace('.js', '');
-      const routePath = `/api/admin/${routeName}`;
+      // Mount admin routes directly under /api/admin (not /api/admin/admin)
+      const routePath = routeName === 'admin' ? '/api/admin' : `/api/admin/${routeName}`;
       const handlerModule = require(path.join(adminRoutesDir, file));
       const handler = handlerModule.default || handlerModule;
       if (typeof handler === 'function' && handler.name === 'router') {
         app.use(routePath, handler);
+        console.log(`Mounted admin route: ${routePath}`);
       } else if (typeof handler === 'function') {
         app.all([routePath, `${routePath}/*`], (req, res) => handler(req, res));
       } else {

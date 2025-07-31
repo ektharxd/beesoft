@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { router: adminRoutes, createSuperadmin } = require('./routes/admin');
+const adminRoutes = require('./routes/admin');
 const adminCreateSuperadmin = require('../../api/admin-create-superadmin');
 const deviceRoutes = require('./routes/devices');
 const licenseRoutes = require('./routes/licenses');
@@ -24,8 +24,6 @@ mongoose.connect(mongoUri, {
 })
 .then(() => {
   console.log('Connected to MongoDB successfully');
-  // Create superadmin after connection is established
-  createSuperadmin();
 })
 .catch((error) => {
   console.error('MongoDB connection error:', error);

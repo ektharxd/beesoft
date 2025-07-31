@@ -623,6 +623,10 @@
           <i class="fas fa-key"></i>
           <span>License Keys</span>
         </a>
+        <a href="#" class="nav-item" data-page="admin">
+          <i class="fas fa-users-cog"></i>
+          <span>Admin Management</span>
+        </a>
         <a href="#" class="nav-item" data-page="settings">
           <i class="fas fa-cog"></i>
           <span>Settings</span>
@@ -723,6 +727,7 @@
         dashboard: { title: 'Dashboard', subtitle: 'Overview of your Beesoft system' },
         devices: { title: 'Device Management', subtitle: 'Manage connected devices and licenses' },
         licenses: { title: 'License Keys', subtitle: 'Generate and manage license keys' },
+        admin: { title: 'Admin Management', subtitle: 'Manage admin users, roles, and passwords' },
         settings: { title: 'Settings', subtitle: 'System configuration and preferences' }
       };
       
@@ -743,7 +748,149 @@
         case 'settings':
           loadSettings();
           break;
+        case 'admin':
+          loadAdminManagement();
+          break;
       }
+    // Admin Management Page
+    async function loadAdminManagement() {
+      const mainBody = document.getElementById('mainBody');
+      mainBody.innerHTML = '<div class="loading"></div>';
+      try {
+        // Fetch admin list
+        const response = await apiRequest('/list');
+        mainBody.innerHTML = `
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">Admin Users</h3>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="showCreateAdminModal()">
+                  <i class="fas fa-user-plus"></i>
+                  Add Admin
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Username</th>
+                      <th>Role</th>
+                      <th>Created</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${response.admins.map(admin => `
+                      <tr>
+                        <td style="font-weight: 600;">${admin.username}</td>
+                        <td><span class="status-badge status-active">${admin.role.charAt(0).toUpperCase() + admin.role.slice(1)}</span></td>
+                        <td>${admin.createdAt ? new Date(admin.createdAt).toLocaleDateString() : ''}</td>
+                        <td>
+                          <button class="btn btn-outline" onclick="showUpdateAdminPasswordModal('${admin.username}')">
+                            <i class="fas fa-key"></i> Change Password
+                          </button>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        mainBody.innerHTML = '<div class="text-center">Error loading admin users</div>';
+      }
+    }
+
+    function showCreateAdminModal() {
+      showModal('Create Admin', `
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-input" id="newAdminUsername" placeholder="Enter username" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="newAdminPassword" placeholder="Enter password" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select class="form-select" id="newAdminRole">
+            <option value="superadmin">Superadmin</option>
+            <option value="admin">Admin</option>
+            <option value="manager">Manager</option>
+          </select>
+        </div>
+      `, `
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="createAdmin()">Create Admin</button>
+      `);
+    }
+
+    async function createAdmin() {
+      const username = document.getElementById('newAdminUsername').value.trim();
+      const password = document.getElementById('newAdminPassword').value;
+      const role = document.getElementById('newAdminRole').value;
+      if (!username || !password) {
+        alert('Username and password are required');
+        return;
+      }
+      try {
+        const response = await apiRequest('/create', {
+          method: 'POST',
+          body: JSON.stringify({ username, password, role })
+        });
+        if (response.success) {
+          closeModal();
+          alert('Admin created successfully');
+          loadAdminManagement();
+        } else {
+          alert(response.error || 'Failed to create admin');
+        }
+      } catch (error) {
+        alert('Server error');
+      }
+    }
+
+    function showUpdateAdminPasswordModal(username) {
+      showModal('Change Password', `
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-input" value="${username}" disabled>
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input type="password" class="form-input" id="updateAdminPassword" placeholder="Enter new password" required>
+        </div>
+      `, `
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="updateAdminPassword('${username}')">Update Password</button>
+      `);
+    }
+
+    async function updateAdminPassword(username) {
+      const password = document.getElementById('updateAdminPassword').value;
+      if (!password) {
+        alert('Password is required');
+        return;
+      }
+      try {
+        const response = await apiRequest('/change-password', {
+          method: 'POST',
+          body: JSON.stringify({ username, newPassword: password })
+        });
+        if (response.success) {
+          closeModal();
+          alert('Password updated successfully');
+        } else {
+          alert(response.error || 'Failed to update password');
+        }
+      } catch (error) {
+        alert('Server error');
+      }
+    }
     }
     
     async function loadDashboard() {
