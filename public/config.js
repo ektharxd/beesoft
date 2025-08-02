@@ -12,23 +12,25 @@ window.API_CONFIG = {
   
   // Get the appropriate base URL based on environment
   getBaseUrl: function() {
-    // Check if we're running on Vercel (production)
-    if (window.location.hostname.includes('vercel.app') || 
-        window.location.hostname.includes('beesoft-one.vercel.app')) {
-      return this.PROD_BASE_URL;
+    // Always use Vercel in production (including Electron builds)
+    // Only use localhost for development when explicitly in a browser with localhost
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return this.DEV_BASE_URLS[0];
     }
     
-    // For local development, return the first dev URL
-    return this.DEV_BASE_URLS[0];
+    // Default to Vercel for all other cases (Vercel web app, Electron builds, etc.)
+    return this.PROD_BASE_URL;
   },
   
   // Get all possible base URLs for fallback attempts
   getAllUrls: function() {
-    if (window.location.hostname.includes('vercel.app') || 
-        window.location.hostname.includes('beesoft-one.vercel.app')) {
-      return [this.PROD_BASE_URL];
+    // For localhost development, try local servers first, then Vercel as fallback
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return [...this.DEV_BASE_URLS, this.PROD_BASE_URL];
     }
-    return this.DEV_BASE_URLS;
+    
+    // For everything else (Vercel web app, Electron builds), use Vercel only
+    return [this.PROD_BASE_URL];
   }
 };
 
