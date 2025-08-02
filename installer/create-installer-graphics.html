@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beesoft Installer Graphics Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4f46e5;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .graphics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .graphic-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .graphic-header {
+            background: #4f46e5;
+            color: white;
+            padding: 10px;
+            font-weight: bold;
+        }
+        .graphic-content {
+            padding: 0;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .download-btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 14px;
+        }
+        .download-btn:hover {
+            background: #3730a3;
+        }
+        .instructions {
+            background: #e0f2fe;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .instructions h3 {
+            color: #0277bd;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐝 Beesoft Installer Graphics Generator</h1>
+        <p>Generate high-quality Material 3 graphics for the NSIS installer.</p>
+        
+        <div class="graphics-grid">
+            <!-- Header Image -->
+            <div class="graphic-item">
+                <div class="graphic-header">Header Image (150x57)</div>
+                <div class="graphic-content">
+                    <canvas id="headerCanvas" width="150" height="57"></canvas>
+                    <button class="download-btn" onclick="downloadCanvas('headerCanvas', 'header.bmp')">Download Header</button>
+                </div>
+            </div>
+            
+            <!-- Welcome Image -->
+            <div class="graphic-item">
+                <div class="graphic-header">Welcome Image (164x314)</div>
+                <div class="graphic-content">
+                    <canvas id="welcomeCanvas" width="164" height="314"></canvas>
+                    <button class="download-btn" onclick="downloadCanvas('welcomeCanvas', 'welcome.bmp')">Download Welcome</button>
+                </div>
+            </div>
+            
+            <!-- Icon -->
+            <div class="graphic-item">
+                <div class="graphic-header">Installer Icon (256x256)</div>
+                <div class="graphic-content">
+                    <canvas id="iconCanvas" width="256" height="256"></canvas>
+                    <button class="download-btn" onclick="downloadCanvas('iconCanvas', 'installer-icon.png')">Download Icon</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 Instructions</h3>
+            <ol>
+                <li><strong>Download Graphics:</strong> Click the download buttons above to save each graphic</li>
+                <li><strong>Convert to BMP:</strong> Use an image editor to convert PNG files to 24-bit BMP format</li>
+                <li><strong>Place Files:</strong> Put the files in the installer/ directory:
+                    <ul>
+                        <li>header.bmp (150x57)</li>
+                        <li>welcome.bmp (164x314)</li>
+                        <li>installer-icon.ico (converted from PNG)</li>
+                    </ul>
+                </li>
+                <li><strong>Build Installer:</strong> Run the NSIS script to create the installer</li>
+            </ol>
+            
+            <h3>🎨 Material 3 Color Palette</h3>
+            <div style="display: flex; gap: 10px; margin: 10px 0;">
+                <div style="background: #4f46e5; color: white; padding: 10px; border-radius: 4px;">Primary #4f46e5</div>
+                <div style="background: #fffbfe; color: #1c1b1f; padding: 10px; border-radius: 4px; border: 1px solid #ddd;">Surface #fffbfe</div>
+                <div style="background: #1c1b1f; color: white; padding: 10px; border-radius: 4px;">On Surface #1c1b1f</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Material 3 Colors
+        const colors = {
+            primary: '#4f46e5',
+            surface: '#fffbfe',
+            onSurface: '#1c1b1f',
+            secondary: '#625b71',
+            tertiary: '#7d5260',
+            background: '#fffbfe'
+        };
+
+        // Create Header Image (150x57)
+        function createHeaderImage() {
+            const canvas = document.getElementById('headerCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 150, 57);
+            gradient.addColorStop(0, colors.primary);
+            gradient.addColorStop(1, '#3730a3');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 150, 57);
+            
+            // Bee icon (simplified)
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.ellipse(30, 28, 12, 8, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Wings
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.beginPath();
+            ctx.ellipse(25, 22, 6, 4, -0.3, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(35, 22, 6, 4, 0.3, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Text
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Segoe UI';
+            ctx.fillText('Beesoft', 50, 25);
+            ctx.font = '10px Segoe UI';
+            ctx.fillText('WhatsApp Automation', 50, 38);
+        }
+
+        // Create Welcome Image (164x314)
+        function createWelcomeImage() {
+            const canvas = document.getElementById('welcomeCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, 314);
+            gradient.addColorStop(0, colors.primary);
+            gradient.addColorStop(0.5, '#6366f1');
+            gradient.addColorStop(1, '#3730a3');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 164, 314);
+            
+            // Large bee icon
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.ellipse(82, 120, 30, 20, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Wings
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.beginPath();
+            ctx.ellipse(65, 105, 15, 10, -0.3, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(99, 105, 15, 10, 0.3, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Stripes
+            ctx.fillStyle = colors.onSurface;
+            for (let i = 0; i < 3; i++) {
+                ctx.fillRect(70 + i * 8, 110, 3, 20);
+            }
+            
+            // Welcome text
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 18px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.fillText('Welcome to', 82, 180);
+            ctx.font = 'bold 24px Segoe UI';
+            ctx.fillText('Beesoft', 82, 205);
+            
+            ctx.font = '12px Segoe UI';
+            ctx.fillText('Smart WhatsApp', 82, 230);
+            ctx.fillText('Automation', 82, 245);
+            
+            // Decorative elements
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            for (let i = 0; i < 20; i++) {
+                const x = Math.random() * 164;
+                const y = Math.random() * 314;
+                const size = Math.random() * 3 + 1;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+
+        // Create Icon (256x256)
+        function createIcon() {
+            const canvas = document.getElementById('iconCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Background circle
+            const gradient = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+            gradient.addColorStop(0, colors.primary);
+            gradient.addColorStop(1, '#3730a3');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(128, 128, 120, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.beginPath();
+            ctx.arc(128, 135, 115, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Main bee body
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.ellipse(128, 128, 60, 40, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Wings
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.beginPath();
+            ctx.ellipse(95, 100, 25, 18, -0.3, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(161, 100, 25, 18, 0.3, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Stripes
+            ctx.fillStyle = colors.onSurface;
+            for (let i = 0; i < 4; i++) {
+                ctx.fillRect(105 + i * 12, 108, 6, 40);
+            }
+            
+            // Eyes
+            ctx.fillStyle = colors.onSurface;
+            ctx.beginPath();
+            ctx.arc(115, 115, 4, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(141, 115, 4, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Highlight
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.beginPath();
+            ctx.ellipse(110, 105, 20, 15, -0.2, 0, Math.PI);
+            ctx.fill();
+        }
+
+        // Download function
+        function downloadCanvas(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // Initialize graphics
+        createHeaderImage();
+        createWelcomeImage();
+        createIcon();
+    </script>
+</body>
+</html>

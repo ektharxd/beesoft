@@ -1,0 +1,43 @@
+BEESOFT SOFTWARE LICENSE AGREEMENT
+
+Copyright (c) 2024 Ekthar
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+ADDITIONAL TERMS:
+
+1. WHATSAPP COMPLIANCE
+   This software is designed to work with WhatsApp Web. Users must comply
+   with WhatsApp's Terms of Service and use this software responsibly.
+
+2. ANTI-SPAM POLICY
+   This software includes anti-ban protection features. Users are responsible
+   for ensuring their usage complies with applicable laws and regulations
+   regarding automated messaging and spam prevention.
+
+3. DATA PRIVACY
+   This software stores data locally on your device. No data is transmitted
+   to external servers without your explicit consent.
+
+4. DISCLAIMER
+   The author is not responsible for any account suspensions, bans, or other
+   consequences resulting from the use of this software. Use at your own risk.
+
+5. SUPPORT
+   Support is provided on a best-effort basis through the project's GitHub
+   repository and email contact.
+
+By installing and using this software, you agree to these terms and conditions.
+
+For questions or support, contact: ekthar.xd@gmail.com
+Project repository: https://github.com/ektharxd/beesoft
