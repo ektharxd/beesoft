@@ -213,12 +213,24 @@
       }
       // POST to backend login endpoint
       try {
-        // Use apiCall helper for proper endpoint handling
-        const response = await window.apiCall('/api/admin-login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
+        let response;
+        
+        // Check if apiCall is available, otherwise use direct fetch to Vercel
+        if (typeof window.apiCall === 'function') {
+          response = await window.apiCall('/api/admin-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+        } else {
+          // Fallback to direct Vercel endpoint
+          console.log('apiCall not available, using direct Vercel endpoint');
+          response = await fetch('https://beesoft-one.vercel.app/api/admin-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+        }
         if (response.ok) {
           const data = await response.json();
           // Store token securely (HttpOnly cookie preferred, fallback to localStorage)
