@@ -1,0 +1,64 @@
+# Beesoft - Core App Only
+# Node.js
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Build outputs
+/dist/
+/build/
+/out/
+
+# WhatsApp data
+.wwebjs_auth/
+.wwebjs_cache/
+.beesoft-data/
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# User data
+uploads/
+user-data/
+wa_error_*.png
+
+# Backup files
+*.rar
+*.zip
+*.backup
+
+# Debug
+.qodo/
+.tmp/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Exclude optional components
+beesoft-backend/
+admin-portal/
+oauth-callback-server.js
+main_*.js
+preload-*.js
+send_whatsapp.js
+
+# Include core files
+!main.js
+!preload.js
+!package.json
+!public/
+!README.md
+!LICENSE
+!CHANGELOG.md
+!build-config.js
+!installer.nsh

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beesoft Admin Login</title>
+  <link href="https://fonts.cdnfonts.com/css/ntype82" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --vercel-bg: #0a0a0a;
+      --vercel-surface: #18181b;
+      --vercel-card: #1c1c1f;
+      --vercel-primary: #fff;
+      --vercel-secondary: #888;
+      --vercel-accent: #6366f1;
+      --vercel-success: #22c55e;
+      --vercel-warning: #facc15;
+      --vercel-error: #ef4444;
+      --vercel-border: #232323;
+      --vercel-radius: 16px;
+      --vercel-shadow: 0 2px 16px 0 #000a;
+      --vercel-font: 'ntype82', 'Inter', sans-serif;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: var(--vercel-font);
+      background: var(--vercel-bg);
+      color: var(--vercel-primary);
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-container {
+      max-width: 400px;
+      width: 100%;
+      padding: 20px;
+    }
+    .vercel-card {
+      background: var(--vercel-surface);
+      border-radius: var(--vercel-radius);
+      box-shadow: var(--vercel-shadow);
+      padding: 2.5rem;
+      border: 1.5px solid var(--vercel-border);
+    }
+    .vercel-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .vercel-logo {
+      font-size: 3rem;
+      color: var(--vercel-accent);
+      margin-bottom: 1rem;
+    }
+    .vercel-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--vercel-primary);
+      margin-bottom: 0.5rem;
+    }
+    .vercel-subtitle {
+      color: var(--vercel-secondary);
+      font-size: 1rem;
+    }
+    .vercel-form-group {
+      margin-bottom: 1.5rem;
+    }
+    .vercel-label {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      color: var(--vercel-secondary);
+    }
+    .vercel-input {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      border: 1.5px solid var(--vercel-border);
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-family: var(--vercel-font);
+      background: #101014;
+      color: var(--vercel-primary);
+      outline: none;
+      transition: border 0.2s;
+      box-sizing: border-box;
+    }
+    .vercel-input:focus {
+      border-color: var(--vercel-accent);
+    }
+    .vercel-btn {
+      width: 100%;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--vercel-accent);
+      color: #fff;
+      font-size: 1.1rem;
+      font-family: var(--vercel-font);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      box-shadow: 0 2px 8px #6366f133;
+    }
+    .vercel-btn:hover {
+      background: #4f46e5;
+    }
+    .vercel-btn:disabled {
+      background: var(--vercel-secondary);
+      cursor: not-allowed;
+    }
+    .vercel-error {
+      color: var(--vercel-error);
+      font-size: 1rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .vercel-success {
+      color: var(--vercel-success);
+      font-size: 1rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #ffffff3d;
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="vercel-card">
+      <div class="vercel-header">
+        <div class="vercel-logo">
+          <i class="fas fa-bee"></i>
+        </div>
+        <div class="vercel-title">Beesoft Admin</div>
+        <div class="vercel-subtitle">Sign in to access the dashboard</div>
+      </div>
+      
+      <form id="loginForm">
+        <div class="vercel-form-group">
+          <label class="vercel-label" for="email">Email</label>
+          <input type="email" id="email" class="vercel-input" placeholder="Enter email" required />
+        </div>
+        
+        <div class="vercel-form-group">
+          <label class="vercel-label" for="password">Password</label>
+          <input type="password" id="password" class="vercel-input" placeholder="Enter password" required />
+        </div>
+        
+        <button type="submit" class="vercel-btn" id="loginBtn">
+          <span id="loginText">Sign In</span>
+          <span id="loginSpinner" class="loading" style="display: none;"></span>
+        </button>
+        
+        <div id="message" style="display: none;"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:4000/api/admin';
+    
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const messageDiv = document.getElementById('message');
+      const loginBtn = document.getElementById('loginBtn');
+      const loginText = document.getElementById('loginText');
+      const loginSpinner = document.getElementById('loginSpinner');
+      
+      // Reset message
+      messageDiv.style.display = 'none';
+      messageDiv.className = '';
+      
+      // Show loading state
+      loginBtn.disabled = true;
+      loginText.style.display = 'none';
+      loginSpinner.style.display = 'inline-block';
+      
+      try {
+        const response = await fetch(`${API_BASE}/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Store token
+          localStorage.setItem('adminToken', data.token);
+          localStorage.setItem('adminEmail', data.user?.email || email);
+          
+          // Show success message
+          messageDiv.textContent = 'Login successful! Redirecting...';
+          messageDiv.className = 'vercel-success';
+          messageDiv.style.display = 'block';
+          
+          // Redirect to dashboard (you can create this later)
+          setTimeout(() => {
+            window.location.href = '/admin-dashboard-new.html';
+          }, 1500);
+          
+        } else {
+          throw new Error(data.error || 'Login failed');
+        }
+        
+      } catch (error) {
+        messageDiv.textContent = error.message;
+        messageDiv.className = 'vercel-error';
+        messageDiv.style.display = 'block';
+      } finally {
+        // Reset loading state
+        loginBtn.disabled = false;
+        loginText.style.display = 'inline-block';
+        loginSpinner.style.display = 'none';
+      }
+    });
+    
+    // Check if already logged in
+    if (localStorage.getItem('adminToken')) {
+      window.location.href = '/admin-dashboard-new.html';
+    }
+  </script>
+</body>
+</html>

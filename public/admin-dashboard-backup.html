@@ -1,0 +1,2271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beesoft Admin Dashboard</title>
+  <link href="https://fonts.cdnfonts.com/css/ntype82" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --vercel-bg: #0a0a0a;
+      --vercel-surface: #18181b;
+      --vercel-card: #1c1c1f;
+      --vercel-primary: #fff;
+      --vercel-secondary: #888;
+      --vercel-accent: #6366f1;
+      --vercel-success: #22c55e;
+      --vercel-warning: #facc15;
+      --vercel-error: #ef4444;
+      --vercel-border: #232323;
+      --vercel-radius: 16px;
+      --vercel-shadow: 0 2px 16px 0 #000a;
+      --vercel-font: 'ntype82', 'Inter', sans-serif;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+      font-family: var(--vercel-font);
+      background: var(--vercel-bg);
+      color: var(--vercel-primary);
+      letter-spacing: 0.01em;
+    }
+    
+    .dashboard-container {
+      display: flex;
+      height: 100vh;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: var(--vercel-surface);
+      border-right: 1px solid var(--vercel-border);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-header {
+      padding: 2rem 1.5rem;
+      border-bottom: 1px solid var(--vercel-border);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    
+    .logo i {
+      color: var(--vercel-accent);
+      font-size: 1.5rem;
+    }
+    
+    .sidebar-nav {
+      flex: 1;
+      padding: 1rem 0;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      color: var(--vercel-secondary);
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .nav-item:hover,
+    .nav-item.active {
+      background: var(--vercel-card);
+      color: var(--vercel-primary);
+    }
+    
+    .nav-item.active {
+      border-right: 2px solid var(--vercel-accent);
+    }
+    
+    .sidebar-footer {
+      padding: 1.5rem;
+      border-top: 1px solid var(--vercel-border);
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--vercel-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    
+    .logout-btn {
+      width: 100%;
+      padding: 0.5rem;
+      background: var(--vercel-error);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: var(--vercel-font);
+      transition: background 0.2s;
+    }
+    
+    .logout-btn:hover {
+      background: #dc2626;
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .main-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--vercel-border);
+      background: var(--vercel-surface);
+    }
+    
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .page-subtitle {
+      color: var(--vercel-secondary);
+    }
+    
+    .main-body {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: var(--vercel-card);
+      border-radius: var(--vercel-radius);
+      padding: 1.5rem;
+      border: 1px solid var(--vercel-border);
+    }
+    
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    
+    .stat-title {
+      color: var(--vercel-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-change {
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .stat-change.positive {
+      color: var(--vercel-success);
+    }
+    
+    .stat-change.negative {
+      color: var(--vercel-error);
+    }
+    
+    /* Content Cards */
+    .content-card {
+      background: var(--vercel-card);
+      border-radius: var(--vercel-radius);
+      border: 1px solid var(--vercel-border);
+      margin-bottom: 2rem;
+    }
+    
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--vercel-border);
+      display: flex;
+      align-items: center;
+      justify-content: between;
+    }
+    
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      flex: 1;
+    }
+    
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--vercel-font);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-primary {
+      background: var(--vercel-accent);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #4f46e5;
+    }
+    
+    .btn-success {
+      background: var(--vercel-success);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #16a34a;
+    }
+    
+    .btn-warning {
+      background: var(--vercel-warning);
+      color: #000;
+    }
+    
+    .btn-warning:hover {
+      background: #eab308;
+    }
+    
+    .btn-danger {
+      background: var(--vercel-error);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--vercel-primary);
+      border: 1px solid var(--vercel-border);
+    }
+    
+    .btn-outline:hover {
+      background: var(--vercel-surface);
+    }
+    
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--vercel-border);
+    }
+    
+    .table th {
+      background: var(--vercel-surface);
+      font-weight: 600;
+      color: var(--vercel-secondary);
+      font-size: 0.875rem;
+    }
+    
+    .table tr:hover {
+      background: var(--vercel-surface);
+    }
+    
+    /* Status badges */
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-online {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--vercel-success);
+    }
+    
+    .status-offline {
+      background: rgba(156, 163, 175, 0.1);
+      color: var(--vercel-secondary);
+    }
+    
+    .status-banned {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--vercel-error);
+    }
+    
+    .status-active {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--vercel-success);
+    }
+    
+    .status-expired {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--vercel-error);
+    }
+    
+    .status-expiring {
+      background: rgba(250, 204, 21, 0.1);
+      color: var(--vercel-warning);
+    }
+    
+    .status-permanent {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--vercel-accent);
+    }
+    
+    /* Forms */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--vercel-secondary);
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--vercel-border);
+      border-radius: 8px;
+      background: var(--vercel-surface);
+      color: var(--vercel-primary);
+      font-family: var(--vercel-font);
+    }
+    
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--vercel-accent);
+    }
+    
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .modal {
+      background: var(--vercel-card);
+      border-radius: var(--vercel-radius);
+      border: 1px solid var(--vercel-border);
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--vercel-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .modal-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--vercel-secondary);
+      cursor: pointer;
+      font-size: 1.25rem;
+    }
+    
+    .modal-body {
+      padding: 1.5rem;
+    }
+    
+    .modal-footer {
+      padding: 1.5rem;
+      border-top: 1px solid var(--vercel-border);
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+    
+    /* Loading */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--vercel-border);
+      border-radius: 50%;
+      border-top-color: var(--vercel-accent);
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Utilities */
+    .hidden {
+      display: none !important;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    /* Message Analytics Styles */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .analytics-card {
+      background-color: var(--vercel-surface);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .analytics-card h4 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: var(--vercel-primary);
+      font-size: 1rem;
+    }
+    
+    .progress-container {
+      margin-bottom: 0.5rem;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background-color: var(--vercel-border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background-color: var(--vercel-accent);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      color: var(--vercel-secondary);
+    }
+    
+    .text-right {
+      text-align: right;
+    }
+    
+    .mb-4 {
+      margin-bottom: 1rem;
+    }
+    
+    .mt-4 {
+      margin-top: 1rem;
+    }
+    
+    .flex {
+      display: flex;
+    }
+    
+    .items-center {
+      align-items: center;
+    }
+    
+    .justify-between {
+      justify-content: space-between;
+    }
+    
+    .gap-2 {
+      gap: 0.5rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: -100%;
+        z-index: 999;
+        transition: left 0.3s;
+      }
+      
+      .sidebar.open {
+        left: 0;
+      }
+      
+      .main-content {
+        width: 100%;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fas fa-bee"></i>
+          <span>Beesoft Admin</span>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-page="dashboard">
+          <i class="fas fa-chart-line"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-page="devices">
+          <i class="fas fa-desktop"></i>
+          <span>Devices</span>
+        </a>
+        <a href="#" class="nav-item" data-page="licenses">
+          <i class="fas fa-key"></i>
+          <span>License Keys</span>
+        </a>
+        <a href="#" class="nav-item" data-page="settings">
+          <i class="fas fa-cog"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">E</div>
+          <div>
+            <div style="font-weight: 600;" id="username">ekthar</div>
+            <div style="font-size: 0.75rem; color: var(--vercel-secondary);">Super Admin</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </button>
+      </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="main-header">
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+        <p class="page-subtitle" id="pageSubtitle">Overview of your Beesoft system</p>
+      </div>
+      
+      <div class="main-body" id="mainBody">
+        <!-- Dashboard content will be loaded here -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Modal Title</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        Modal content
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="modalConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let currentPage = 'dashboard';
+    let authToken = localStorage.getItem('adminToken');
+    let currentUser = localStorage.getItem('adminUsername');
+    const API_BASE = 'http://localhost:4000/api/admin';
+    
+    // Check authentication
+    if (!authToken) {
+      window.location.href = '/admin-login.html';
+    }
+    
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeDashboard();
+      loadPage('dashboard');
+    });
+    
+    function initializeDashboard() {
+      // Set user info
+      if (currentUser) {
+        document.getElementById('username').textContent = currentUser;
+        document.getElementById('userAvatar').textContent = currentUser.charAt(0).toUpperCase();
+      }
+      
+      // Add navigation event listeners
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          const page = this.dataset.page;
+          loadPage(page);
+        });
+      });
+    }
+    
+    function loadPage(page) {
+      // Update navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.querySelector(`[data-page="${page}"]`).classList.add('active');
+      
+      currentPage = page;
+      
+      // Update page title
+      const titles = {
+        dashboard: { title: 'Dashboard', subtitle: 'Overview of your Beesoft system' },
+        devices: { title: 'Device Management', subtitle: 'Manage connected devices and licenses' },
+        licenses: { title: 'License Keys', subtitle: 'Generate and manage license keys' },
+        settings: { title: 'Settings', subtitle: 'System configuration and preferences' }
+      };
+      
+      document.getElementById('pageTitle').textContent = titles[page].title;
+      document.getElementById('pageSubtitle').textContent = titles[page].subtitle;
+      
+      // Load page content
+      switch (page) {
+        case 'dashboard':
+          loadDashboard();
+          break;
+        case 'devices':
+          loadDevices();
+          break;
+        case 'licenses':
+          loadLicenses();
+          break;
+        case 'settings':
+          loadSettings();
+          break;
+      }
+    }
+    
+    async function loadDashboard() {
+      const mainBody = document.getElementById('mainBody');
+      mainBody.innerHTML = '<div class="loading"></div>';
+      
+      try {
+        // Fetch dashboard stats
+        const [deviceStats, licenseStats, messageStats] = await Promise.all([
+          apiRequest('/devices/stats'),
+          apiRequest('/licenses/stats'),
+          fetch('http://localhost:3001/api/message-limits').then(res => res.json()).catch(() => ({}))
+        ]);
+        
+        mainBody.innerHTML = `
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Total Devices</span>
+                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--vercel-accent);">
+                  <i class="fas fa-desktop"></i>
+                </div>
+              </div>
+              <div class="stat-value">${deviceStats.totalDevices || 0}</div>
+              <div class="stat-change">
+                <span>Registered devices</span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Online Devices</span>
+                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--vercel-success);">
+                  <i class="fas fa-circle"></i>
+                </div>
+              </div>
+              <div class="stat-value">${deviceStats.onlineDevices || 0}</div>
+              <div class="stat-change">
+                <span>${deviceStats.offlineDevices || 0} offline</span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Active Licenses</span>
+                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--vercel-success);">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+              </div>
+              <div class="stat-value">${deviceStats.activeSubscriptions || 0}</div>
+              <div class="stat-change">
+                <span>${deviceStats.permanentLicenses || 0} permanent, ${deviceStats.trialLicenses || 0} trial</span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Available Keys</span>
+                <div class="stat-icon" style="background: rgba(250, 204, 21, 0.1); color: var(--vercel-warning);">
+                  <i class="fas fa-key"></i>
+                </div>
+              </div>
+              <div class="stat-value">${licenseStats.availableKeys || 0}</div>
+              <div class="stat-change">
+                <span>${licenseStats.usedKeys || 0} used</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Messages Sent</span>
+                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--vercel-accent);">
+                  <i class="fas fa-comment"></i>
+                </div>
+              </div>
+              <div class="stat-value">${messageStats.totalUsed || 0}</div>
+              <div class="stat-change">
+                <span>${messageStats.dailyUsed || 0} today</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">Message Analytics</h3>
+            </div>
+            <div class="card-body">
+              <div id="messageAnalytics">
+                <div class="analytics-grid">
+                  <div class="analytics-card">
+                    <h4>Total Message Usage</h4>
+                    <div class="progress-container">
+                      <div id="totalProgressBar" class="progress-bar">
+                        <div class="progress-fill" style="width: 0%;"></div>
+                      </div>
+                      <div class="progress-labels">
+                        <span id="totalUsedMessages">0</span>
+                        <span id="totalMessageLimit">0</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="analytics-card">
+                    <h4>Daily Message Usage</h4>
+                    <div class="progress-container">
+                      <div id="dailyProgressBar" class="progress-bar">
+                        <div class="progress-fill" style="width: 0%;"></div>
+                      </div>
+                      <div class="progress-labels">
+                        <span id="dailyUsedMessages">0</span>
+                        <span id="dailyMessageLimit">0</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">Recent Activity</h3>
+              <button class="btn btn-outline" onclick="loadPage('devices')">
+                <i class="fas fa-external-link-alt"></i>
+                View All
+              </button>
+            </div>
+            <div class="card-body">
+              <div id="recentActivity">Loading recent activity...</div>
+            </div>
+          </div>
+        `;
+        
+        // Update message analytics
+        updateMessageAnalytics(messageStats);
+        
+        // Load recent devices
+        loadRecentActivity();
+        
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+        mainBody.innerHTML = '<div class="text-center">Error loading dashboard data</div>';
+      }
+    }
+    
+    function updateMessageAnalytics(messageStats) {
+      // Default values if no data is available
+      const stats = messageStats || {
+        totalLimit: 1000,
+        totalUsed: 0,
+        dailyLimit: 100,
+        dailyUsed: 0
+      };
+      
+      // Calculate percentages
+      const totalPercentage = stats.totalLimit ? Math.min(100, (stats.totalUsed / stats.totalLimit) * 100) : 0;
+      const dailyPercentage = stats.dailyLimit ? Math.min(100, (stats.dailyUsed / stats.dailyLimit) * 100) : 0;
+      
+      // Update the progress bars
+      document.getElementById('totalProgressBar').querySelector('.progress-fill').style.width = `${totalPercentage}%`;
+      document.getElementById('dailyProgressBar').querySelector('.progress-fill').style.width = `${dailyPercentage}%`;
+      
+      // Update the labels
+      document.getElementById('totalUsedMessages').textContent = `${stats.totalUsed || 0} used`;
+      document.getElementById('totalMessageLimit').textContent = `${stats.totalLimit || 0} limit`;
+      document.getElementById('dailyUsedMessages').textContent = `${stats.dailyUsed || 0} used today`;
+      document.getElementById('dailyMessageLimit').textContent = `${stats.dailyLimit || 0} daily limit`;
+      
+      // Set colors based on usage
+      const totalFill = document.getElementById('totalProgressBar').querySelector('.progress-fill');
+      const dailyFill = document.getElementById('dailyProgressBar').querySelector('.progress-fill');
+      
+      if (totalPercentage > 90) {
+        totalFill.style.backgroundColor = 'var(--vercel-error)';
+      } else if (totalPercentage > 70) {
+        totalFill.style.backgroundColor = 'var(--vercel-warning)';
+      } else {
+        totalFill.style.backgroundColor = 'var(--vercel-accent)';
+      }
+      
+      if (dailyPercentage > 90) {
+        dailyFill.style.backgroundColor = 'var(--vercel-error)';
+      } else if (dailyPercentage > 70) {
+        dailyFill.style.backgroundColor = 'var(--vercel-warning)';
+      } else {
+        dailyFill.style.backgroundColor = 'var(--vercel-accent)';
+      }
+    }
+    
+    async function loadRecentActivity() {
+      try {
+        const devices = await apiRequest('/devices?limit=5&sortBy=lastSeen&sortOrder=desc');
+        const activityContainer = document.getElementById('recentActivity');
+        
+        if (devices.devices && devices.devices.length > 0) {
+          activityContainer.innerHTML = `
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Device</th>
+                    <th>Status</th>
+                    <th>License</th>
+                    <th>Last Seen</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${devices.devices.map(device => `
+                    <tr>
+                      <td>
+                        <div>
+                          <div style="font-weight: 600;">${device.name || device.username}</div>
+                          <div style="font-size: 0.75rem; color: var(--vercel-secondary);">${device.machineId}</div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="status-badge ${device.isOnline ? 'status-online' : 'status-offline'}">
+                          ${device.isOnline ? 'Online' : 'Offline'}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="status-badge status-${getSubscriptionStatusClass(device.subscriptionStatus)}">
+                          ${getSubscriptionStatusText(device.subscriptionStatus)}
+                        </span>
+                      </td>
+                      <td>${formatTimeAgo(device.lastSeen)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        } else {
+          activityContainer.innerHTML = '<div class="text-center">No devices found</div>';
+        }
+      } catch (error) {
+        console.error('Error loading recent activity:', error);
+        document.getElementById('recentActivity').innerHTML = '<div class="text-center">Error loading activity</div>';
+      }
+    }
+    
+    // Continue with more functions...
+    // This is getting quite long, so I'll continue in the next part
+    
+    // Utility functions
+    function getSubscriptionStatusClass(status) {
+      const statusMap = {
+        'active': 'active',
+        'permanent': 'permanent',
+        'expired': 'expired',
+        'expiring_soon': 'expiring',
+        'expiring_warning': 'expiring',
+        'banned': 'banned',
+        'inactive': 'offline'
+      };
+      return statusMap[status] || 'offline';
+    }
+    
+    function getSubscriptionStatusText(status) {
+      const statusMap = {
+        'active': 'Active',
+        'permanent': 'Permanent',
+        'expired': 'Expired',
+        'expiring_soon': 'Expiring',
+        'expiring_warning': 'Expiring',
+        'banned': 'Banned',
+        'inactive': 'Inactive'
+      };
+      return statusMap[status] || 'Unknown';
+    }
+    
+    function formatTimeAgo(dateString) {
+      const now = new Date();
+      const date = new Date(dateString);
+      const diffMs = now - date;
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMinutes / 60);
+      const diffDays = Math.floor(diffHours / 24);
+      
+      if (diffMinutes < 1) return 'Just now';
+      if (diffMinutes < 60) return `${diffMinutes}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      return `${diffDays}d ago`;
+    }
+    
+    async function apiRequest(endpoint, options = {}) {
+      const url = `${API_BASE}${endpoint}`;
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        ...options
+      };
+      
+      const response = await fetch(url, config);
+      
+      if (response.status === 401) {
+        logout();
+        return;
+      }
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    }
+    
+    function logout() {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUsername');
+      window.location.href = '/admin-login.html';
+    }
+    
+    function showModal(title, body, footer) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalBody').innerHTML = body;
+      if (footer) {
+        document.getElementById('modalFooter').innerHTML = footer;
+      }
+      document.getElementById('modalOverlay').classList.remove('hidden');
+    }
+    
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.add('hidden');
+    }
+    
+    // Device Management Page
+    async function loadDevices() {
+      const mainBody = document.getElementById('mainBody');
+      mainBody.innerHTML = '<div class="loading"></div>';
+      
+      try {
+        mainBody.innerHTML = `
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">Device Management</h3>
+              <div class="card-actions">
+                <button class="btn btn-outline" onclick="refreshDevices()">
+                  <i class="fas fa-sync-alt"></i>
+                  Refresh
+                </button>
+                <button class="btn btn-primary" onclick="exportDevices()">
+                  <i class="fas fa-download"></i>
+                  Export
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <!-- Filters -->
+              <div class="flex items-center gap-2 mb-4">
+                <select class="form-select" id="statusFilter" onchange="filterDevices()" style="width: auto;">
+                  <option value="">All Status</option>
+                  <option value="online">Online</option>
+                  <option value="offline">Offline</option>
+                  <option value="banned">Banned</option>
+                  <option value="active_subscription">Active License</option>
+                  <option value="expired">Expired</option>
+                </select>
+                <select class="form-select" id="platformFilter" onchange="filterDevices()" style="width: auto;">
+                  <option value="">All Platforms</option>
+                  <option value="Windows">Windows</option>
+                  <option value="macOS">macOS</option>
+                  <option value="Linux">Linux</option>
+                </select>
+                <input type="text" class="form-input" id="searchInput" placeholder="Search devices..." onkeyup="searchDevices()" style="width: 300px;">
+              </div>
+              
+              <!-- Device Table -->
+              <div class="table-container">
+                <table class="table" id="devicesTable">
+                  <thead>
+                    <tr>
+                      <th>Device</th>
+                      <th>Status</th>
+                      <th>License</th>
+                      <th>Platform</th>
+                      <th>Last Seen</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="devicesTableBody">
+                    <tr><td colspan="6" class="text-center">Loading devices...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Pagination -->
+              <div class="flex items-center justify-between mt-4">
+                <div id="devicesPagination"></div>
+                <div id="devicesCount"></div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Load devices data
+        await refreshDevices();
+        
+        // Auto-refresh every 30 seconds
+        if (window.deviceRefreshInterval) {
+          clearInterval(window.deviceRefreshInterval);
+        }
+        window.deviceRefreshInterval = setInterval(() => {
+          if (currentPage === 'devices') {
+            refreshDevices();
+          }
+        }, 30000);
+        
+      } catch (error) {
+        console.error('Error loading devices page:', error);
+        mainBody.innerHTML = '<div class="text-center">Error loading devices page</div>';
+      }
+    }
+    
+    let currentDevicesPage = 1;
+    let currentDevicesFilters = {};
+    
+    async function refreshDevices() {
+      try {
+        const params = new URLSearchParams({
+          page: currentDevicesPage,
+          limit: 20,
+          sortBy: 'lastSeen',
+          sortOrder: 'desc',
+          ...currentDevicesFilters
+        });
+        
+        const response = await apiRequest(`/devices?${params}`);
+        displayDevices(response);
+        
+      } catch (error) {
+        console.error('Error refreshing devices:', error);
+        document.getElementById('devicesTableBody').innerHTML = 
+          '<tr><td colspan="6" class="text-center">Error loading devices</td></tr>';
+      }
+    }
+    
+    function displayDevices(data) {
+      const tbody = document.getElementById('devicesTableBody');
+      const pagination = document.getElementById('devicesPagination');
+      const count = document.getElementById('devicesCount');
+      
+      if (!data.devices || data.devices.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center">No devices found</td></tr>';
+        pagination.innerHTML = '';
+        count.innerHTML = '';
+        return;
+      }
+      
+      tbody.innerHTML = data.devices.map(device => `
+        <tr>
+          <td>
+            <div>
+              <div style="font-weight: 600;">${device.name || device.username}</div>
+              <div style="font-size: 0.75rem; color: var(--vercel-secondary);">${device.machineId}</div>
+              <div style="font-size: 0.75rem; color: var(--vercel-secondary);">${device.email || 'No email'}</div>
+            </div>
+          </td>
+          <td>
+            <span class="status-badge ${device.isOnline ? 'status-online' : 'status-offline'}">
+              ${device.isOnline ? 'Online' : 'Offline'}
+            </span>
+            ${device.isBanned ? '<br><span class="status-badge status-banned">Banned</span>' : ''}
+          </td>
+          <td>
+            <span class="status-badge status-${getSubscriptionStatusClass(device.subscriptionStatus)}">
+              ${getSubscriptionStatusText(device.subscriptionStatus)}
+            </span>
+            ${device.subscription && device.subscription.type === 'trial' ? `
+              <div style="margin-top: 0.5rem; font-size: 0.75rem;">
+                <div>Messages: <span style="font-weight: bold; color: var(--vercel-accent);">${device.subscription.messageLimit !== undefined ? device.subscription.messageLimit : 'Unlimited'}</span></div>
+                <div>Daily: <span style="font-weight: bold; color: var(--vercel-accent);">${device.subscription.dailyMessageLimit !== undefined ? device.subscription.dailyMessageLimit : 'Unlimited'}</span></div>
+              </div>
+            ` : ''}
+            ${device.daysRemaining > 0 && device.daysRemaining < 9999 ? 
+              `<br><small>${device.daysRemaining} days left</small>` : ''}
+          </td>
+          <td>${device.platform || 'Unknown'}</td>
+          <td>${formatTimeAgo(device.lastSeen)}</td>
+          <td>
+            <div class="flex gap-2">
+              <button class="btn btn-outline" onclick="showDeviceActions('${device.machineId}')" title="Actions">
+                <i class="fas fa-cog"></i>
+              </button>
+              <button class="btn btn-outline" onclick="editDevice('${device.machineId}')" title="Edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-outline" onclick="viewDeviceLogsAndHeartbeats('${device.machineId}')" title="Logs/Heartbeats">
+                <i class="fas fa-history"></i>
+              </button>
+              ${device.isBanned ? 
+                `<button class="btn btn-success" onclick="unbanDevice('${device.machineId}')" title="Unban">
+                  <i class="fas fa-unlock"></i>
+                </button>` :
+                `<button class="btn btn-warning" onclick="banDevice('${device.machineId}')" title="Ban">
+                  <i class="fas fa-ban"></i>
+                </button>`
+              }
+              <button class="btn btn-danger" onclick="removeDevice('${device.machineId}')" title="Remove">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+      
+      // Pagination
+      const { page, pages, total } = data.pagination;
+      let paginationHtml = '';
+      
+      if (pages > 1) {
+        paginationHtml = '<div class="flex gap-2">';
+        
+        if (page > 1) {
+          paginationHtml += `<button class="btn btn-outline" onclick="goToDevicesPage(${page - 1})">Previous</button>`;
+        }
+        
+        for (let i = Math.max(1, page - 2); i <= Math.min(pages, page + 2); i++) {
+          paginationHtml += `<button class="btn ${i === page ? 'btn-primary' : 'btn-outline'}" onclick="goToDevicesPage(${i})">${i}</button>`;
+        }
+        
+        if (page < pages) {
+          paginationHtml += `<button class="btn btn-outline" onclick="goToDevicesPage(${page + 1})">Next</button>`;
+        }
+        
+        paginationHtml += '</div>';
+      }
+      
+      pagination.innerHTML = paginationHtml;
+      count.innerHTML = `Showing ${data.devices.length} of ${total} devices`;
+    }
+    
+    function goToDevicesPage(page) {
+      currentDevicesPage = page;
+      refreshDevices();
+    }
+    
+    function filterDevices() {
+      const status = document.getElementById('statusFilter').value;
+      const platform = document.getElementById('platformFilter').value;
+      
+      currentDevicesFilters = {};
+      if (status) currentDevicesFilters.status = status;
+      if (platform) currentDevicesFilters.platform = platform;
+      
+      currentDevicesPage = 1;
+      refreshDevices();
+    }
+    
+    function searchDevices() {
+      const search = document.getElementById('searchInput').value.trim();
+      
+      if (search) {
+        currentDevicesFilters.search = search;
+      } else {
+        delete currentDevicesFilters.search;
+      }
+      
+      currentDevicesPage = 1;
+      refreshDevices();
+    }
+    
+    function showDeviceActions(machineId) {
+      showModal('Device Actions', `
+        <div class="form-group">
+          <label class="form-label">Choose Action:</label>
+          <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+            <button class="btn btn-success" onclick="closeModal(); activateTrialModal('${machineId}')">
+              <i class="fas fa-clock"></i>
+              Activate Trial
+            </button>
+            <button class="btn btn-primary" onclick="closeModal(); activatePermanentModal('${machineId}')">
+              <i class="fas fa-key"></i>
+              Activate Permanent License
+            </button>
+            <button class="btn btn-warning" onclick="closeModal(); updateMessageLimitsModal('${machineId}')">
+              <i class="fas fa-comment"></i>
+              Update Message Limits
+            </button>
+            <button class="btn btn-outline" onclick="closeModal(); viewDeviceLogs('${machineId}')">
+              <i class="fas fa-history"></i>
+              View Device Logs
+            </button>
+          </div>
+        </div>
+      `, '<button class="btn btn-outline" onclick="closeModal()">Close</button>');
+    }
+    
+    function activateTrialModal(machineId) {
+      showModal('Activate Trial License', `
+        <div class="form-group">
+          <label class="form-label">Trial Duration (Days):</label>
+          <input type="number" class="form-input" id="trialDays" min="1" max="365" value="30" placeholder="Enter days (1-365)">
+          <small style="color: var(--vercel-secondary);">Enter the number of days for the trial license</small>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Total Message Limit:</label>
+          <input type="number" class="form-input" id="messageLimit" min="0" value="100" placeholder="Total messages (0 = unlimited)">
+          <small style="color: var(--vercel-secondary);">Maximum total messages for the entire trial period</small>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Daily Message Limit:</label>
+          <input type="number" class="form-input" id="dailyMessageLimit" min="0" value="50" placeholder="Daily messages (0 = unlimited)">
+          <small style="color: var(--vercel-secondary);">Maximum messages per day</small>
+        </div>
+        
+        <div class="form-group">
+          <div style="background: var(--vercel-surface); padding: 1rem; border-radius: 8px; font-size: 0.875rem;">
+            <strong>Trial Limits Summary:</strong><br>
+            • Duration: <span id="durationSummary">30 days</span><br>
+            • Total Messages: <span id="totalMessagesSummary">100 messages</span><br>
+            • Daily Messages: <span id="dailyMessagesSummary">50 messages/day</span>
+          </div>
+        </div>
+      `, `
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-success" onclick="activateTrial('${machineId}')">Activate Trial</button>
+      `);
+      
+      // Add event listeners for real-time summary updates
+      setTimeout(() => {
+        function updateTrialSummary() {
+          const days = document.getElementById('trialDays').value || 30;
+          const totalMessages = document.getElementById('messageLimit').value || 100;
+          const dailyMessages = document.getElementById('dailyMessageLimit').value || 50;
+          
+          document.getElementById('durationSummary').textContent = days + ' days';
+          document.getElementById('totalMessagesSummary').textContent = totalMessages == 0 ? 'Unlimited' : totalMessages + ' messages';
+          document.getElementById('dailyMessagesSummary').textContent = dailyMessages == 0 ? 'Unlimited' : dailyMessages + ' messages/day';
+        }
+        
+        document.getElementById('trialDays').addEventListener('input', updateTrialSummary);
+        document.getElementById('messageLimit').addEventListener('input', updateTrialSummary);
+        document.getElementById('dailyMessageLimit').addEventListener('input', updateTrialSummary);
+      }, 100);
+    }
+    
+    function activatePermanentModal(machineId) {
+      showModal('Activate Permanent License', `
+        <div class="form-group">
+          <label class="form-label">License Key:</label>
+          <input type="text" class="form-input" id="licenseKey" placeholder="XXXX-XXXX-XXXX-XXXX" style="text-transform: uppercase;">
+          <small style="color: var(--vercel-secondary);">Enter a valid license key in format: XXXX-XXXX-XXXX-XXXX</small>
+        </div>
+      `, `
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="activatePermanent('${machineId}')">Activate License</button>
+      `);
+    }
+    
+    async function activateTrial(machineId) {
+      const days = parseInt(document.getElementById('trialDays').value);
+      const messageLimit = parseInt(document.getElementById('messageLimit').value) || 0;
+      const dailyMessageLimit = parseInt(document.getElementById('dailyMessageLimit').value) || 0;
+      
+      if (!days || days < 1 || days > 365) {
+        alert('Please enter a valid number of days (1-365)');
+        return;
+      }
+      
+      try {
+        await apiRequest(`/devices/${machineId}/trial`, {
+          method: 'POST',
+          body: JSON.stringify({ 
+            days,
+            messageLimit,
+            dailyMessageLimit
+          })
+        });
+        
+        closeModal();
+        alert(`Trial activated for ${days} days with message limits: ${messageLimit || 'unlimited'} total, ${dailyMessageLimit || 'unlimited'} daily`);
+        refreshDevices();
+        
+      } catch (error) {
+        console.error('Error activating trial:', error);
+        alert('Failed to activate trial');
+      }
+    }
+    
+    async function activatePermanent(machineId) {
+      const key = document.getElementById('licenseKey').value.trim().toUpperCase();
+      
+      if (!key) {
+        alert('Please enter a license key');
+        return;
+      }
+      
+      const keyPattern = /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+      if (!keyPattern.test(key)) {
+        alert('Invalid key format. Use: XXXX-XXXX-XXXX-XXXX');
+        return;
+      }
+      
+      try {
+        await apiRequest(`/devices/${machineId}/permanent`, {
+          method: 'POST',
+          body: JSON.stringify({ key })
+        });
+        
+        closeModal();
+        alert('Permanent license activated successfully');
+        refreshDevices();
+        
+      } catch (error) {
+        console.error('Error activating permanent license:', error);
+        alert(error.message || 'Failed to activate permanent license');
+      }
+    }
+    
+    function updateMessageLimitsModal(machineId) {
+      showModal('Update Message Limits', `
+        <div class="form-group">
+          <label class="form-label">Total Message Limit:</label>
+          <input type="number" class="form-input" id="messageLimit" min="0" placeholder="Total messages (0 = unlimited)">
+          <small style="color: var(--vercel-secondary);">Maximum total messages for the entire subscription period</small>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Daily Message Limit:</label>
+          <input type="number" class="form-input" id="dailyMessageLimit" min="0" placeholder="Daily messages (0 = unlimited)">
+          <small style="color: var(--vercel-secondary);">Maximum messages per day</small>
+        </div>
+        
+        <div class="form-group">
+          <div style="background: var(--vercel-surface); padding: 1rem; border-radius: 8px; font-size: 0.875rem;">
+            <strong>Message Limits Summary:</strong><br>
+            • Total Messages: <span id="totalMessagesSummary">Not set</span><br>
+            • Daily Messages: <span id="dailyMessagesSummary">Not set</span>
+          </div>
+        </div>
+      `, `
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-warning" onclick="updateMessageLimits('${machineId}')">Update Limits</button>
+      `);
+      
+      // Add event listeners for real-time summary updates
+      setTimeout(() => {
+        function updateLimitsSummary() {
+          const totalMessages = document.getElementById('messageLimit').value;
+          const dailyMessages = document.getElementById('dailyMessageLimit').value;
+          
+          document.getElementById('totalMessagesSummary').textContent = !totalMessages ? 'Not set' : 
+            (totalMessages == 0 ? 'Unlimited' : totalMessages + ' messages');
+          document.getElementById('dailyMessagesSummary').textContent = !dailyMessages ? 'Not set' : 
+            (dailyMessages == 0 ? 'Unlimited' : dailyMessages + ' messages/day');
+        }
+        
+        document.getElementById('messageLimit').addEventListener('input', updateLimitsSummary);
+        document.getElementById('dailyMessageLimit').addEventListener('input', updateLimitsSummary);
+      }, 100);
+    }
+    
+    async function updateMessageLimits(machineId) {
+      const messageLimit = parseInt(document.getElementById('messageLimit').value) || 0;
+      const dailyMessageLimit = parseInt(document.getElementById('dailyMessageLimit').value) || 0;
+      
+      try {
+        await apiRequest(`/devices/${machineId}/update-limits`, {
+          method: 'POST',
+          body: JSON.stringify({ 
+            totalMessageLimit: messageLimit,
+            dailyMessageLimit
+          })
+        });
+        
+        closeModal();
+        alert(`Message limits updated: ${messageLimit || 'unlimited'} total, ${dailyMessageLimit || 'unlimited'} daily`);
+        refreshDevices();
+        
+      } catch (error) {
+        console.error('Error updating message limits:', error);
+        alert(error.message || 'Failed to update message limits');
+      }
+    }
+    
+    async function banDevice(machineId) {
+      const reason = prompt('Enter ban reason:');
+      if (!reason) return;
+      
+      try {
+        await apiRequest(`/devices/${machineId}/ban`, {
+          method: 'POST',
+          body: JSON.stringify({ reason })
+        });
+        
+        alert('Device banned successfully');
+        refreshDevices();
+        
+      } catch (error) {
+        console.error('Error banning device:', error);
+        alert('Failed to ban device');
+      }
+    }
+    
+    async function unbanDevice(machineId) {
+      if (!confirm('Are you sure you want to unban this device?')) return;
+      
+      try {
+        await apiRequest(`/devices/${machineId}/unban`, {
+          method: 'POST'
+        });
+        
+        alert('Device unbanned successfully');
+        refreshDevices();
+        
+      } catch (error) {
+        console.error('Error unbanning device:', error);
+        alert('Failed to unban device');
+      }
+    }
+    
+    async function removeDevice(machineId) {
+      if (!confirm('Are you sure you want to remove this device? This action cannot be undone.')) return;
+      
+      try {
+        await apiRequest(`/devices/${machineId}`, {
+          method: 'DELETE'
+        });
+        
+        alert('Device removed successfully');
+        refreshDevices();
+        
+      } catch (error) {
+        console.error('Error removing device:', error);
+        alert('Failed to remove device');
+      }
+    }
+    
+    async function editDevice(machineId) {
+      try {
+        const device = await apiRequest(`/devices/${machineId}`);
+        
+        showModal('Edit Device', `
+          <div class="form-group">
+            <label class="form-label">Username:</label>
+            <input type="text" class="form-input" id="editUsername" value="${device.username || ''}" placeholder="Username">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Name:</label>
+            <input type="text" class="form-input" id="editName" value="${device.name || ''}" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email:</label>
+            <input type="email" class="form-input" id="editEmail" value="${device.email || ''}" placeholder="Email address">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mobile:</label>
+            <input type="text" class="form-input" id="editMobile" value="${device.mobile || ''}" placeholder="Mobile number">
+          </div>
+        `, `
+          <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-primary" onclick="saveDeviceEdit('${machineId}')">Save Changes</button>
+        `);
+        
+      } catch (error) {
+        console.error('Error loading device details:', error);
+        alert('Failed to load device details');
+      }
+    }
+    
+    async function saveDeviceEdit(machineId) {
+      const username = document.getElementById('editUsername').value.trim();
+      const name = document.getElementById('editName').value.trim();
+      const email = document.getElementById('editEmail').value.trim();
+      const mobile = document.getElementById('editMobile').value.trim();
+      
+      try {
+        await apiRequest(`/devices/${machineId}`, {
+          method: 'PUT',
+          body: JSON.stringify({ username, name, email, mobile })
+        });
+        
+        closeModal();
+        alert('Device updated successfully');
+        refreshDevices();
+        
+      } catch (error) {
+        console.error('Error updating device:', error);
+        alert('Failed to update device');
+      }
+    }
+    
+    async function viewDeviceLogs(machineId) {
+      try {
+        const device = await apiRequest(`/devices/${machineId}`);
+        
+        let logsHtml = '<div style="max-height: 400px; overflow-y: auto;">';
+        
+        if (device.logs && device.logs.length > 0) {
+          logsHtml += device.logs.map(log => `
+            <div style="border-bottom: 1px solid var(--vercel-border); padding: 1rem 0;">
+              <div style="font-weight: 600; color: var(--vercel-primary);">${log.type}</div>
+              <div style="font-size: 0.875rem; color: var(--vercel-secondary); margin: 0.5rem 0;">
+                ${new Date(log.timestamp).toLocaleString()}
+                ${log.activatedBy ? ` • by ${log.activatedBy}` : ''}
+              </div>
+              ${log.details ? `<div style="font-size: 0.875rem;">${JSON.stringify(log.details, null, 2)}</div>` : ''}
+            </div>
+          `).join('');
+        } else {
+          logsHtml += '<div class="text-center">No logs found for this device</div>';
+        }
+        
+        logsHtml += '</div>';
+        
+        showModal('Device Logs', logsHtml, '<button class="btn btn-outline" onclick="closeModal()">Close</button>');
+        
+      } catch (error) {
+        console.error('Error loading device logs:', error);
+        alert('Failed to load device logs');
+      }
+    }
+    
+    async function exportDevices() {
+      try {
+        const response = await apiRequest('/devices?limit=1000');
+        const devices = response.devices;
+        
+        const csvContent = [
+          ['Machine ID', 'Username', 'Name', 'Email', 'Mobile', 'Platform', 'Status', 'License', 'Last Seen'].join(','),
+          ...devices.map(device => [
+            device.machineId,
+            device.username || '',
+            device.name || '',
+            device.email || '',
+            device.mobile || '',
+            device.platform || '',
+            device.isOnline ? 'Online' : 'Offline',
+            getSubscriptionStatusText(device.subscriptionStatus),
+            device.lastSeen
+          ].join(','))
+        ].join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `devices_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+      } catch (error) {
+        console.error('Error exporting devices:', error);
+        alert('Failed to export devices');
+      }
+    }
+    
+    // License Management Page
+    async function loadLicenses() {
+      const mainBody = document.getElementById('mainBody');
+      mainBody.innerHTML = '<div class="loading"></div>';
+      
+      try {
+        mainBody.innerHTML = `
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">License Key Management</h3>
+              <div class="card-actions">
+                <button class="btn btn-outline" onclick="refreshLicenses()">
+                  <i class="fas fa-sync-alt"></i>
+                  Refresh
+                </button>
+                <button class="btn btn-success" onclick="generateLicenseModal()">
+                  <i class="fas fa-plus"></i>
+                  Generate Keys
+                </button>
+                <button class="btn btn-primary" onclick="validateKeyModal()">
+                  <i class="fas fa-check"></i>
+                  Validate Key
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <!-- Filters -->
+              <div class="flex items-center gap-2 mb-4">
+                <select class="form-select" id="licenseStatusFilter" onchange="filterLicenses()" style="width: auto;">
+                  <option value="">All Status</option>
+                  <option value="available">Available</option>
+                  <option value="used">Used</option>
+                  <option value="expired">Expired</option>
+                  <option value="deactivated">Deactivated</option>
+                </select>
+                <select class="form-select" id="licenseTypeFilter" onchange="filterLicenses()" style="width: auto;">
+                  <option value="">All Types</option>
+                  <option value="permanent">Permanent</option>
+                  <option value="trial">Trial</option>
+                </select>
+                <input type="text" class="form-input" id="licenseSearchInput" placeholder="Search license keys..." onkeyup="searchLicenses()" style="width: 300px;">
+              </div>
+              
+              <!-- License Table -->
+              <div class="table-container">
+                <table class="table" id="licensesTable">
+                  <thead>
+                    <tr>
+                      <th>License Key</th>
+                      <th>Type</th>
+                      <th>Status</th>
+                      <th>Assigned To</th>
+                      <th>Created</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="licensesTableBody">
+                    <tr><td colspan="6" class="text-center">Loading licenses...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Pagination -->
+              <div class="flex items-center justify-between mt-4">
+                <div id="licensesPagination"></div>
+                <div id="licensesCount"></div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Load licenses data
+        await refreshLicenses();
+        
+      } catch (error) {
+        console.error('Error loading licenses page:', error);
+        mainBody.innerHTML = '<div class="text-center">Error loading licenses page</div>';
+      }
+    }
+    
+    let currentLicensesPage = 1;
+    let currentLicensesFilters = {};
+    
+    async function refreshLicenses() {
+      try {
+        const params = new URLSearchParams({
+          page: currentLicensesPage,
+          limit: 20,
+          sortBy: 'createdAt',
+          sortOrder: 'desc',
+          ...currentLicensesFilters
+        });
+        
+        const response = await apiRequest(`/licenses?${params}`);
+        displayLicenses(response);
+        
+      } catch (error) {
+        console.error('Error refreshing licenses:', error);
+        document.getElementById('licensesTableBody').innerHTML = 
+          '<tr><td colspan="6" class="text-center">Error loading licenses</td></tr>';
+      }
+    }
+    
+    function displayLicenses(data) {
+      const tbody = document.getElementById('licensesTableBody');
+      const pagination = document.getElementById('licensesPagination');
+      const count = document.getElementById('licensesCount');
+      
+      if (!data.licenses || data.licenses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center">No license keys found</td></tr>';
+        pagination.innerHTML = '';
+        count.innerHTML = '';
+        return;
+      }
+      
+      tbody.innerHTML = data.licenses.map(license => {
+        const isExpired = license.expiresAt && new Date() > new Date(license.expiresAt);
+        const isAvailable = !license.used && license.isActive && !isExpired;
+        
+        let statusClass = 'status-offline';
+        let statusText = 'Unknown';
+        
+        if (!license.isActive) {
+          statusClass = 'status-banned';
+          statusText = 'Deactivated';
+        } else if (isExpired) {
+          statusClass = 'status-expired';
+          statusText = 'Expired';
+        } else if (license.used) {
+          statusClass = 'status-active';
+          statusText = 'Used';
+        } else {
+          statusClass = 'status-online';
+          statusText = 'Available';
+        }
+        
+        return `
+          <tr>
+            <td>
+              <div style="font-family: monospace; font-weight: 600;">${license.key}</div>
+              ${license.description ? `<div style="font-size: 0.75rem; color: var(--vercel-secondary);">${license.description}</div>` : ''}
+            </td>
+            <td>
+              <span class="status-badge ${license.type === 'permanent' ? 'status-permanent' : 'status-warning'}">
+                ${license.type}
+              </span>
+              ${license.type === 'trial' ? `<br><small>${license.days} days</small>` : ''}
+            </td>
+            <td>
+              <span class="status-badge ${statusClass}">
+                ${statusText}
+              </span>
+            </td>
+            <td>
+              ${license.assignedTo ? `
+                <div style="font-weight: 600;">${license.assignedTo}</div>
+                ${license.deviceInfo ? `
+                  <div style="font-size: 0.75rem; color: var(--vercel-secondary);">
+                    ${license.deviceInfo.username || license.deviceInfo.email || 'Unknown user'}
+                  </div>
+                ` : ''}
+              ` : '<span style="color: var(--vercel-secondary);">Not assigned</span>'}
+            </td>
+            <td>${new Date(license.createdAt).toLocaleDateString()}</td>
+            <td>
+              <div class="flex gap-2">
+                ${license.isActive ? 
+                  `<button class="btn btn-warning" onclick="deactivateLicense('${license._id}')" title="Deactivate">
+                    <i class="fas fa-ban"></i>
+                  </button>` :
+                  `<button class="btn btn-success" onclick="reactivateLicense('${license._id}')" title="Reactivate">
+                    <i class="fas fa-check"></i>
+                  </button>`
+                }
+                ${!license.used ? 
+                  `<button class="btn btn-danger" onclick="deleteLicense('${license._id}')" title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>` : ''
+                }
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      
+      // Pagination
+      const { page, pages, total } = data.pagination;
+      let paginationHtml = '';
+      
+      if (pages > 1) {
+        paginationHtml = '<div class="flex gap-2">';
+        
+        if (page > 1) {
+          paginationHtml += `<button class="btn btn-outline" onclick="goToLicensesPage(${page - 1})">Previous</button>`;
+        }
+        
+        for (let i = Math.max(1, page - 2); i <= Math.min(pages, page + 2); i++) {
+          paginationHtml += `<button class="btn ${i === page ? 'btn-primary' : 'btn-outline'}" onclick="goToLicensesPage(${i})">${i}</button>`;
+        }
+        
+        if (page < pages) {
+          paginationHtml += `<button class="btn btn-outline" onclick="goToLicensesPage(${page + 1})">Next</button>`;
+        }
+        
+        paginationHtml += '</div>';
+      }
+      
+      pagination.innerHTML = paginationHtml;
+      count.innerHTML = `Showing ${data.licenses.length} of ${total} license keys`;
+    }
+    
+    function goToLicensesPage(page) {
+      currentLicensesPage = page;
+      refreshLicenses();
+    }
+    
+    function filterLicenses() {
+      const status = document.getElementById('licenseStatusFilter').value;
+      const type = document.getElementById('licenseTypeFilter').value;
+      
+      currentLicensesFilters = {};
+      if (status) currentLicensesFilters.status = status;
+      if (type) currentLicensesFilters.type = type;
+      
+      currentLicensesPage = 1;
+      refreshLicenses();
+    }
+    
+    function searchLicenses() {
+      const search = document.getElementById('licenseSearchInput').value.trim();
+      
+      if (search) {
+        currentLicensesFilters.search = search;
+      } else {
+        delete currentLicensesFilters.search;
+      }
+      
+      currentLicensesPage = 1;
+      refreshLicenses();
+    }
+    
+    function generateLicenseModal() {
+      showModal('Generate License Keys', `
+        <div class="form-group">
+          <label class="form-label">Number of Keys:</label>
+          <input type="number" class="form-input" id="keyCount" min="1" max="100" value="1" placeholder="1-100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">License Type:</label>
+          <select class="form-select" id="keyType" onchange="toggleTrialDays()">
+            <option value="permanent">Permanent</option>
+            <option value="trial">Trial</option>
+          </select>
+        </div>
+        <div class="form-group hidden" id="trialDaysGroup">
+          <label class="form-label">Trial Days:</label>
+          <input type="number" class="form-input" id="keyTrialDays" min="1" max="365" value="30" placeholder="1-365">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description (Optional):</label>
+          <input type="text" class="form-input" id="keyDescription" placeholder="Description for these keys">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expiry Date (Optional):</label>
+          <input type="date" class="form-input" id="keyExpiryDate">
+        </div>
+      `, `
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-success" onclick="generateLicenseKeys()">Generate Keys</button>
+      `);
+    }
+    
+    function toggleTrialDays() {
+      const type = document.getElementById('keyType').value;
+      const trialDaysGroup = document.getElementById('trialDaysGroup');
+      
+      if (type === 'trial') {
+        trialDaysGroup.classList.remove('hidden');
+      } else {
+        trialDaysGroup.classList.add('hidden');
+      }
+    }
+    
+    async function generateLicenseKeys() {
+      const count = parseInt(document.getElementById('keyCount').value);
+      const type = document.getElementById('keyType').value;
+      const days = parseInt(document.getElementById('keyTrialDays').value);
+      const description = document.getElementById('keyDescription').value.trim();
+      const expiryDate = document.getElementById('keyExpiryDate').value;
+      
+      if (!count || count < 1 || count > 100) {
+        alert('Please enter a valid number of keys (1-100)');
+        return;
+      }
+      
+      if (type === 'trial' && (!days || days < 1 || days > 365)) {
+        alert('Please enter valid trial days (1-365)');
+        return;
+      }
+      
+      try {
+        const payload = { count, type, description };
+        if (type === 'trial') payload.days = days;
+        if (expiryDate) payload.expiresAt = expiryDate;
+        
+        const response = await apiRequest('/licenses/generate', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        
+        closeModal();
+        alert(`Generated ${count} license key(s) successfully`);
+        refreshLicenses();
+        
+        // Show generated keys
+        const keysHtml = response.keys.map(key => `
+          <div style="font-family: monospace; padding: 0.5rem; background: var(--vercel-surface); border-radius: 4px; margin: 0.25rem 0;">
+            ${key.key}
+          </div>
+        `).join('');
+        
+        showModal('Generated License Keys', `
+          <div style="margin-bottom: 1rem;">Successfully generated ${count} license key(s):</div>
+          <div style="max-height: 300px; overflow-y: auto;">
+            ${keysHtml}
+          </div>
+          <div style="margin-top: 1rem; font-size: 0.875rem; color: var(--vercel-secondary);">
+            Copy these keys and store them securely. They will be available in the license management table.
+          </div>
+        `, '<button class="btn btn-primary" onclick="closeModal()">Close</button>');
+        
+      } catch (error) {
+        console.error('Error generating license keys:', error);
+        alert('Failed to generate license keys');
+      }
+    }
+    
+    function validateKeyModal() {
+      showModal('Validate License Key', `
+        <div class="form-group">
+          <label class="form-label">License Key:</label>
+          <input type="text" class="form-input" id="validateKey" placeholder="XXXX-XXXX-XXXX-XXXX" style="text-transform: uppercase;">
+        </div>
+        <div id="validationResult" style="margin-top: 1rem;"></div>
+      `, `
+        <button class="btn btn-outline" onclick="closeModal()">Close</button>
+        <button class="btn btn-primary" onclick="validateLicenseKey()">Validate</button>
+      `);
+    }
+    
+    async function validateLicenseKey() {
+      const key = document.getElementById('validateKey').value.trim().toUpperCase();
+      const resultDiv = document.getElementById('validationResult');
+      
+      if (!key) {
+        resultDiv.innerHTML = '<div style="color: var(--vercel-error);">Please enter a license key</div>';
+        return;
+      }
+      
+      try {
+        const response = await apiRequest(`/licenses/${key}/validate`);
+        
+        if (response.valid) {
+          resultDiv.innerHTML = `
+            <div style="color: var(--vercel-success); font-weight: 600;">✓ Valid License Key</div>
+            <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+              <div>Type: ${response.key.type}</div>
+              <div>Created: ${new Date(response.key.createdAt).toLocaleDateString()}</div>
+              ${response.key.description ? `<div>Description: ${response.key.description}</div>` : ''}
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `
+            <div style="color: var(--vercel-error); font-weight: 600;">✗ Invalid License Key</div>
+            <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+              Reason: ${response.reason}
+              ${response.assignedTo ? `<br>Assigned to: ${response.assignedTo}` : ''}
+            </div>
+          `;
+        }
+        
+      } catch (error) {
+        console.error('Error validating license key:', error);
+        resultDiv.innerHTML = '<div style="color: var(--vercel-error);">Error validating license key</div>';
+      }
+    }
+    
+    async function deactivateLicense(licenseId) {
+      const reason = prompt('Enter deactivation reason:');
+      if (!reason) return;
+      
+      try {
+        await apiRequest(`/licenses/${licenseId}/deactivate`, {
+          method: 'POST',
+          body: JSON.stringify({ reason })
+        });
+        
+        alert('License key deactivated successfully');
+        refreshLicenses();
+        
+      } catch (error) {
+        console.error('Error deactivating license:', error);
+        alert('Failed to deactivate license key');
+      }
+    }
+    
+    async function reactivateLicense(licenseId) {
+      if (!confirm('Are you sure you want to reactivate this license key?')) return;
+      
+      try {
+        await apiRequest(`/licenses/${licenseId}/reactivate`, {
+          method: 'POST'
+        });
+        
+        alert('License key reactivated successfully');
+        refreshLicenses();
+        
+      } catch (error) {
+        console.error('Error reactivating license:', error);
+        alert('Failed to reactivate license key');
+      }
+    }
+    
+    async function deleteLicense(licenseId) {
+      if (!confirm('Are you sure you want to delete this license key? This action cannot be undone.')) return;
+      
+      try {
+        await apiRequest(`/licenses/${licenseId}`, {
+          method: 'DELETE'
+        });
+        
+        alert('License key deleted successfully');
+        refreshLicenses();
+        
+      } catch (error) {
+        console.error('Error deleting license:', error);
+        alert('Failed to delete license key');
+      }
+    }
+    
+    // Settings Page
+    async function loadSettings() {
+      const mainBody = document.getElementById('mainBody');
+      
+      mainBody.innerHTML = `
+        <div class="content-card">
+          <div class="card-header">
+            <h3 class="card-title">System Settings</h3>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Change Admin Password:</label>
+              <input type="password" class="form-input" id="currentPassword" placeholder="Current password" style="margin-bottom: 0.5rem;">
+              <input type="password" class="form-input" id="newPassword" placeholder="New password" style="margin-bottom: 0.5rem;">
+              <input type="password" class="form-input" id="confirmPassword" placeholder="Confirm new password" style="margin-bottom: 1rem;">
+              <button class="btn btn-primary" onclick="changePassword()">Change Password</button>
+            </div>
+            
+            <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--vercel-border);">
+            
+            <div class="form-group">
+              <label class="form-label">System Information:</label>
+              <div style="background: var(--vercel-surface); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.875rem;">
+                <div>Admin Dashboard Version: 1.0.0</div>
+                <div>Backend API: http://localhost:4000</div>
+                <div>Database: MongoDB Atlas</div>
+                <div>Current User: ${currentUser}</div>
+                <div>Login Time: ${new Date().toLocaleString()}</div>
+              </div>
+            </div>
+            
+            <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--vercel-border);">
+            
+            <div class="form-group">
+              <label class="form-label">Auto-refresh Settings:</label>
+              <div style="margin-top: 0.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                  <input type="checkbox" id="autoRefreshDevices" checked onchange="toggleAutoRefresh()">
+                  Auto-refresh device status every 30 seconds
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    async function changePassword() {
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        alert('Please fill in all password fields');
+        return;
+      }
+      
+      if (newPassword !== confirmPassword) {
+        alert('New passwords do not match');
+        return;
+      }
+      
+      if (newPassword.length < 6) {
+        alert('New password must be at least 6 characters long');
+        return;
+      }
+      
+      // This would need to be implemented in the backend
+      alert('Password change functionality would be implemented here');
+    }
+    
+    function toggleAutoRefresh() {
+      const enabled = document.getElementById('autoRefreshDevices').checked;
+      
+      if (enabled) {
+        if (currentPage === 'devices' && !window.deviceRefreshInterval) {
+          window.deviceRefreshInterval = setInterval(() => {
+            if (currentPage === 'devices') {
+              refreshDevices();
+            }
+          }, 30000);
+        }
+      } else {
+        if (window.deviceRefreshInterval) {
+          clearInterval(window.deviceRefreshInterval);
+          window.deviceRefreshInterval = null;
+        }
+      }
+    }
+
+    // Add this function globally for the logs/heartbeats button
+    async function viewDeviceLogsAndHeartbeats(machineId) {
+      try {
+        // Fetch device logs
+        const device = await apiRequest(`/devices/${machineId}`);
+        // Fetch heartbeats from the backend
+        const heartbeatsRes = await fetch(`http://localhost:3001/api/device-heartbeats?machineId=${encodeURIComponent(machineId)}`);
+        const heartbeatsData = await heartbeatsRes.json();
+
+        let html = '<div style="max-height: 400px; overflow-y: auto;">';
+        html += '<h4>Device Logs</h4>';
+        if (device.logs && device.logs.length > 0) {
+          html += device.logs.map(log => `
+            <div style="border-bottom: 1px solid var(--vercel-border); padding: 0.5rem 0;">
+              <div style="font-weight: 600;">${log.type}</div>
+              <div style="font-size: 0.85rem; color: var(--vercel-secondary);">${new Date(log.timestamp).toLocaleString()}</div>
+              ${log.details ? `<div style="font-size: 0.85rem;">${JSON.stringify(log.details, null, 2)}</div>` : ''}
+            </div>
+          `).join('');
+        } else {
+          html += '<div class="text-center">No logs found for this device</div>';
+        }
+
+        html += '<h4 style="margin-top:1rem;">Heartbeats</h4>';
+        if (heartbeatsData.heartbeats && heartbeatsData.heartbeats.length > 0) {
+          html += heartbeatsData.heartbeats.map(hb => `
+            <div style="border-bottom: 1px solid var(--vercel-border); padding: 0.5rem 0;">
+              <div style="font-size: 0.85rem; color: var(--vercel-secondary);">${new Date(hb.timestamp).toLocaleString()}</div>
+              <div style="font-size: 0.85rem;">IP: ${hb.ip}, Version: ${hb.version}, Platform: ${hb.platform}</div>
+            </div>
+          `).join('');
+        } else {
+          html += '<div class="text-center">No heartbeats found for this device</div>';
+        }
+        html += '</div>';
+
+        showModal('Device Logs & Heartbeats', html, '<button class="btn btn-outline" onclick="closeModal()">Close</button>');
+      } catch (error) {
+        alert('Failed to load logs/heartbeats');
+      }
+    }
+  </script>
+</body>
+</html>

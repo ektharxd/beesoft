@@ -1,0 +1,209 @@
+[33mcommit 582162708c4f1a594822f91f55a7565a232d54e6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: ektharxd <ekthar.xd@gmail.com>
+Date:   Sun Jul 27 23:20:04 2025 +0530
+
+    Fix: Implement Material 3 confirmation dialog for back button and modal improvements
+    
+     Features:
+    - Add Material 3 styled confirmation dialog for back button navigation
+    - Implement proper X icon close buttons for message statistics modal
+    - Fix updates modal close button glitching issues
+    
+     Technical Changes:
+    - Create dedicated back-button-fix.js with Material 3 dialog component
+    - Add proper event handling and animations for dialog interactions
+    - Implement backdrop blur, scale animations, and hover effects
+    - Add keyboard navigation (Escape key) and accessibility features
+    
+     UI/UX Improvements:
+    - Replace browser confirm() with beautiful Material 3 dialog
+    - Add warning icon and proper typography following Material 3 guidelines
+    - Implement proper button states (hover, focus, active)
+    - Add smooth entry/exit animations with cubic-bezier easing
+    
+     Bug Fixes:
+    - Fix back button not working due to event listener conflicts
+    - Resolve updates modal close button disappearing issue
+    - Fix message statistics modal using button instead of X icon
+    - Improve modal event handling to prevent conflicts
+    
+     Responsive Design:
+    - Dialog adapts to different screen sizes (90vw max width)
+    - Proper touch targets for mobile devices
+    - Consistent styling across light/dark themes
+    
+     Accessibility:
+    - Proper focus management and keyboard navigation
+    - WCAG compliant color contrast ratios
+    - Screen reader friendly semantic structure
+    - Escape key support for dialog dismissal
+
+[33mcommit 785b82c38149d4fe4d299cc317d7caf31a7a2f29[m
+Author: ektharxd <ekthar.xd@gmail.com>
+Date:   Sun Jul 27 16:19:20 2025 +0530
+
+    Integrate MongoDB for persistent device and log storage
+
+[33mcommit 0df6194c0cf169601d37a3f746a54a446889a77c[m
+Author: ektharxd <ekthar.xd@gmail.com>
+Date:   Sun Jul 27 15:58:05 2025 +0530
+
+    removed pin
+
+[33mcommit f41e156fdd20ebc69321b4179e45a2c8121de6b1[m
+Author: ektharxd <ekthar.xd@gmail.com>
+Date:   Sun Jul 27 15:54:37 2025 +0530
+
+    Material UI admin dashboard, ntype82 font
+
+[33mcommit 096cd75d8bf1cef7ba9dbe9f02042916dd84365e[m
+Author: ektharxd <ekthar.xd@gmail.com>
+Date:   Sun Jul 27 15:50:45 2025 +0530
+
+    Material UI admin dashboard, ntype82 font, PIN login, responsive offline detection
+
+[33mcommit dc9797bbae2c8e2faaeafc51a61c3ccf5895708e[m
+Author: ektharxd <ekthar.xd@gmail.com>
+Date:   Sun Jul 27 15:36:28 2025 +0530
+
+    Redesign admin dashboard and dev console UI, Apple Terminal style, ntype82 font, persistent device history
+
+[33mcommit fcc610595c680bf156550edc19b171fb1e90011a[m[33m ([m[1;33mtag: [m[1;33mv1.0.3[m[33m)[m
+Author: ektharxd <ekthar.xd@gmail.com>
+Date:   Sun Jul 27 13:51:55 2025 +0530
+
+    🚀 Release v1.0.3 - Enhanced UI, Developer Console & Total Messages Counter
+    
+    ## 🎯 Major Features Added:
+    
+    ### 📊 Total Messages Counter System
+    - Real-time counter with persistent storage (bottom-left corner)
+    - Only shows in main app, counts actual sent messages only
+    - Interactive statistics modal with detailed analytics
+    - Milestone celebrations every 100 messages
+    - Responsive design for all screen sizes
+    
+    ### ⚡ Enhanced Developer Console
+    - Futuristic cyberpunk-style UI with neon animations
+    - Secure access via keyboard shortcut
+    - Features: Error testing, software management, admin tools
+    - 24-hour session management with encrypted storage
+    
+    ### 📱 Responsive UI & Auto-Resizing
+    - Mobile: Counter repositions automatically, compact design
+    - Tablet: Medium adjustments for optimal viewing
+    - Desktop: Enhanced positioning and styling
+    - Real-time adaptation on window resize
+    - Smart visibility management across pages
+    
+    ### 🔧 Enhanced Admin System
+    - Dual admin access levels
+    - Enhanced privileges for advanced management
+    - Comprehensive trial management capabilities
+    - Seamless integration across all pages
+    
+    ## 🛠️ Technical Improvements:
+    
+    ### 🎨 UI/UX Enhancements
+    - Removed all test buttons and debug elements
+    - Professional styling with backdrop blur effects
+    - Smooth animations and enhanced interactions
+    - Consistent typography and visual feedback
+    
+    ### 🔒 Security & Performance
+    - Encrypted localStorage for sensitive data
+    - Improved error handling and code organization
+    - Better resource management and cleanup
+    - Enhanced connection monitoring system
+    
+    ### 🐛 Bug Fixes
+    - Fixed syntax errors and IPC handler formatting
+    - Resolved counter visibility and responsive issues
+    - Corrected authentication flow and modal displays
+    - Improved campaign progress tracking accuracy
+    
+    ## 📋 Key Features:
+    ✅ Total messages counter (responsive, main app only)
+    ✅ Developer console with secure access
+    ✅ Enhanced admin system with multiple access levels
+    ✅ Responsive design for all devices
+    ✅ Professional UI without test elements
+    ✅ Accurate message counting (sent only)
+    ✅ Milestone celebrations and statistics
+    ✅ Secure authentication and session management
+    
+    Version: 1.0.3
+    Built by: Ekthar
+
+[33mcommit 4fd4197ad7033d5baa7e51a2cd1e4a297e1d2f55[m
+Author: ektharxd <ekthar.xd@gmail.com>
+Date:   Sun Jul 27 13:46:53 2025 +0530
+
+     Release v1.0.3 - Enhanced UI, Developer Console & Total Messages Counter
+    
+    ##  Major Features Added:
+    
+    ###  Total Messages Counter System
+    - Real-time counter with persistent storage (bottom-left corner)
+    - Only shows in main app, counts actual sent messages only
+    - Interactive statistics modal with detailed analytics
+    - Milestone celebrations every 100 messages
+    - Responsive design for all screen sizes
+    
+    ###  Enhanced Developer Console
+    - Futuristic cyberpunk-style UI with neon animations
+    - Secure access via Ctrl+Shift+E (ekthar/Ekthar@8302)
+    - Features: Sentry testing, software activation, admin reset
+    - 24-hour session management with encrypted storage
+    
+    ###  Responsive UI & Auto-Resizing
+    - Mobile: Counter moves to top-left, compact design
+    - Tablet: Medium adjustments for optimal viewing
+    - Desktop: Enhanced positioning and styling
+    - Real-time adaptation on window resize
+    - Smart visibility management across pages
+    
+    ###  Enhanced Admin System
+    - Dual admin access (regular admin + developer)
+    - Developer privileges for software activation
+    - Enhanced trial management capabilities
+    - Seamless integration across all pages
+    
+    ##  Technical Improvements:
+    
+    ###  UI/UX Enhancements
+    - Removed all test buttons and debug elements
+    - Professional styling with backdrop blur effects
+    - Smooth animations and enhanced interactions
+    - Consistent typography and visual feedback
+    
+    ###  Security & Performance
+    - Encrypted localStorage for sensitive data
+    - Improved error handling and code organization
+    - Better resource management and cleanup
+    - Enhanced connection monitoring system
+    
+    ###  Bug Fixes
+    - Fixed syntax errors and IPC handler formatting
+    - Resolved counter visibility and responsive issues
+    - Corrected authentication flow and modal displays
+    - Improved campaign progress tracking accuracy
+    
+    ##  Key Features:
+     Total messages counter (responsive, main app only)
+     Developer console (Ctrl+Shift+E access)
+     Enhanced admin system with dual access
+     Responsive design for all devices
+     Professional UI without test elements
+     Accurate message counting (sent only)
+     Milestone celebrations and statistics
+     Secure authentication and session management
+    
+    Version: 1.0.3
+    Built by: Ekthar
+
+[33mcommit 16b1a972aa70dc6f15bf08aba75316444c958bc2[m
+Author: ektharxd <ekthar.xd@gmail.com>
+Date:   Sun Jul 27 13:10:13 2025 +0530
+
+    Implement 
