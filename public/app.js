@@ -518,6 +518,23 @@ async function initializeActivationSystem() {
   // Check activation/subscription status
   window.checkTrial = async function() {
     console.log('checkTrial called');
+    
+    // Check if user is currently on main app page - don't force navigation away
+    const mainAppPage = document.getElementById('main-app-page');
+    const welcomePage = document.getElementById('welcome-page');
+    const isOnMainApp = mainAppPage && mainAppPage.style.display !== 'none';
+    const isOnWelcome = welcomePage && welcomePage.style.display !== 'none';
+    
+    if (isOnMainApp) {
+      console.log('User is on main app - skipping forced navigation');
+      // Still update status but don't change pages
+      try {
+        await fetchDeviceStatus();
+      } catch (error) {
+        console.error('Error updating device status:', error);
+      }
+      return;
+    }
     try {
       const status = await fetchDeviceStatus();
       console.log('Device status:', status);
@@ -573,21 +590,28 @@ async function initializeActivationSystem() {
         if (trialInfo) trialInfo.textContent = `Subscription expired on ${new Date(expiry).toLocaleDateString()}.`;
         return;
       }
-      console.log('Subscription active, showing welcome page. Days left:', daysLeft);
+      console.log('Subscription active. Days left:', daysLeft);
       
-      // Ensure all pages are hidden first
-      document.querySelectorAll('.page-container').forEach(page => {
-        page.style.display = 'none';
-      });
-      
-      const welcomePage = document.getElementById('welcome-page');
-      if (welcomePage) {
-        welcomePage.style.display = 'flex';
-        welcomePage.scrollIntoView({ behavior: 'smooth' });
-        window.history.replaceState(null, '', '#welcome');
+      // Only show welcome page if no page is currently active (initial load)
+      if (!isOnWelcome && !isOnMainApp) {
+        console.log('No active page detected, showing welcome page');
+        
+        // Ensure all pages are hidden first
+        document.querySelectorAll('.page-container').forEach(page => {
+          page.style.display = 'none';
+        });
+        
+        const welcomePage = document.getElementById('welcome-page');
+        if (welcomePage) {
+          welcomePage.style.display = 'flex';
+          welcomePage.scrollIntoView({ behavior: 'smooth' });
+          window.history.replaceState(null, '', '#welcome');
+        } else {
+          console.error('Welcome page element not found');
+          window.location.href = '/#welcome';
+        }
       } else {
-        console.error('Welcome page element not found');
-        window.location.href = '/#welcome';
+        console.log('User is already on a page, not forcing navigation');
       }
       
       const statusAlert = document.getElementById('status-alert');
@@ -1875,6 +1899,13 @@ function handleBackendUpdate(data) {
             
             window.logger.error(`Campaign error: ${data.error}`);
             window.notifications.error(`Campaign error: ${data.error}`);
+            break;
+            
+        case 'refresh-message-limits':
+            // Refresh the message limits widget after successful message send
+            if (typeof window.refreshMessageLimits === 'function') {
+                window.refreshMessageLimits();
+            }
             break;
             
         default:

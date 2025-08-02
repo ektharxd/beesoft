@@ -1472,6 +1472,9 @@ ipcMain.handle('start-session', async (event, data) => {
                             body: JSON.stringify({ machineId: deviceId, messageCount: 1 })
                         });
                     }
+                    
+                    // Refresh the message limits widget
+                    sendToUI('refresh-message-limits', {});
                 } catch (trackError) {
                     sendToUI('log', { level: 'warning', message: 'Could not update message limits tracking' });
                 }

@@ -361,11 +361,37 @@ class MessageLimitsWidget {
   }
 
   startAutoUpdate() {
-    // Update every 30 seconds
+    // Update every 3 seconds to show real-time changes
     this.updateInterval = setInterval(async () => {
+      const oldStats = this.messageStats;
       await this.loadMessageStats();
+      
+      // Only update widget if stats actually changed
+      if (this.hasStatsChanged(oldStats, this.messageStats)) {
+        console.log('Message stats changed, updating widget');
+        this.updateWidgetContent();
+      }
+    }, 3000);
+  }
+
+  hasStatsChanged(oldStats, newStats) {
+    if (!oldStats || !newStats) return true;
+    
+    return (
+      oldStats.totalUsed !== newStats.totalUsed ||
+      oldStats.dailyUsed !== newStats.dailyUsed ||
+      oldStats.totalRemaining !== newStats.totalRemaining ||
+      oldStats.dailyRemaining !== newStats.dailyRemaining
+    );
+  }
+
+  // Force refresh the widget immediately (call after sending messages)
+  async forceRefresh() {
+    console.log('Force refreshing message limits widget');
+    await this.loadMessageStats();
+    if (this.widget) {
       this.updateWidgetContent();
-    }, 30000);
+    }
   }
 
   stopAutoUpdate() {
@@ -468,6 +494,13 @@ class MessageLimitsWidget {
 
 // Global instance
 window.messageLimitsWidget = new MessageLimitsWidget();
+
+// Global function to refresh the widget
+window.refreshMessageLimits = function() {
+  if (window.messageLimitsWidget) {
+    window.messageLimitsWidget.forceRefresh();
+  }
+};
 
 // Auto-initialize when DOM is ready
 if (document.readyState === 'loading') {
