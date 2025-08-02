@@ -44,7 +44,7 @@ class MessageLimitsWidget {
 
   async loadMessageStats() {
     try {
-      const response = await fetch(`http://localhost:3001/api/message-limits?machineId=${encodeURIComponent(this.deviceId)}`);
+      const response = await window.apiCall(`/api/message-limits?machineId=${encodeURIComponent(this.deviceId)}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -255,10 +255,12 @@ class MessageLimitsWidget {
 
   async checkMessageLimits(messageCount = 1) {
     try {
-      const response = await fetch(`http://localhost:3001/api/message-limits/check?machineId=${encodeURIComponent(this.deviceId)}`, {
+            const response = await window.apiCall(`/api/message-limits/check?machineId=${encodeURIComponent(this.deviceId)}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messageCount })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ requestedMessages })
       });
 
       if (response.ok) {
@@ -279,7 +281,7 @@ class MessageLimitsWidget {
       if (campaignId) payload.campaignId = campaignId;
       if (contactCount) payload.contactCount = contactCount;
 
-      const response = await fetch(`http://localhost:3001/api/message-limits/track?machineId=${encodeURIComponent(this.deviceId)}`, {
+      const response = await window.apiCall(`/api/message-limits/track?machineId=${encodeURIComponent(this.deviceId)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
