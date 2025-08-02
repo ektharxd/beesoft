@@ -5,6 +5,18 @@
 const ADMIN_API_KEY = 'Ekthar@8302';
 
 export default async function handler(req, res) {
+    // Add deployment info for debugging
+    if (req.query.debug === 'deployment') {
+        return res.status(200).json({
+            status: 'deployed',
+            environment: process.env.NODE_ENV || 'development',
+            timestamp: new Date().toISOString(),
+            version: '1.0.3',
+            supabase_configured: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+            vercel_deployment: true
+        });
+    }
+
     if (req.method !== 'GET') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
