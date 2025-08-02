@@ -95,43 +95,47 @@ module.exports = async (req, res) => {
       }
     }
 
-    // POST: Check if can send specific number of messages
-    if (req.method === 'POST' && (req.url.includes('/check') || req.originalUrl.includes('/check'))) {
-      const { messageCount = 1 } = req.body;
+    // POST: Handle different POST operations
+    if (req.method === 'POST') {
+      const url = req.url || req.originalUrl || '';
       
-      try {
-        const { data: device, error } = await supabase
-          .from('devices')
-          .select('*')
-          .eq('machine_id', machineId)
-          .single();
+      // Check if can send specific number of messages
+      if (url.includes('/check')) {
+        const { messageCount = 1 } = req.body;
+        
+        try {
+          const { data: device, error } = await supabase
+            .from('devices')
+            .select('*')
+            .eq('machine_id', machineId)
+            .single();
 
-        if (error || !device) {
-          return res.status(404).json({ error: 'Device not found' });
+          if (error || !device) {
+            return res.status(404).json({ error: 'Device not found' });
+          }
+
+          const canSend = checkCanSendMessagesFromDevice(device, messageCount);
+          const messageStats = calculateMessageStatsFromDevice(device);
+
+          return res.json({
+            success: true,
+            allowed: canSend.allowed,
+            reason: canSend.reason,
+            messageCount,
+            messagesRemaining: canSend.messagesRemaining,
+            dailyMessagesRemaining: canSend.dailyMessagesRemaining,
+            messageStats
+          });
+
+        } catch (error) {
+          console.error('[MessageLimits] Error checking message limits:', error);
+          return res.status(500).json({ error: 'Database error' });
         }
-
-        const canSend = checkCanSendMessagesFromDevice(device, messageCount);
-        const messageStats = calculateMessageStatsFromDevice(device);
-
-        return res.json({
-          success: true,
-          allowed: canSend.allowed,
-          reason: canSend.reason,
-          messageCount,
-          messagesRemaining: canSend.messagesRemaining,
-          dailyMessagesRemaining: canSend.dailyMessagesRemaining,
-          messageStats
-        });
-
-      } catch (error) {
-        console.error('[MessageLimits] Error checking message limits:', error);
-        return res.status(500).json({ error: 'Database error' });
       }
-    }
 
-    // POST: Track message usage
-    if (req.method === 'POST' && (req.url.includes('/track') || req.originalUrl.includes('/track'))) {
-      const { messageCount = 1, campaignId, contactCount } = req.body;
+      // Track message usage
+      if (url.includes('/track') || !url.includes('/check')) {
+        const { messageCount = 1, campaignId, contactCount } = req.body;
       
       try {
         const { data: device, error } = await supabase
@@ -202,6 +206,7 @@ module.exports = async (req, res) => {
       } catch (error) {
         console.error('[MessageLimits] Error tracking message usage:', error);
         return res.status(500).json({ error: 'Failed to track message usage' });
+      }
       }
     }
     

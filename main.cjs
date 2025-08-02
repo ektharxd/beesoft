@@ -1453,6 +1453,29 @@ ipcMain.handle('start-session', async (event, data) => {
                 }
                 // Track successful message
                 trackMessage();
+                
+                // Update message limits after successful send
+                try {
+                    const deviceId = await getDeviceId();
+                    // Try local first
+                    try {
+                        await fetch(`http://localhost:3001/api/message-limits/track`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ machineId: deviceId, messageCount: 1 })
+                        });
+                    } catch (localError) {
+                        // Try Vercel if local fails
+                        await fetch(`https://beesoft-one.vercel.app/api/message-limits/track`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ machineId: deviceId, messageCount: 1 })
+                        });
+                    }
+                } catch (trackError) {
+                    sendToUI('log', { level: 'warning', message: 'Could not update message limits tracking' });
+                }
+                
                 successCount++;
                 sendToUI('log', { level: 'success', message: `✅ Message sent successfully to ${numberRaw}` });
                 sendToUI('campaign-success', { 

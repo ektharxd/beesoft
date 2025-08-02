@@ -32,28 +32,47 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     
+    // Additional protection: don't allow automatic changes from main-app back to welcome
+    if (currentPage === 'main-app-page' && pageId === 'welcome-page') {
+      console.log(`Blocked automatic navigation from main app back to welcome page`);
+      return;
+    }
+    
     console.log(`Allowing page change to: ${pageId}`);
     
     // Call original showPage function
     if (originalShowPage) {
       originalShowPage(pageId);
     } else {
-      // Fallback implementation
+      // Fallback implementation with enhanced cleanup
       const allPages = ['welcome-page', 'main-app-page', 'trial-lock-page'];
       
       allPages.forEach(id => {
-        const pages = document.querySelectorAll(`#${id}`);
+        const pages = document.querySelectorAll(`#${id}, .${id}`);
         pages.forEach(page => {
           page.style.display = 'none';
-          page.classList.remove('flex', 'active');
+          page.style.visibility = 'hidden';
+          page.classList.remove('flex', 'active', 'show', 'visible');
+          page.setAttribute('aria-hidden', 'true');
         });
       });
       
-      const targetPages = document.querySelectorAll(`#${pageId}`);
+      // Clear any active states from body classes
+      document.body.classList.remove('welcome-active', 'main-active', 'trial-lock-active');
+      
+      const targetPages = document.querySelectorAll(`#${pageId}, .${pageId}`);
       targetPages.forEach(targetPage => {
         targetPage.style.display = 'flex';
-        targetPage.classList.add('flex', 'active');
+        targetPage.style.visibility = 'visible';
+        targetPage.classList.add('flex', 'active', 'show', 'visible');
+        targetPage.setAttribute('aria-hidden', 'false');
       });
+      
+      // Add body state class
+      document.body.classList.add(`${pageId.replace('-page', '')}-active`);
+      
+      // Force repaint
+      document.body.offsetHeight;
     }
     
     // Update current page
@@ -100,6 +119,37 @@ document.addEventListener('DOMContentLoaded', function() {
       pageChangeBlocked = false;
     }, 300);
   }, { passive: true });
+  
+  // Block navigation during form interactions and button clicks
+  document.addEventListener('click', (e) => {
+    // If clicking on interactive elements, temporarily block automatic page changes
+    if (e.target.matches('button, input, select, textarea, .btn, .modal, .dropdown, [role="button"]')) {
+      pageChangeBlocked = true;
+      console.log('User interaction detected - temporarily blocking page changes');
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        pageChangeBlocked = false;
+        console.log('Page change blocking released after interaction');
+      }, 1000); // Longer timeout for interactions
+    }
+  });
+  
+  // Block navigation during input focus
+  document.addEventListener('focusin', (e) => {
+    if (e.target.matches('input, textarea, select')) {
+      pageChangeBlocked = true;
+      console.log('Input focused - blocking page changes');
+    }
+  });
+  
+  document.addEventListener('focusout', (e) => {
+    if (e.target.matches('input, textarea, select')) {
+      setTimeout(() => {
+        pageChangeBlocked = false;
+        console.log('Input unfocused - allowing page changes');
+      }, 500);
+    }
+  });
   
   // Override any intersection observers that might be causing page changes
   const originalIntersectionObserver = window.IntersectionObserver;
