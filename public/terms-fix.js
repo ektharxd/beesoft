@@ -8,13 +8,47 @@ document.addEventListener('DOMContentLoaded', function() {
     if (termsCheckbox && getStartedBtn) {
       console.log('Terms fix script: Setting up Get Started button');
       
+      // Function to update button state based on checkbox
+      function updateButtonState() {
+        if (termsCheckbox.checked) {
+          getStartedBtn.disabled = false;
+          localStorage.setItem('beesoft_terms_accepted', 'true');
+        } else {
+          getStartedBtn.disabled = true;
+          localStorage.removeItem('beesoft_terms_accepted');
+        }
+      }
+      
+      // Initialize button state based on localStorage
+      if (localStorage.getItem('beesoft_terms_accepted') === 'true') {
+        termsCheckbox.checked = true;
+        getStartedBtn.disabled = false;
+      } else {
+        getStartedBtn.disabled = true;
+      }
+      
+      // Handle checkbox changes
+      termsCheckbox.addEventListener('change', updateButtonState);
+      
       // Remove any existing event listeners by cloning the button
       const newGetStartedBtn = getStartedBtn.cloneNode(true);
       getStartedBtn.parentNode.replaceChild(newGetStartedBtn, getStartedBtn);
       
+      // Preserve the disabled state on the new button
+      if (getStartedBtn.disabled) {
+        newGetStartedBtn.disabled = true;
+      }
+      
       // Add the click event listener to the new button
-      newGetStartedBtn.addEventListener('click', function() {
+      newGetStartedBtn.addEventListener('click', function(e) {
         console.log('Get Started button clicked');
+        
+        // Check if button is disabled
+        if (newGetStartedBtn.disabled) {
+          console.log('Button is disabled, preventing action');
+          e.preventDefault();
+          return false;
+        }
         
         if (!termsCheckbox.checked) {
           if (window.notifications) {
@@ -22,7 +56,8 @@ document.addEventListener('DOMContentLoaded', function() {
           } else {
             alert('Please accept the terms and conditions to continue');
           }
-          return;
+          e.preventDefault();
+          return false;
         }
         
         // Navigate to main app
@@ -59,6 +94,13 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Error loading main application');
           }
         }
+      });
+      
+      // Re-add the checkbox change listener to the new button context
+      termsCheckbox.addEventListener('change', function() {
+        updateButtonState();
+        // Update the new button's disabled state too
+        newGetStartedBtn.disabled = !termsCheckbox.checked;
       });
       
       console.log('Terms fix script: Get Started button event listener added');
