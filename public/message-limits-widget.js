@@ -40,6 +40,65 @@ class MessageLimitsWidget {
     this.createWidget();
     this.startAutoUpdate();
     this.setupPageVisibilityListener();
+    this.setupMessageBlockingHooks();
+  }
+
+  setupMessageBlockingHooks() {
+    // Hook into campaign start to check limits
+    const originalStartCampaign = window.startCampaign;
+    if (originalStartCampaign) {
+      window.startCampaign = async (...args) => {
+        if (await this.shouldBlockCampaign()) {
+          return;
+        }
+        return originalStartCampaign.apply(this, args);
+      };
+    }
+
+    // Hook into manual message sending
+    const originalSendMessage = window.sendMessage;
+    if (originalSendMessage) {
+      window.sendMessage = async (...args) => {
+        if (await this.shouldBlockMessage()) {
+          return;
+        }
+        return originalSendMessage.apply(this, args);
+      };
+    }
+  }
+
+  async shouldBlockCampaign() {
+    await this.loadMessageStats();
+    if (!this.messageStats || this.messageStats.unlimited) {
+      return false;
+    }
+
+    const { totalRemaining, dailyRemaining } = this.messageStats;
+    const criticalRemaining = Math.min(totalRemaining, dailyRemaining || Infinity);
+
+    if (criticalRemaining <= 0) {
+      this.showLimitWarning(0, this.messageStats.type);
+      return true;
+    }
+
+    return false;
+  }
+
+  async shouldBlockMessage() {
+    await this.loadMessageStats();
+    if (!this.messageStats || this.messageStats.unlimited) {
+      return false;
+    }
+
+    const { totalRemaining, dailyRemaining } = this.messageStats;
+    const criticalRemaining = Math.min(totalRemaining, dailyRemaining || Infinity);
+
+    if (criticalRemaining <= 0) {
+      this.showLimitWarning(0, this.messageStats.type);
+      return true;
+    }
+
+    return false;
   }
 
   async loadMessageStats() {

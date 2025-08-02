@@ -13,28 +13,40 @@ document.addEventListener('DOMContentLoaded', function() {
     // Define all possible page IDs
     const allPages = ['welcome-page', 'main-app-page', 'trial-lock-page'];
     
-    // Hide all pages first
+    // Hide all pages first with more thorough cleanup
     allPages.forEach(id => {
-      const pages = document.querySelectorAll(`#${id}`);
+      const pages = document.querySelectorAll(`#${id}, .${id}`);
       pages.forEach(page => {
         page.style.display = 'none';
-        page.classList.remove('flex');
-        page.classList.remove('active');
+        page.style.visibility = 'hidden';
+        page.classList.remove('flex', 'active', 'show', 'visible');
+        page.setAttribute('aria-hidden', 'true');
       });
     });
     
-    // Show only the requested page
-    const targetPages = document.querySelectorAll(`#${pageId}`);
+    // Clear any active states from body classes
+    document.body.classList.remove('welcome-active', 'main-active', 'trial-lock-active');
+    
+    // Show only the requested page with proper cleanup
+    const targetPages = document.querySelectorAll(`#${pageId}, .${pageId}`);
     if (targetPages.length > 0) {
       targetPages.forEach(targetPage => {
         targetPage.style.display = 'flex';
-        targetPage.classList.add('flex');
-        targetPage.classList.add('active');
+        targetPage.style.visibility = 'visible';
+        targetPage.classList.add('flex', 'active', 'show', 'visible');
+        targetPage.setAttribute('aria-hidden', 'false');
       });
+      
+      // Add body state class for CSS targeting
+      document.body.classList.add(`${pageId.replace('-page', '')}-active`);
+      
       console.log(`Successfully showed page: ${pageId}`);
     } else {
       console.error(`Page not found: ${pageId}`);
     }
+    
+    // Force repaint to prevent visual glitches
+    document.body.offsetHeight;
     
     // Update URL hash for navigation
     if (pageId === 'welcome-page') {

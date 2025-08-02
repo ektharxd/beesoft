@@ -1411,6 +1411,33 @@ ipcMain.handle('start-session', async (event, data) => {
                 messageCount: sessionControl.messageCount
             });
             try {
+                // CRITICAL FIX: Check message limits before sending
+                try {
+                    const deviceId = await getDeviceId();
+                    const response = await fetch(`http://localhost:3001/api/message-limits?machineId=${encodeURIComponent(deviceId)}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (!data.canSendMessages) {
+                            throw new Error(`Message limit exceeded: ${data.reason || 'Trial limit reached'}`);
+                        }
+                    }
+                } catch (limitError) {
+                    // If local API fails, try Vercel
+                    try {
+                        const deviceId = await getDeviceId();
+                        const response = await fetch(`https://beesoft-one.vercel.app/api/message-limits?machineId=${encodeURIComponent(deviceId)}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (!data.canSendMessages) {
+                                throw new Error(`Message limit exceeded: ${data.reason || 'Trial limit reached'}`);
+                            }
+                        }
+                    } catch (vercelError) {
+                        // If both fail, log but continue (offline mode)
+                        sendToUI('log', { level: 'warning', message: 'Could not verify message limits - continuing in offline mode' });
+                    }
+                }
+                
                 // CRITICAL FIX: Final check before sending
                 if (!waClient) {
                     throw new Error('WhatsApp client is null');
