@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
         machineId = localStorage.getItem('beesoft_device_id') || 'unknown';
       }
       
-      const res = await fetch(`http://34.10.132.60:3001/api/device-status?machineId=${encodeURIComponent(machineId)}`);
+      const res = await fetch(`http://104.154.62.181:3001/api/device-status?machineId=${encodeURIComponent(machineId)}`);
       if (!res.ok) {
         console.error('Failed to fetch device status:', res.status, res.statusText);
         return null;

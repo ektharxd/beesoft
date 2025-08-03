@@ -618,7 +618,7 @@ async function simulateTyping(chatId, message) {
 // Heartbeat system for live device monitoring
 let deviceId = null;
 let heartbeatInterval = null;
-const HEARTBEAT_URL = 'http://34.10.132.60:3001/api/devices';
+const HEARTBEAT_URL = 'http://104.154.62.181:3001/api/devices';
 const HEARTBEAT_INTERVAL = 2 * 60 * 1000; // 2 minutes
 let heartbeatFailureCount = 0;
 const MAX_HEARTBEAT_FAILURES = 5;
@@ -804,7 +804,7 @@ async function registerDevice() {
         };
         
         const data = JSON.stringify(registrationData);
-        const url = new URL('http://34.10.132.60:3001/api/devices?register=1');
+        const url = new URL('http://104.154.62.181:3001/api/devices?register=1');
         
         const options = {
             hostname: url.hostname,

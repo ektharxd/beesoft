@@ -679,7 +679,7 @@
     let currentPage = 'dashboard';
     let authToken = localStorage.getItem('adminToken');
     let currentUser = localStorage.getItem('adminUsername');
-    const API_BASE = 'http://34.10.132.60:4000/api/admin';
+    const API_BASE = 'http://104.154.62.181:4000/api/admin';
     
     // Check authentication
     if (!authToken) {
@@ -755,7 +755,7 @@
         const [deviceStats, licenseStats, messageStats] = await Promise.all([
           apiRequest('/devices/stats'),
           apiRequest('/licenses/stats'),
-          fetch('http://34.10.132.60:3001/api/message-limits').then(res => res.json()).catch(() => ({}))
+          fetch('http://104.154.62.181:3001/api/message-limits').then(res => res.json()).catch(() => ({}))
         ]);
         
         mainBody.innerHTML = `
@@ -2159,7 +2159,7 @@
               <label class="form-label">System Information:</label>
               <div style="background: var(--vercel-surface); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.875rem;">
                 <div>Admin Dashboard Version: 1.0.0</div>
-                <div>Backend API: http://34.10.132.60:4000</div>
+                <div>Backend API: http://104.154.62.181:4000</div>
                 <div>Database: MongoDB Atlas</div>
                 <div>Current User: ${currentUser}</div>
                 <div>Login Time: ${new Date().toLocaleString()}</div>
@@ -2231,7 +2231,7 @@
         // Fetch device logs
         const device = await apiRequest(`/devices/${machineId}`);
         // Fetch heartbeats from the backend
-        const heartbeatsRes = await fetch(`http://34.10.132.60:3001/api/device-heartbeats?machineId=${encodeURIComponent(machineId)}`);
+        const heartbeatsRes = await fetch(`http://104.154.62.181:3001/api/device-heartbeats?machineId=${encodeURIComponent(machineId)}`);
         const heartbeatsData = await heartbeatsRes.json();
 
         let html = '<div style="max-height: 400px; overflow-y: auto;">';

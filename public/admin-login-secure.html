@@ -212,8 +212,8 @@
       }
       // POST to backend login endpoint (should be HTTPS in production)
       try {
-        // Use correct backend URL (http://34.10.132.60:4000)
-        const API_BASE = 'http://34.10.132.60:4000/api/admin';
+        // Use correct backend URL (http://104.154.62.181:4000)
+        const API_BASE = 'http://104.154.62.181:4000/api/admin';
         const resp = await fetch(API_BASE + '/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

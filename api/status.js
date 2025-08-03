@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     try {
         // Since we can't share memory between serverless functions,
         // let's fetch from the heartbeat endpoint to get recent data
-        const heartbeatResponse = await fetch(`${req.headers.origin || 'https://34.10.132.60:3001'}/api/heartbeat`, {
+        const heartbeatResponse = await fetch(`${req.headers.origin || 'https://104.154.62.181:3001'}/api/heartbeat`, {
             method: 'GET',
             headers: {
                 'x-admin-request': 'true'

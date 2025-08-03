@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       // Fetch device status
-      const res = await fetch(`http://34.10.132.60:3001/api/device-status?machineId=${encodeURIComponent(machineId)}`);
+      const res = await fetch(`http://104.154.62.181:3001/api/device-status?machineId=${encodeURIComponent(machineId)}`);
       if (!res.ok) {
         console.log('Device status fetch failed, showing trial lock page');
         window.showPage('trial-lock-page');

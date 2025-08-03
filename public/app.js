@@ -482,7 +482,7 @@ async function initializeActivationSystem() {
       if (!mobile) { window.notifications.error('Device mobile is required.'); return; }
     }
 
-    await fetch('http://34.10.132.60:3001/api/devices?register=1', {
+    await fetch('http://104.154.62.181:3001/api/devices?register=1', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ machineId, username, platform, name, mobile })
@@ -493,7 +493,7 @@ async function initializeActivationSystem() {
   async function fetchDeviceStatus() {
     const machineId = await getDeviceId();
     if (!machineId) return null;
-    const res = await fetch(`http://34.10.132.60:3001/api/device-status?machineId=${encodeURIComponent(machineId)}`);
+    const res = await fetch(`http://104.154.62.181:3001/api/device-status?machineId=${encodeURIComponent(machineId)}`);
     if (!res.ok) return null;
     return await res.json();
   }
@@ -632,9 +632,9 @@ async function initializeActivationSystem() {
       // Try multiple authentication methods
       let authenticated = false;
       
-      // Method 1: Try 34.10.132.60:3001 (main API)
+      // Method 1: Try 104.154.62.181:3001 (main API)
       try {
-        const res = await fetch('http://34.10.132.60:3001/api/admin/login', {
+        const res = await fetch('http://104.154.62.181:3001/api/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -646,10 +646,10 @@ async function initializeActivationSystem() {
         console.log('Method 1 failed:', error.message);
       }
       
-      // Method 2: Try 34.10.132.60:4000 (backup API)
+      // Method 2: Try 104.154.62.181:4000 (backup API)
       if (!authenticated) {
         try {
-          const res = await fetch('http://34.10.132.60:4000/api/admin/login', {
+          const res = await fetch('http://104.154.62.181:4000/api/admin/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -1249,7 +1249,7 @@ function showAdminActionsWindow() {
       }
       const payload = { machineId: deviceId, username: 'admin', name, email, mobile, version, platform, hostname };
       console.log('Register device payload:', payload);
-      const res = await fetch('http://34.10.132.60:3001/api/devices?register=1', {
+      const res = await fetch('http://104.154.62.181:3001/api/devices?register=1', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -1259,7 +1259,7 @@ function showAdminActionsWindow() {
     // Remove device
     document.getElementById('remove-device-btn').onclick = async () => {
       // Remove device from DB
-      const res = await fetch(`http://34.10.132.60:3001/api/devices?remove=1&machineId=${encodeURIComponent(deviceId)}`, {
+      const res = await fetch(`http://104.154.62.181:3001/api/devices?remove=1&machineId=${encodeURIComponent(deviceId)}`, {
         method: 'DELETE'
       });
       document.getElementById('admin-action-result').textContent = res.ok ? 'Device removed.' : 'Failed to remove device.';
@@ -1272,7 +1272,7 @@ function showAdminActionsWindow() {
     quickActivateBtn.onclick = async () => {
       const resultEl = document.getElementById('admin-action-result');
       try {
-        const res = await fetch('http://34.10.132.60:3001/api/assign-subscription', {
+        const res = await fetch('http://104.154.62.181:3001/api/assign-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
@@ -1341,7 +1341,7 @@ function showAdminActionsWindow() {
       }
       
       try {
-        const res = await fetch('http://34.10.132.60:3001/api/assign-subscription', {
+        const res = await fetch('http://104.154.62.181:3001/api/assign-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
@@ -1390,7 +1390,7 @@ function showAdminActionsWindow() {
       }
       
       try {
-        const res = await fetch('http://34.10.132.60:3001/api/assign-subscription', {
+        const res = await fetch('http://104.154.62.181:3001/api/assign-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 

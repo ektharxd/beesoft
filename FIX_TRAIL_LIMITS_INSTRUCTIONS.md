@@ -179,13 +179,13 @@ After these fixes:
 ✅ **Desktop app will show**: "Trial: 1000 messages (45 used), 100 daily (5 used)"
 ✅ **Message limits will update** in real-time when messages are sent
 ✅ **Admin dashboard** will show correct usage statistics
-✅ **API endpoint** `http://34.10.132.60:4000/api/message-limits?machineId=xxx` will return proper data
+✅ **API endpoint** `http://104.154.62.181:4000/api/message-limits?machineId=xxx` will return proper data
 
 ## Verification
 
 Test the API directly:
 ```bash
-curl "http://34.10.132.60:4000/api/message-limits?machineId=2372aa27f40ac256d160c55f45561f64abefab095ed7de086c022c3716bee7fe"
+curl "http://104.154.62.181:4000/api/message-limits?machineId=2372aa27f40ac256d160c55f45561f64abefab095ed7de086c022c3716bee7fe"
 ```
 
 Should return:
