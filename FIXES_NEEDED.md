@@ -4,7 +4,7 @@ Based on the console errors, here are the fixes needed:
 
 ## Issue 1: 404 Error for device-heartbeats endpoint
 
-**Problem**: `GET http://localhost:4000/api/device-heartbeats?machineId=... 404 (Not Found)`
+**Problem**: `GET http://34.10.132.60:4000/api/device-heartbeats?machineId=... 404 (Not Found)`
 
 **Solution**: Start the backend server on port 4000:
 
@@ -25,7 +25,7 @@ The route is already configured in `app.js` and the `device-heartbeats.js` file 
 **Find this code** (around line 2250):
 ```javascript
 // Fetch heartbeats from the backend
-const heartbeatsRes = await fetch(`http://localhost:4000/api/device-heartbeats?machineId=${encodeURIComponent(machineId)}`);
+const heartbeatsRes = await fetch(`http://34.10.132.60:4000/api/device-heartbeats?machineId=${encodeURIComponent(machineId)}`);
 const heartbeatsData = await heartbeatsRes.json();
 ```
 
@@ -34,7 +34,7 @@ const heartbeatsData = await heartbeatsRes.json();
 // Try to fetch heartbeats from the backend, but handle 404 gracefully
 let heartbeatsData = { heartbeats: [] };
 try {
-  const heartbeatsRes = await fetch(`http://localhost:4000/api/device-heartbeats?machineId=${encodeURIComponent(machineId)}`);
+  const heartbeatsRes = await fetch(`http://34.10.132.60:4000/api/device-heartbeats?machineId=${encodeURIComponent(machineId)}`);
   if (heartbeatsRes.ok) {
     heartbeatsData = await heartbeatsRes.json();
   } else {

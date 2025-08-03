@@ -57,5 +57,5 @@ if (fs.existsSync(adminRoutesDir)) {
 }
 
 app.listen(PORT, () => {
-  console.log(`Local API server running at http://localhost:${PORT}`);
+  console.log(`Local API server running at http://34.10.132.60:${PORT}`);
 });

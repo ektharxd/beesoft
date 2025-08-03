@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
           
           console.log('Register device payload:', payload);
           
-          const res = await fetch('http://localhost:3001/api/devices?register=1', {
+          const res = await fetch('http://34.10.132.60:3001/api/devices?register=1', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showResult('Removing device...', 'info');
         
         try {
-          const res = await fetch(`http://localhost:3001/api/devices?remove=1&machineId=${encodeURIComponent(deviceId)}`, {
+          const res = await fetch(`http://34.10.132.60:3001/api/devices?remove=1&machineId=${encodeURIComponent(deviceId)}`, {
             method: 'DELETE'
           });
           
@@ -315,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showResult('Activating trial...', 'info');
         
         try {
-          const res = await fetch('http://localhost:3001/api/assign-subscription', {
+          const res = await fetch('http://34.10.132.60:3001/api/assign-subscription', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -371,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showResult('Validating activation key...', 'info');
         
         try {
-          const res = await fetch('http://localhost:3001/api/assign-subscription', {
+          const res = await fetch('http://34.10.132.60:3001/api/assign-subscription', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 

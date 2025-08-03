@@ -32,7 +32,7 @@ function setupAdminActionsHandlers() {
           
           console.log('Register device payload:', payload);
           
-          const res = await fetch('http://localhost:3001/api/devices?register=1', {
+          const res = await fetch('http://34.10.132.60:3001/api/devices?register=1', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -65,7 +65,7 @@ function setupAdminActionsHandlers() {
     if (removeBtn) {
       removeBtn.onclick = async () => {
         try {
-          const res = await fetch(`http://localhost:3001/api/devices?remove=1&machineId=${encodeURIComponent(deviceId)}`, {
+          const res = await fetch(`http://34.10.132.60:3001/api/devices?remove=1&machineId=${encodeURIComponent(deviceId)}`, {
             method: 'DELETE'
           });
           
@@ -102,7 +102,7 @@ function setupAdminActionsHandlers() {
             return;
           }
           
-          const res = await fetch('http://localhost:3001/api/assign-subscription', {
+          const res = await fetch('http://34.10.132.60:3001/api/assign-subscription', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -141,7 +141,7 @@ function setupAdminActionsHandlers() {
             return;
           }
           
-          const res = await fetch('http://localhost:3001/api/assign-subscription', {
+          const res = await fetch('http://34.10.132.60:3001/api/assign-subscription', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
