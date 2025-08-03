@@ -247,7 +247,7 @@ class FormValidator {
 
   static validateImageFile(file) {
     const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 15 * 1024 * 1024; // 15MB (increased from 5MB)
 
     return validTypes.includes(file.type) && file.size <= maxSize;
   }

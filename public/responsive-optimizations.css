@@ -1,0 +1,413 @@
+/* RESPONSIVE OPTIMIZATIONS - CSS-only responsive fixes */
+
+/* Counter chip responsive positioning - replaces JS positioning */
+#total-messages-chip {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 20px !important;
+  z-index: 9998 !important;
+  padding: 12px 20px !important;
+  font-size: 14px !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 25px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  user-select: none !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+#total-messages-chip:hover {
+  transform: translateY(-2px) scale(1.05) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Developer panel responsive positioning - replaces JS positioning */
+#dev-panel {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  z-index: 9999 !important;
+  min-width: 280px !important;
+  max-width: 320px !important;
+  background: linear-gradient(145deg, #1a1b2e, #16213e) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: var(--radius-xl) !important;
+  padding: var(--space-lg) !important;
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.3),
+    0 10px 10px -5px rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+/* Tablet responsive adjustments */
+@media (max-width: 1024px) and (min-width: 769px) {
+  #total-messages-chip {
+    bottom: 15px !important;
+    left: 15px !important;
+    padding: 10px 16px !important;
+    font-size: 13px !important;
+  }
+  
+  #dev-panel {
+    min-width: 260px !important;
+    max-width: 300px !important;
+  }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  #total-messages-chip {
+    bottom: auto !important;
+    top: 70px !important; /* Below theme toggle */
+    left: 15px !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    border-radius: 20px !important;
+  }
+  
+  #dev-panel {
+    bottom: 10px !important;
+    right: 10px !important;
+    left: 10px !important;
+    width: calc(100% - 20px) !important;
+    min-width: auto !important;
+    max-width: none !important;
+  }
+  
+  /* Adjust modal sizing for mobile */
+  .modal-content {
+    width: 95vw !important;
+    margin: var(--space-md) !important;
+    max-height: calc(100vh - 2rem) !important;
+  }
+  
+  .admin-actions-modal .modal-content {
+    width: 98vw !important;
+    margin: var(--space-xs) !important;
+  }
+  
+  /* Stack form elements on mobile */
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-md) !important;
+  }
+  
+  .form-actions {
+    flex-direction: column !important;
+    gap: var(--space-sm) !important;
+  }
+  
+  .btn-large {
+    width: 100% !important;
+    min-width: auto !important;
+  }
+  
+  .device-info-card {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: var(--space-md) !important;
+  }
+  
+  .device-id-chip {
+    min-width: auto !important;
+    width: 100% !important;
+  }
+  
+  .device-actions {
+    justify-content: center !important;
+  }
+}
+
+/* Small mobile adjustments */
+@media (max-width: 480px) {
+  #total-messages-chip {
+    top: 60px !important;
+    left: 10px !important;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+  }
+
+  #dev-panel {
+    bottom: 5px !important;
+    right: 5px !important;
+    left: 5px !important;
+    width: calc(100% - 10px) !important;
+    padding: var(--space-md) !important;
+  }
+}
+
+/* Landscape mobile adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  #total-messages-chip {
+    top: 15px !important;
+    left: 70px !important; /* Make room for theme toggle */
+  }
+}
+
+/* Page-specific responsive adjustments */
+.page-wrapper {
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .page-wrapper {
+    padding: var(--space-md);
+  }
+  
+  .welcome-card,
+  .card {
+    margin: 0 !important;
+    border-radius: var(--radius-lg) !important;
+  }
+  
+  .welcome-title {
+    font-size: 1.75rem !important;
+  }
+  
+  .text-display {
+    font-size: 1.5rem !important;
+  }
+  
+  .btn-lg {
+    padding: var(--space-md) var(--space-lg) !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* Workflow steps responsive */
+.workflow-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+@media (max-width: 768px) {
+  .workflow-indicator {
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+  }
+  
+  .workflow-step {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.875rem !important;
+  }
+  
+  .workflow-step-label {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Form responsive improvements */
+.form-input,
+.form-textarea {
+  width: 100%;
+  font-size: 16px; /* Prevents zoom on iOS */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+@media (max-width: 768px) {
+  .form-group {
+    margin-bottom: var(--space-md) !important;
+  }
+  
+  .form-label {
+    font-size: 0.9rem !important;
+    margin-bottom: var(--space-xs) !important;
+  }
+  
+  .form-input,
+  .form-textarea {
+    padding: var(--space-md) !important;
+    font-size: 16px !important;
+  }
+}
+
+/* Statistics and progress responsive */
+.stats-container,
+.progress-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: var(--space-sm) !important;
+  }
+  
+  .stat-card {
+    padding: var(--space-md) !important;
+  }
+  
+  .stat-value {
+    font-size: 1.25rem !important;
+  }
+  
+  .stat-label {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Message limits widget responsive */
+.message-limits-widget {
+  position: fixed !important;
+  top: 120px !important;
+  right: 20px !important;
+  z-index: 9997 !important;
+  background: var(--surface-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+  border-radius: var(--radius-lg) !important;
+  padding: var(--space-md) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  min-width: 200px !important;
+  max-width: 280px !important;
+}
+
+@media (max-width: 768px) {
+  .message-limits-widget {
+    top: 110px !important;
+    right: 10px !important;
+    left: 10px !important;
+    width: calc(100% - 20px) !important;
+    min-width: auto !important;
+    max-width: none !important;
+  }
+}
+
+/* Prevent horizontal scroll */
+html,
+body {
+  overflow-x: hidden !important;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Improve touch targets */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  .btn,
+  [role="button"],
+  .clickable {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding: var(--space-md) var(--space-lg) !important;
+  }
+  
+  input,
+  textarea,
+  select {
+    min-height: 44px !important;
+    padding: var(--space-md) !important;
+  }
+  
+  .checkbox-label,
+  .radio-label {
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: var(--space-sm) 0 !important;
+  }
+}
+
+/* Loading states responsive */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(var(--surface-primary-rgb), 0.8);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99998;
+}
+
+@media (max-width: 768px) {
+  .loading-overlay {
+    padding: var(--space-md);
+  }
+  
+  .loading-content {
+    text-align: center;
+    max-width: 90%;
+  }
+  
+  .loading-title {
+    font-size: 1.125rem !important;
+    margin-bottom: var(--space-sm) !important;
+  }
+  
+  .loading-message {
+    font-size: 0.875rem !important;
+  }
+}
+
+/* Notification responsive */
+.notification {
+  position: fixed;
+  top: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  min-width: 300px;
+  max-width: 500px;
+}
+
+@media (max-width: 768px) {
+  .notification {
+    top: 70px; /* Below theme toggle */
+    left: var(--space-md);
+    right: var(--space-md);
+    transform: none;
+    min-width: auto;
+    max-width: none;
+    width: calc(100% - 2rem);
+  }
+}
+
+/* Print styles */
+@media print {
+  #total-messages-chip,
+  #dev-panel,
+  .message-limits-widget,
+  .notification,
+  #theme-toggle {
+    display: none !important;
+  }
+  
+  .page-wrapper {
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+  
+  .modal-overlay {
+    position: static !important;
+    background: none !important;
+  }
+  
+  .modal-content {
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+  }
+}
