@@ -1,0 +1,191 @@
+/**
+ * CAMPAIGN BUTTON STYLES FIX
+ * Ensures the Start Campaign button has proper styling and visual feedback
+ */
+
+/* Start Campaign Button - Enhanced Styling */
+#sendButton {
+  position: relative !important;
+  transition: all 0.3s ease !important;
+  min-height: 50px !important;
+  font-weight: 600 !important;
+}
+
+/* Enabled state styling */
+#sendButton:not(:disabled) {
+  background: #4f46e5 !important;
+  border-color: #4f46e5 !important;
+  color: white !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3) !important;
+}
+
+/* Disabled state styling */
+#sendButton:disabled {
+  background: #9ca3af !important;
+  border-color: #9ca3af !important;
+  color: #6b7280 !important;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  box-shadow: none !important;
+}
+
+/* Hover effect for enabled button */
+#sendButton:not(:disabled):hover {
+  background: #4338ca !important;
+  border-color: #4338ca !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4) !important;
+}
+
+/* Active/click effect */
+#sendButton:not(:disabled):active {
+  transform: translateY(0) !important;
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3) !important;
+}
+
+/* Loading state */
+#sendButton.loading {
+  background: #6366f1 !important;
+  pointer-events: none !important;
+  opacity: 0.9 !important;
+}
+
+/* Button text styling */
+#send-btn-text {
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+}
+
+/* Icon styling */
+#sendButton .material-symbols-outlined {
+  font-size: 1.2rem !important;
+  margin-right: 8px !important;
+}
+
+/* Action controls styling */
+.action-controls {
+  display: flex !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+}
+
+.action-controls button {
+  min-height: 40px !important;
+  transition: all 0.3s ease !important;
+}
+
+.action-controls button:not(:disabled):hover {
+  transform: translateY(-1px) !important;
+}
+
+/* Pause button */
+#pauseButton:not(:disabled) {
+  background: #f59e0b !important;
+  border-color: #f59e0b !important;
+  color: white !important;
+}
+
+#pauseButton:not(:disabled):hover {
+  background: #d97706 !important;
+  border-color: #d97706 !important;
+}
+
+/* Continue button */
+#continueButton:not(:disabled) {
+  background: #10b981 !important;
+  border-color: #10b981 !important;
+  color: white !important;
+}
+
+#continueButton:not(:disabled):hover {
+  background: #059669 !important;
+  border-color: #059669 !important;
+}
+
+/* Stop button */
+#stopButton:not(:disabled) {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: white !important;
+}
+
+#stopButton:not(:disabled):hover {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+}
+
+/* Focus styles for accessibility */
+#sendButton:focus-visible {
+  outline: 2px solid #4f46e5 !important;
+  outline-offset: 2px !important;
+}
+
+/* Visual indicator for button state */
+#sendButton::before {
+  content: '' !important;
+  position: absolute !important;
+  top: -2px !important;
+  left: -2px !important;
+  right: -2px !important;
+  bottom: -2px !important;
+  border-radius: inherit !important;
+  background: linear-gradient(45deg, #10b981, #3b82f6) !important;
+  z-index: -1 !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease !important;
+}
+
+#sendButton:not(:disabled)::before {
+  opacity: 1 !important;
+}
+
+/* Remove Show QR Now button if it still exists */
+#show-qr-now-btn {
+  display: none !important;
+}
+
+/* QR Container styling */
+#qr-container {
+  background: #f8f9fa !important;
+  border: 2px solid #dee2e6 !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  margin: 20px 0 !important;
+  text-align: center !important;
+}
+
+#qr-code-display {
+  min-height: 200px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Connect WhatsApp button styling */
+#connect-btn {
+  background: #25d366 !important;
+  border-color: #25d366 !important;
+  color: white !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+#connect-btn:hover {
+  background: #128c7e !important;
+  border-color: #128c7e !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3) !important;
+}
+
+#connect-btn:disabled {
+  background: #9ca3af !important;
+  border-color: #9ca3af !important;
+  color: #6b7280 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}

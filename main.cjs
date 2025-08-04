@@ -538,7 +538,16 @@ async function checkWhatsAppClientConnection() {
         }
         // Try to ping the client with a simple operation
         try {
-            await waClient.getContacts();
+            // CRITICAL FIX: Skip aggressive connection checks during active campaigns
+            if (sessionControl.isRunning) {
+                // During campaigns, just check if client exists and has basic functionality
+                if (waClient && typeof waClient.getState === 'function') {
+                    return; // Skip the aggressive getContacts() call during campaigns
+                }
+            } else {
+                // Only do full connection check when not running campaigns
+                await waClient.getContacts();
+            }
         } catch (error) {
             // If basic operations fail, client is likely disconnected
             if (isReady && (error.message.includes('Session closed') || 
@@ -1357,18 +1366,22 @@ ipcMain.handle('start-session', async (event, data) => {
             }
         }
     };
+    // CRITICAL FIX: Pause connection monitoring during campaign to prevent interference
+    sendToUI('log', { level: 'info', message: '🛡️ Pausing connection monitoring during campaign...' });
+    stopConnectionMonitoring();
+    
     // Main processing loop with anti-ban features
     try {
         for (let i = 0; i < numbers.length; i++) {
             // Check pause/stop before processing
             const canProceed = await waitIfPaused();
             if (!canProceed || sessionControl.stopped) {
-                sendToUI('log', { level: 'warning', message: `�� Campaign stopped at ${i}/${numbers.length} numbers.` });
+                sendToUI('log', { level: 'warning', message: `⛔ Campaign stopped at ${i}/${numbers.length} numbers.` });
                 break;
             }
             // CRITICAL FIX: Double-check waClient before each message
             if (!waClient) {
-                sendToUI('log', { level: 'error', message: '� WhatsApp client became null during campaign. Stopping.' });
+                sendToUI('log', { level: 'error', message: '❌ WhatsApp client became null during campaign. Stopping.' });
                 break;
             }
             // Check if we need a batch break
@@ -1437,7 +1450,7 @@ ipcMain.handle('start-session', async (event, data) => {
             } catch (err) {
                 errorCount++;
                 errorNumbers.push(numberRaw);
-                sendToUI('log', { level: 'error', message: `� Failed to send to ${numberRaw}: ${err.message}` });
+                sendToUI('log', { level: 'error', message: `❌ Failed to send to ${numberRaw}: ${err.message}` });
                 sendToUI('campaign-failure', { 
                     number: numberRaw, 
                     error: err.message, 
@@ -1445,6 +1458,18 @@ ipcMain.handle('start-session', async (event, data) => {
                     errorCount,
                     progress: Math.round((processedCount / numbers.length) * 100)
                 });
+                
+                // CRITICAL FIX: Check if error indicates client disconnection
+                if (err.message.includes('Session closed') || 
+                    err.message.includes('Protocol error') || 
+                    err.message.includes('Target closed') ||
+                    err.message.includes('Connection closed') ||
+                    err.message.includes('client is null')) {
+                    sendToUI('log', { level: 'warning', message: '🔌 WhatsApp client connection lost during campaign. Attempting to continue...' });
+                    // Don't break the campaign immediately - try to continue with remaining numbers
+                    // The next iteration will check waClient and break if needed
+                }
+                
                 // Check if error indicates rate limiting or ban
                 if (err.message.includes('rate') || err.message.includes('limit') || err.message.includes('spam')) {
                     sendToUI('log', { level: 'warning', message: '🚨 Possible rate limiting detected. Increasing delays...' });
@@ -1493,6 +1518,13 @@ ipcMain.handle('start-session', async (event, data) => {
     sessionControl.isRunning = false;
     sessionControl.batchCount = 0;
     sessionControl.messageCount = 0;
+    
+    // CRITICAL FIX: Restart connection monitoring after campaign completion
+    sendToUI('log', { level: 'info', message: '🔄 Restarting connection monitoring after campaign...' });
+    if (isReady && waClient) {
+        initializeConnectionMonitoring();
+    }
+    
     return { 
         success: true, 
         message: `Anti-ban campaign ${completionReason}.`,

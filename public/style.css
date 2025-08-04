@@ -99,13 +99,13 @@
 /* Dark Theme */
 [data-theme="dark"] {
   /* Surface Colors */
-  --surface-primary: #1e293b;
-  --surface-secondary: #334155;
-  --surface-tertiary: #475569;
+  --surface-primary: #000000;
+  --surface-secondary: #000000;
+  --surface-tertiary: #000000;
   --surface-inverse: #f8fafc;
   
   /* Background */
-  --bg-primary: #0f172a;
+  --bg-primary: #000000;
   --bg-secondary: #1e293b;
   --bg-tertiary: #334155;
   --bg-accent: #312e81;
@@ -1380,7 +1380,7 @@ body {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 2000) {
   .welcome-container {
     max-width: 100%;
   }

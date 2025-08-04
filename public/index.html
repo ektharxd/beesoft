@@ -12,6 +12,9 @@
   <link rel="stylesheet" href="enhanced-modal-styles.css">
   <link rel="stylesheet" href="accessibility-styles.css">
   <link rel="stylesheet" href="responsive-optimizations.css">
+  <link rel="stylesheet" href="get-started-styles.css">
+  <link rel="stylesheet" href="campaign-button-styles.css">
+  <link rel="stylesheet" href="manual-controls-styles.css">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="performance-manager.js"></script>
   <script src="modal-system.js"></script>
@@ -20,6 +23,9 @@
   <script src="accessibility-enhancements.js"></script>
   <script src="main-initialization.js"></script>
   <script src="immediate-fixes.js"></script>
+  <script src="immediate-get-started-fix.js"></script>
+  <script src="debug-get-started.js"></script>
+  <script src="campaign-button-qr-fix.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -54,6 +60,35 @@
             <button id="get-started-btn" class="btn btn-primary btn-lg btn-full welcome-cta">
               <span class="material-symbols-outlined">rocket_launch</span>
               Get Started
+              <script>
+                // Inline fallback for Get Started button
+                (function() {
+                  setTimeout(function() {
+                    const cb = document.getElementById("accept-terms-checkbox");
+                    const btn = document.getElementById("get-started-btn");
+                    if (cb && btn) {
+                      const accepted = localStorage.getItem("beesoft_terms_accepted") === "true";
+                      cb.checked = accepted;
+                      btn.disabled = !accepted;
+                      cb.onchange = function() {
+                        if (this.checked) {
+                          localStorage.setItem("beesoft_terms_accepted", "true");
+                          btn.disabled = false;
+                        } else {
+                          localStorage.removeItem("beesoft_terms_accepted");
+                          btn.disabled = true;
+                        }
+                      };
+                      btn.onclick = function(e) {
+                        e.preventDefault();
+                        if (!cb.checked) { alert("Please accept terms first"); return; }
+                        document.getElementById("welcome-page").style.display = "none";
+                        document.getElementById("main-app-page").style.display = "flex";
+                      };
+                    }
+                  }, 100);
+                })();
+              </script>
             </button>
             <p class="text-caption text-center">
               <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">shield</span>
@@ -136,9 +171,7 @@
                     Connect WhatsApp
                   </button>
                   
-                  <button id="show-qr-now-btn" class="btn btn-secondary" style="margin-left: 10px;" onclick="window.showQRCodeNow()">
                     <span class="material-symbols-outlined">qr_code</span>
-                    Show QR Now
                   </button>
                   
                   <div class="connection-help" style="margin-top: var(--space-md);">
@@ -482,5 +515,11 @@
   <script src="image-size-limit-override.js"></script>
   <script src="terms-fix.js"></script>
   <script src="back-button-fix.js"></script>
+  <script src="excel-campaign-fix.js"></script>
+  <script src="get-started-fix.js"></script>
+  <script src="final-campaign-button-override.js"></script>
+  <script src="campaign-completion-fix.js"></script>
+  <script src="campaign-status-display.js"></script>
+  <script src="manual-campaign-control.js"></script>
 </body>
 </html>
