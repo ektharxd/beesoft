@@ -700,526 +700,501 @@ async function initializeActivationSystem() {
 // Show admin actions window/modal after successful login
 function showAdminActionsWindow() {
   const modalHtml = `
-    <div class="admin-actions-modal">
-      <!-- Header Section -->
-      <div class="admin-header">
-        <div class="admin-title">
-          <i class="fas fa-shield-alt"></i>
-          <h2>Admin Control Panel</h2>
-        </div>
-        <div class="admin-subtitle">Device Management & Trial Activation</div>
-      </div>
+<div class="admin-actions-modal">
+         <!-- Device Information Section (Sticky) -->
+         <div class="device-info-sticky">
+           <div class="device-info-card">
+             <div class="section-header">
+               <h3>Device Information</h3>
+             </div>
+             <div class="device-info-content">
+               <div class="device-id-container">
+                 <label for="device-id-chip">Device ID</label>
+                 <div id="device-id-chip" class="device-id-chip">Loading...</div>
+               </div>
+               <div class="device-actions">
+                 <button id="register-device-btn" class="admin-btn primary">Register Device</button>
+                 <button id="remove-device-btn" class="admin-btn danger">Remove Device</button>
+               </div>
+             </div>
+           </div>
+         </div>
 
-      <!-- Device Information Section -->
-      <div class="admin-section">
-        <div class="section-header">
-          <i class="fas fa-desktop"></i>
-          <h3>Device Information</h3>
-        </div>
-        <div class="device-info-card">
-          <div class="device-id-container">
-            <label>Device ID</label>
-            <div id="device-id-chip" class="device-id-chip">Loading...</div>
-          </div>
-          <div class="device-actions">
-            <button id="register-device-btn" class="admin-btn primary">
-              <i class="fas fa-plus-circle"></i>
-              Register Device
-            </button>
-            <button id="remove-device-btn" class="admin-btn danger">
-              <i class="fas fa-trash-alt"></i>
-              Remove Device
-            </button>
-          </div>
-        </div>
-      </div>
+         <!-- Header Section -->
+         <div class="admin-header">
+           <div class="admin-title">
+             <h2>Admin Control Panel</h2>
+           </div>
+           <div class="admin-subtitle">Device Management & Trial Activation</div>
+         </div>
 
-      <!-- Customer Information Section -->
-      <div class="admin-section">
-        <div class="section-header">
-          <i class="fas fa-user"></i>
-          <h3>Customer Information</h3>
-        </div>
-        <div class="customer-form">
-          <div class="form-row">
-            <div class="form-field">
-              <label for="customer-name-input">Customer Name *</label>
-              <input id="customer-name-input" type="text" class="admin-input" placeholder="Enter full name" required />
-            </div>
-            <div class="form-field">
-              <label for="customer-email-input">Email Address *</label>
-              <input id="customer-email-input" type="email" class="admin-input" placeholder="customer@example.com" required />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-field">
-              <label for="customer-phone-input">Phone Number *</label>
-              <input id="customer-phone-input" type="text" class="admin-input" placeholder="+1234567890" required />
-            </div>
-            <div class="form-field">
-              <label for="trial-days-input">Trial Duration (Days) *</label>
-              <input id="trial-days-input" type="number" class="admin-input" min="1" max="365" placeholder="30" required />
-            </div>
-          </div>
-        </div>
-      </div>
+         <!-- Customer Information Section -->
+         <div class="admin-section">
+           <div class="section-header">
+             <h3>Customer Information</h3>
+           </div>
+           <div class="customer-form">
+             <div class="form-row">
+               <div class="form-field">
+                 <label for="customer-name-input">Customer Name *</label>
+                 <input id="customer-name-input" type="text" class="admin-input" placeholder="Enter full name" required />
+               </div>
+               <div class="form-field">
+                 <label for="customer-email-input">Email Address *</label>
+                 <input id="customer-email-input" type="email" class="admin-input" placeholder="customer@example.com" required />
+               </div>
+             </div>
+             <div class="form-row">
+               <div class="form-field">
+                 <label for="customer-phone-input">Phone Number *</label>
+                 <input id="customer-phone-input" type="text" class="admin-input" placeholder="+1234567890" required />
+               </div>
+               <div class="form-field">
+                 <label for="trial-days-input">Trial Duration (Days) *</label>
+                 <input id="trial-days-input" type="number" class="admin-input" min="1" max="365" placeholder="30" required />
+               </div>
+             </div>
+           </div>
+         </div>
 
-      <!-- Action Section -->
-      <div class="admin-section">
-        <div class="section-header">
-          <i class="fas fa-rocket"></i>
-          <h3>Activation Options</h3>
-        </div>
-        
-        <!-- Trial Activation -->
-        <div class="activation-card">
-          <div class="activation-info">
-            <h4>Trial Activation</h4>
-            <p>Activate a time-limited trial for this device with the specified customer information.</p>
-          </div>
-          <button id="activate-trial-btn" class="admin-btn success large">
-            <i class="fas fa-play-circle"></i>
-            Activate Trial
-          </button>
-        </div>
-        
-        <!-- Permanent License Section -->
-        <div class="permanent-license-section">
-          <div class="section-divider">
-            <span>OR</span>
-          </div>
-          <div class="permanent-card">
-            <div class="permanent-info">
-              <h4>Permanent License</h4>
-              <p>Activate permanent license using a valid license key (optional).</p>
-            </div>
-            <div class="permanent-form">
-              <div class="form-field">
-                <label for="perm-key-input">License Key (Optional)</label>
-                <input id="perm-key-input" type="text" class="admin-input" placeholder="Enter license key (e.g., PERM-XXXX-XXXX-XXXX)" />
-              </div>
-              <button id="activate-perm-btn" class="admin-btn warning large">
-                <i class="fas fa-key"></i>
-                Activate Permanent License
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+         <!-- Action Section -->
+         <div class="admin-section">
+           <div class="section-header">
+             <h3>Activation Options</h3>
+           </div>
+           
+           <!-- Trial Activation -->
+           <div class="activation-card">
+             <div class="activation-info">
+               <h4>Trial Activation</h4>
+               <p>Activate a time-limited trial for this device with the specified customer information.</p>
+             </div>
+             <button id="activate-trial-btn" class="admin-btn success large">Activate Trial</button>
+           </div>
+           
+           <!-- Permanent License Section -->
+           <div class="permanent-license-section">
+             <div class="section-divider">
+               <span>OR</span>
+             </div>
+             <div class="permanent-card">
+               <div class="permanent-info">
+                 <h4>Permanent License</h4>
+                 <p>Activate permanent license using a valid license key (optional).</p>
+               </div>
+               <div class="permanent-form">
+                 <div class="form-field">
+                   <label for="perm-key-input">License Key (Optional)</label>
+                   <input id="perm-key-input" type="text" class="admin-input" placeholder="Enter license key (e.g., PERM-XXXX-XXXX-XXXX)" />
+                 </div>
+                 <button id="activate-perm-btn" class="admin-btn warning large">Activate Permanent License</button>
+               </div>
+             </div>
+           </div>
+         </div>
 
-      <!-- Result Section -->
-      <div id="admin-action-result" class="result-message"></div>
-    </div>
+         <!-- Result Section -->
+         <div id="admin-action-result" class="result-message"></div>
+       </div>
 
-    <style>
-      .admin-actions-modal {
-        display: flex;
-        flex-direction: column;
-        padding: 0;
-        width: 100vw;
-        height: 100vh;
-        max-width: none;
-        min-width: none;
-        max-height: none;
-        overflow-y: auto;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 0;
-        box-shadow: none;
-        color: white;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 999999;
-      }
+       <style>
+         :root {
+           --color-background: #000000;
+           --color-surface: #1a1a1a;
+           --color-text: #ffffff;
+           --color-text-secondary: #b0b0b0;
+           --color-primary: #ffffff;
+           --color-error: #ff4d4d;
+           --color-warning: #ffca28;
+           --color-success: #4caf50;
+           --color-border: #333333;
+           --transition: all 0.2s ease-out;
+         }
 
-      .admin-header {
-        background: rgba(255,255,255,0.1);
-        backdrop-filter: blur(10px);
-        padding: 40px 60px;
-        border-radius: 0;
-        border-bottom: 1px solid rgba(255,255,255,0.2);
-      }
+         .admin-actions-modal {
+           display: flex;
+           flex-direction: column;
+           width: 100vw;
+           height: 100vh;
+           max-width: none;
+           min-width: none;
+           max-height: none;
+           overflow-y: auto;
+           background: var(--color-background);
+           color: var(--color-text);
+           font-family: 'Inter', sans-serif;
+           position: fixed;
+           top: 0;
+           left: 0;
+           z-index: 999999;
+         }
 
-      .admin-title {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 8px;
-      }
+         .device-info-sticky {
+           position: sticky;
+           top: 0;
+           z-index: 1000;
+           background: var(--color-background);
+           border-bottom: 1px solid var(--color-border);
+         }
 
-      .admin-title i {
-        font-size: 2rem;
-        color: #ffd700;
-      }
+         .device-info-card {
+           padding: 16px 24px;
+           background: var(--color-surface);
+         }
 
-      .admin-title h2 {
-        margin: 0;
-        font-size: 2rem;
-        font-weight: 700;
-        background: linear-gradient(45deg, #ffd700, #ffed4e);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
+         .device-info-content {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           gap: 16px;
+         }
 
-      .admin-subtitle {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        margin-left: 50px;
-      }
+         .section-header {
+           margin-bottom: 12px;
+         }
 
-      .admin-section {
-        padding: 40px 80px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-      }
+         .section-header h3 {
+           margin: 0;
+           font-size: 1.125rem;
+           font-weight: 600;
+           color: var(--color-text);
+         }
 
-      .admin-section:last-child {
-        border-bottom: none;
-        padding-bottom: 80px;
-      }
+         .device-id-container label {
+           font-size: 0.75rem;
+           font-weight: 500;
+           color: var(--color-text-secondary);
+           margin-bottom: 4px;
+           display: block;
+         }
 
-      .section-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 20px;
-      }
+         .device-id-chip {
+           background: var(--color-background);
+           color: var(--color-text);
+           padding: 8px 12px;
+           border-radius: 8px;
+           font-size: 0.875rem;
+           font-weight: 500;
+           font-family: 'Inter', monospace;
+           user-select: all;
+           border: 1px solid var(--color-border);
+           min-width: 200px;
+           text-align: center;
+           transition: var(--transition);
+         }
 
-      .section-header i {
-        font-size: 1.3rem;
-        color: #ffd700;
-      }
+         .device-id-chip:hover {
+           border-color: var(--color-primary);
+         }
 
-      .section-header h3 {
-        margin: 0;
-        font-size: 1.3rem;
-        font-weight: 600;
-      }
+         .device-actions {
+           display: flex;
+           gap: 8px;
+         }
 
-      .device-info-card {
-        background: rgba(255,255,255,0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        padding: 25px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border: 1px solid rgba(255,255,255,0.2);
-      }
+         .admin-header {
+           padding: 24px 24px 16px;
+           border-bottom: 1px solid var(--color-border);
+         }
 
-      .device-id-container label {
-        display: block;
-        font-size: 0.9rem;
-        opacity: 0.8;
-        margin-bottom: 8px;
-      }
+         .admin-title {
+           margin-bottom: 4px;
+         }
 
-      .device-id-chip {
-        background: rgba(255,255,255,0.2);
-        color: white;
-        padding: 12px 20px;
-        border-radius: 25px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        font-family: 'Courier New', monospace;
-        user-select: all;
-        border: 1px solid rgba(255,255,255,0.3);
-        min-width: 300px;
-        text-align: center;
-      }
+         .admin-title h2 {
+           margin: 0;
+           font-size: 1.5rem;
+           font-weight: 700;
+           color: var(--color-text);
+         }
 
-      .device-actions {
-        display: flex;
-        gap: 12px;
-      }
+         .admin-subtitle {
+           font-size: 0.875rem;
+           font-weight: 400;
+           color: var(--color-text-secondary);
+         }
 
-      .customer-form {
-        background: rgba(255,255,255,0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        padding: 30px;
-        border: 1px solid rgba(255,255,255,0.2);
-      }
+         .admin-section {
+           padding: 24px;
+           border-bottom: 1px solid var(--color-border);
+         }
 
-      .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 25px;
-        margin-bottom: 20px;
-      }
+         .admin-section:last-child {
+           border-bottom: none;
+           padding-bottom: 48px;
+         }
 
-      .form-row:last-child {
-        margin-bottom: 0;
-      }
+         .customer-form {
+           background: var(--color-surface);
+           border-radius: 8px;
+           padding: 16px;
+         }
 
-      .form-field {
-        display: flex;
-        flex-direction: column;
-      }
+         .form-row {
+           display: grid;
+           grid-template-columns: 1fr 1fr;
+           gap: 16px;
+           margin-bottom: 12px;
+         }
 
-      .form-field label {
-        font-size: 0.95rem;
-        font-weight: 500;
-        margin-bottom: 8px;
-        opacity: 0.9;
-      }
+         .form-row:last-child {
+           margin-bottom: 0;
+         }
 
-      .admin-input {
-        padding: 12px 16px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-radius: 10px;
-        background: rgba(255,255,255,0.1);
-        color: white;
-        font-size: 1rem;
-        font-family: inherit;
-        outline: none;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(5px);
-      }
+         .form-field {
+           display: flex;
+           flex-direction: column;
+         }
 
-      .admin-input::placeholder {
-        color: rgba(255,255,255,0.6);
-      }
+         .form-field label {
+           font-size: 0.75rem;
+           font-weight: 500;
+           color: var(--color-text-secondary);
+           margin-bottom: 4px;
+         }
 
-      .admin-input:focus {
-        border-color: #ffd700;
-        background: rgba(255,255,255,0.15);
-        box-shadow: 0 0 0 3px rgba(255,215,0,0.3);
-      }
+         .admin-input {
+           padding: 10px 12px;
+           border: 1px solid var(--color-border);
+           border-radius: 4px;
+           background: var(--color-background);
+           color: var(--color-text);
+           font-size: 0.875rem;
+           font-family: 'Inter', sans-serif;
+           outline: none;
+           transition: var(--transition);
+         }
 
-      .activation-card {
-        background: rgba(255,255,255,0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        padding: 30px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border: 1px solid rgba(255,255,255,0.2);
-      }
+         .admin-input::placeholder {
+           color: var(--color-text-secondary);
+           opacity: 0.6;
+         }
 
-      .activation-info h4 {
-        margin: 0 0 8px 0;
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #ffd700;
-      }
+         .admin-input:focus {
+           border-color: var(--color-primary);
+           box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+         }
 
-      .activation-info p {
-        margin: 0;
-        opacity: 0.9;
-        line-height: 1.5;
-      }
+         .activation-card {
+           background: var(--color-surface);
+           border-radius: 8px;
+           padding: 16px;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           gap: 16px;
+           transition: var(--transition);
+         }
 
-      .admin-btn {
-        padding: 12px 24px;
-        border: none;
-        border-radius: 10px;
-        font-size: 0.95rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        backdrop-filter: blur(10px);
-        border: 2px solid transparent;
-      }
+         .activation-card:hover {
+           background: #252525;
+         }
 
-      .admin-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-      }
+         .activation-info h4 {
+           margin: 0 0 4px 0;
+           font-size: 1rem;
+           font-weight: 600;
+           color: var(--color-text);
+         }
 
-      .admin-btn.primary {
-        background: linear-gradient(45deg, #4facfe, #00f2fe);
-        color: white;
-      }
+         .activation-info p {
+           margin: 0;
+           font-size: 0.75rem;
+           font-weight: 400;
+           color: var(--color-text-secondary);
+           line-height: 1.4;
+         }
 
-      .admin-btn.primary:hover {
-        background: linear-gradient(45deg, #43a3f5, #00e5f2);
-      }
+         .admin-btn {
+           padding: 10px 16px;
+           border: none;
+           border-radius: 4px;
+           font-size: 0.875rem;
+           font-weight: 600;
+           cursor: pointer;
+           transition: var(--transition);
+           text-align: center;
+           text-transform: uppercase;
+           letter-spacing: 0.5px;
+         }
 
-      .admin-btn.danger {
-        background: linear-gradient(45deg, #ff6b6b, #ee5a52);
-        color: white;
-      }
+         .admin-btn:hover {
+           filter: brightness(1.1);
+         }
 
-      .admin-btn.danger:hover {
-        background: linear-gradient(45deg, #ff5252, #e53e3e);
-      }
+         .admin-btn.primary {
+           background: var(--color-primary);
+           color: var(--color-background);
+         }
 
-      .admin-btn.success {
-        background: linear-gradient(45deg, #51cf66, #40c057);
-        color: white;
-      }
+         .admin-btn.danger {
+           background: var(--color-error);
+           color: var(--color-text);
+         }
 
-      .admin-btn.success:hover {
-        background: linear-gradient(45deg, #47c75f, #37b24d);
-      }
+         .admin-btn.success {
+           background: var(--color-success);
+           color: var(--color-text);
+         }
 
-      .admin-btn.warning {
-        background: linear-gradient(45deg, #ffd93d, #ff9500);
-        color: white;
-      }
+         .admin-btn.warning {
+           background: var(--color-warning);
+           color: var(--color-background);
+         }
 
-      .admin-btn.warning:hover {
-        background: linear-gradient(45deg, #ffcc02, #ff8c00);
-      }
+         .admin-btn.large {
+           padding: 12px 24px;
+           font-size: 1rem;
+           min-width: 180px;
+         }
 
-      .admin-btn.large {
-        padding: 16px 32px;
-        font-size: 1.1rem;
-        min-width: 200px;
-        justify-content: center;
-      }
+         .permanent-license-section {
+           margin-top: 16px;
+         }
 
-      .permanent-license-section {
-        margin-top: 30px;
-      }
+         .section-divider {
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           margin: 16px 0;
+           position: relative;
+         }
 
-      .section-divider {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 20px 0;
-        position: relative;
-      }
+         .section-divider::before {
+           content: '';
+           position: absolute;
+           top: 50%;
+           left: 0;
+           right: 0;
+           height: 1px;
+           background: var(--color-border);
+         }
 
-      .section-divider::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: rgba(255,255,255,0.3);
-      }
+         .section-divider span {
+           background: var(--color-surface);
+           padding: 4px 12px;
+           border-radius: 8px;
+           font-size: 0.75rem;
+           font-weight: 600;
+           border: 1px solid var(--color-border);
+           position: relative;
+           z-index: 1;
+           color: var(--color-text-secondary);
+         }
 
-      .section-divider span {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 8px 20px;
-        border-radius: 20px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        border: 1px solid rgba(255,255,255,0.3);
-        position: relative;
-        z-index: 1;
-      }
+         .permanent-card {
+           background: var(--color-surface);
+           border-radius: 8px;
+           padding: 16px;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           gap: 16px;
+           transition: var(--transition);
+         }
 
-      .permanent-card {
-        background: rgba(255,255,255,0.08);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        padding: 30px;
-        border: 1px solid rgba(255,255,255,0.15);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 30px;
-      }
+         .permanent-card:hover {
+           background: #252525;
+         }
 
-      .permanent-info h4 {
-        margin: 0 0 8px 0;
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #ffd93d;
-      }
+         .permanent-info h4 {
+           margin: 0 0 4px 0;
+           font-size: 1rem;
+           font-weight: 600;
+           color: var(--color-text);
+         }
 
-      .permanent-info p {
-        margin: 0;
-        opacity: 0.9;
-        line-height: 1.5;
-      }
+         .permanent-info p {
+           margin: 0;
+           font-size: 0.75rem;
+           font-weight: 400;
+           color: var(--color-text-secondary);
+           line-height: 1.4;
+         }
 
-      .permanent-form {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        min-width: 300px;
-      }
+         .permanent-form {
+           display: flex;
+           flex-direction: column;
+           gap: 12px;
+           min-width: 240px;
+         }
 
-      .result-message {
-        margin: 20px 40px;
-        padding: 15px 20px;
-        border-radius: 10px;
-        font-weight: 500;
-        text-align: center;
-        display: none;
-      }
+         .result-message {
+           margin: 16px 24px;
+           padding: 12px;
+           border-radius: 4px;
+           font-size: 0.875rem;
+           font-weight: 500;
+           text-align: center;
+           display: none;
+         }
 
-      .result-message.success {
-        background: rgba(81, 207, 102, 0.2);
-        border: 1px solid rgba(81, 207, 102, 0.5);
-        color: #51cf66;
-        display: block;
-      }
+         .result-message.success {
+           background: rgba(76, 175, 80, 0.1);
+           border: 1px solid rgba(76, 175, 80, 0.3);
+           color: var(--color-success);
+           display: block;
+         }
 
-      .result-message.error {
-        background: rgba(255, 107, 107, 0.2);
-        border: 1px solid rgba(255, 107, 107, 0.5);
-        color: #ff6b6b;
-        display: block;
-      }
+         .result-message.error {
+           background: rgba(255, 77, 77, 0.1);
+           border: 1px solid rgba(255, 77, 77, 0.3);
+           color: var(--color-error);
+           display: block;
+         }
 
-      /* Responsive Design */
-      @media (max-width: 1024px) {
-        .admin-actions-modal {
-          min-width: 90vw;
-          max-width: 95vw;
-        }
-        
-        .form-row {
-          grid-template-columns: 1fr;
-          gap: 15px;
-        }
-        
-        .device-info-card,
-        .activation-card {
-          flex-direction: column;
-          gap: 20px;
-          text-align: center;
-        }
-        
-        .device-id-chip {
-          min-width: auto;
-          width: 100%;
-        }
-      }
+         /* Responsive Design */
+         @media (max-width: 1024px) {
+           .admin-actions-modal {
+             min-width: 90vw;
+             max-width: 95vw;
+           }
+           
+           .form-row {
+             grid-template-columns: 1fr;
+             gap: 12px;
+           }
+           
+           .device-info-content,
+           .activation-card,
+           .permanent-card {
+             flex-direction: column;
+             gap: 12px;
+             text-align: center;
+           }
+           
+           .device-id-chip {
+             min-width: auto;
+             width: 100%;
+           }
+         }
 
-      @media (max-width: 768px) {
-        .admin-actions-modal {
-          min-width: 95vw;
-          margin: 10px;
-        }
-        
-        .admin-header,
-        .admin-section {
-          padding: 20px 25px;
-        }
-        
-        .admin-title h2 {
-          font-size: 1.5rem;
-        }
-        
-        .admin-title i {
-          font-size: 1.5rem;
-        }
-        
-        .device-actions {
-          flex-direction: column;
-          width: 100%;
-        }
-        
-        .admin-btn {
-          width: 100%;
-          justify-content: center;
-        }
-      }
-    </style>
+         @media (max-width: 768px) {
+           .admin-actions-modal {
+             min-width: 95vw;
+             margin: 8px;
+           }
+           
+           .device-info-card,
+           .admin-header,
+           .admin-section {
+             padding: 16px 20px;
+           }
+           
+           .admin-title h2 {
+             font-size: 1.25rem;
+           }
+           
+           .device-actions {
+             flex-direction: column;
+             width: 100%;
+           }
+           
+           .admin-btn {
+             width: 100%;
+           }
+         }
+</style>
   `;
   showModal('Admin Control Panel', modalHtml, { okText: 'Close', cancelText: '' });
 
