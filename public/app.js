@@ -701,499 +701,545 @@ async function initializeActivationSystem() {
 function showAdminActionsWindow() {
   const modalHtml = `
 <div class="admin-actions-modal">
-         <!-- Device Information Section (Sticky) -->
-         <div class="device-info-sticky">
-           <div class="device-info-card">
-             <div class="section-header">
-               <h3>Device Information</h3>
-             </div>
-             <div class="device-info-content">
-               <div class="device-id-container">
-                 <label for="device-id-chip">Device ID</label>
-                 <div id="device-id-chip" class="device-id-chip">Loading...</div>
-               </div>
-               <div class="device-actions">
-                 <button id="register-device-btn" class="admin-btn primary">Register Device</button>
-                 <button id="remove-device-btn" class="admin-btn danger">Remove Device</button>
-               </div>
-             </div>
-           </div>
-         </div>
+  <!-- Device Information Section (Sticky) -->
+  <div class="device-info-sticky">
+    <div class="device-info-card">
+      <div class="section-header">
+        <i class="material-icons">devices</i>
+        <h3>Device Information</h3>
+      </div>
+      <div class="device-info-content">
+        <div class="device-id-container">
+          <label for="device-id-chip">Device ID</label>
+          <div id="device-id-chip" class="device-id-chip">Loading...</div>
+        </div>
+        <div class="device-actions">
+          <button id="register-device-btn" class="admin-btn primary">
+            <i class="material-icons">add</i>
+            Register Device
+          </button>
+          <button id="remove-device-btn" class="admin-btn danger">
+            <i class="material-icons">delete</i>
+            Remove Device
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-         <!-- Header Section -->
-         <div class="admin-header">
-           <div class="admin-title">
-             <h2>Admin Control Panel</h2>
-           </div>
-           <div class="admin-subtitle">Device Management & Trial Activation</div>
-         </div>
+  <!-- Header Section -->
+  <div class="admin-header">
+    <div class="admin-title">
+      <i class="material-icons">admin_panel_settings</i>
+      <h2>Admin Control Panel</h2>
+    </div>
+    <div class="admin-subtitle">Device Management & Trial Activation</div>
+  </div>
 
-         <!-- Customer Information Section -->
-         <div class="admin-section">
-           <div class="section-header">
-             <h3>Customer Information</h3>
-           </div>
-           <div class="customer-form">
-             <div class="form-row">
-               <div class="form-field">
-                 <label for="customer-name-input">Customer Name *</label>
-                 <input id="customer-name-input" type="text" class="admin-input" placeholder="Enter full name" required />
-               </div>
-               <div class="form-field">
-                 <label for="customer-email-input">Email Address *</label>
-                 <input id="customer-email-input" type="email" class="admin-input" placeholder="customer@example.com" required />
-               </div>
-             </div>
-             <div class="form-row">
-               <div class="form-field">
-                 <label for="customer-phone-input">Phone Number *</label>
-                 <input id="customer-phone-input" type="text" class="admin-input" placeholder="+1234567890" required />
-               </div>
-               <div class="form-field">
-                 <label for="trial-days-input">Trial Duration (Days) *</label>
-                 <input id="trial-days-input" type="number" class="admin-input" min="1" max="365" placeholder="30" required />
-               </div>
-             </div>
-           </div>
-         </div>
+  <!-- Customer Information Section -->
+  <div class="admin-section">
+    <div class="section-header">
+      <i class="material-icons">person</i>
+      <h3>Customer Information</h3>
+    </div>
+    <div class="customer-form">
+      <div class="form-row">
+        <div class="form-field">
+          <label for="customer-name-input">Customer Name *</label>
+          <input id="customer-name-input" type="text" class="admin-input" placeholder="Enter full name" required />
+        </div>
+        <div class="form-field">
+          <label for="customer-email-input">Email Address *</label>
+          <input id="customer-email-input" type="email" class="admin-input" placeholder="customer@example.com" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="customer-phone-input">Phone Number *</label>
+          <input id="customer-phone-input" type="text" class="admin-input" placeholder="+1234567890" required />
+        </div>
+        <div class="form-field">
+          <label for="trial-days-input">Trial Duration (Days) *</label>
+          <input id="trial-days-input" type="number" class="admin-input" min="1" max="365" placeholder="30" required />
+        </div>
+      </div>
+    </div>
+  </div>
 
-         <!-- Action Section -->
-         <div class="admin-section">
-           <div class="section-header">
-             <h3>Activation Options</h3>
-           </div>
-           
-           <!-- Trial Activation -->
-           <div class="activation-card">
-             <div class="activation-info">
-               <h4>Trial Activation</h4>
-               <p>Activate a time-limited trial for this device with the specified customer information.</p>
-             </div>
-             <button id="activate-trial-btn" class="admin-btn success large">Activate Trial</button>
-           </div>
-           
-           <!-- Permanent License Section -->
-           <div class="permanent-license-section">
-             <div class="section-divider">
-               <span>OR</span>
-             </div>
-             <div class="permanent-card">
-               <div class="permanent-info">
-                 <h4>Permanent License</h4>
-                 <p>Activate permanent license using a valid license key (optional).</p>
-               </div>
-               <div class="permanent-form">
-                 <div class="form-field">
-                   <label for="perm-key-input">License Key (Optional)</label>
-                   <input id="perm-key-input" type="text" class="admin-input" placeholder="Enter license key (e.g., PERM-XXXX-XXXX-XXXX)" />
-                 </div>
-                 <button id="activate-perm-btn" class="admin-btn warning large">Activate Permanent License</button>
-               </div>
-             </div>
-           </div>
-         </div>
+  <!-- Action Section -->
+  <div class="admin-section">
+    <div class="section-header">
+      <i class="material-icons">bolt</i>
+      <h3>Activation Options</h3>
+    </div>
+    
+    <!-- Trial Activation -->
+    <div class="activation-card">
+      <div class="activation-info">
+        <h4>Trial Activation</h4>
+        <p>Activate a time-limited trial for this device with the specified customer information.</p>
+      </div>
+      <button id="activate-trial-btn" class="admin-btn success large">
+        <i class="material-icons">play_arrow</i>
+        Activate Trial
+      </button>
+    </div>
+    
+    <!-- Permanent License Section -->
+    <div class="permanent-license-section">
+      <div class="section-divider">
+        <span>OR</span>
+      </div>
+      <div class="permanent-card">
+        <div class="permanent-info">
+          <h4>Permanent License</h4>
+          <p>Activate permanent license using a valid license key (optional).</p>
+        </div>
+        <div class="permanent-form">
+          <div class="form-field">
+            <label for="perm-key-input">License Key (Optional)</label>
+            <input id="perm-key-input" type="text" class="admin-input" placeholder="Enter license key (e.g., PERM-XXXX-XXXX-XXXX)" />
+          </div>
+          <button id="activate-perm-btn" class="admin-btn warning large">
+            <i class="material-icons">key</i>
+            Activate Permanent License
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-         <!-- Result Section -->
-         <div id="admin-action-result" class="result-message"></div>
-       </div>
+  <!-- Result Section -->
+  <div id="admin-action-result" class="result-message"></div>
+</div>
 
-       <style>
-         :root {
-           --color-background: #000000;
-           --color-surface: #1a1a1a;
-           --color-text: #ffffff;
-           --color-text-secondary: #b0b0b0;
-           --color-primary: #ffffff;
-           --color-error: #ff4d4d;
-           --color-warning: #ffca28;
-           --color-success: #4caf50;
-           --color-border: #333333;
-           --transition: all 0.2s ease-out;
-         }
+<style>
+  :root {
+    --color-background: #000000;
+    --color-surface: #1a1a1a;
+    --color-text: #ffffff;
+    --color-text-secondary: #b0b0b0;
+    --color-primary: #ffffff;
+    --color-error: #ff4d4d;
+    --color-warning: #ffca28;
+    --color-success: #4caf50;
+    --color-border: #333333;
+    --transition: all 0.2s ease-out;
+  }
 
-         .admin-actions-modal {
-           display: flex;
-           flex-direction: column;
-           width: 100vw;
-           height: 100vh;
-           max-width: none;
-           min-width: none;
-           max-height: none;
-           overflow-y: auto;
-           background: var(--color-background);
-           color: var(--color-text);
-           font-family: 'Inter', sans-serif;
-           position: fixed;
-           top: 0;
-           left: 0;
-           z-index: 999999;
-         }
+  @font-face {
+    font-family: 'Inter';
+    src: url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  }
 
-         .device-info-sticky {
-           position: sticky;
-           top: 0;
-           z-index: 1000;
-           background: var(--color-background);
-           border-bottom: 1px solid var(--color-border);
-         }
+  .admin-actions-modal {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    min-width: none;
+    max-height: none;
+    overflow-y: auto;
+    background: var(--color-background);
+    color: var(--color-text);
+    font-family: 'Inter', sans-serif;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999999;
+  }
 
-         .device-info-card {
-           padding: 16px 24px;
-           background: var(--color-surface);
-         }
+  .device-info-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: var(--color-background);
+    border-bottom: 1px solid var(--color-border);
+  }
 
-         .device-info-content {
-           display: flex;
-           justify-content: space-between;
-           align-items: center;
-           gap: 16px;
-         }
+  .device-info-card {
+    padding: 16px 24px;
+    background: var(--color-surface);
+  }
 
-         .section-header {
-           margin-bottom: 12px;
-         }
+  .device-info-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
 
-         .section-header h3 {
-           margin: 0;
-           font-size: 1.125rem;
-           font-weight: 600;
-           color: var(--color-text);
-         }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
 
-         .device-id-container label {
-           font-size: 0.75rem;
-           font-weight: 500;
-           color: var(--color-text-secondary);
-           margin-bottom: 4px;
-           display: block;
-         }
+  .section-header i {
+    font-size: 20px;
+    color: var(--color-primary);
+  }
 
-         .device-id-chip {
-           background: var(--color-background);
-           color: var(--color-text);
-           padding: 8px 12px;
-           border-radius: 8px;
-           font-size: 0.875rem;
-           font-weight: 500;
-           font-family: 'Inter', monospace;
-           user-select: all;
-           border: 1px solid var(--color-border);
-           min-width: 200px;
-           text-align: center;
-           transition: var(--transition);
-         }
+  .section-header h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
 
-         .device-id-chip:hover {
-           border-color: var(--color-primary);
-         }
+  .device-id-container label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+    display: block;
+  }
 
-         .device-actions {
-           display: flex;
-           gap: 8px;
-         }
+  .device-id-chip {
+    background: var(--color-background);
+    color: var(--color-text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: 'Inter', monospace;
+    user-select: all;
+    border: 1px solid var(--color-border);
+    min-width: 200px;
+    text-align: center;
+    transition: var(--transition);
+  }
 
-         .admin-header {
-           padding: 24px 24px 16px;
-           border-bottom: 1px solid var(--color-border);
-         }
+  .device-id-chip:hover {
+    border-color: var(--color-primary);
+  }
 
-         .admin-title {
-           margin-bottom: 4px;
-         }
+  .device-actions {
+    display: flex;
+    gap: 8px;
+  }
 
-         .admin-title h2 {
-           margin: 0;
-           font-size: 1.5rem;
-           font-weight: 700;
-           color: var(--color-text);
-         }
+  .admin-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid var(--color-border);
+  }
 
-         .admin-subtitle {
-           font-size: 0.875rem;
-           font-weight: 400;
-           color: var(--color-text-secondary);
-         }
+  .admin-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
 
-         .admin-section {
-           padding: 24px;
-           border-bottom: 1px solid var(--color-border);
-         }
+  .admin-title i {
+    font-size: 24px;
+    color: var(--color-primary);
+  }
 
-         .admin-section:last-child {
-           border-bottom: none;
-           padding-bottom: 48px;
-         }
+  .admin-title h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
 
-         .customer-form {
-           background: var(--color-surface);
-           border-radius: 8px;
-           padding: 16px;
-         }
+  .admin-subtitle {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--color-text-secondary);
+    margin-left: 32px;
+  }
 
-         .form-row {
-           display: grid;
-           grid-template-columns: 1fr 1fr;
-           gap: 16px;
-           margin-bottom: 12px;
-         }
+  .admin-section {
+    padding: 24px;
+    border-bottom: 1px solid var(--color-border);
+  }
 
-         .form-row:last-child {
-           margin-bottom: 0;
-         }
+  .admin-section:last-child {
+    border-bottom: none;
+    padding-bottom: 48px;
+  }
 
-         .form-field {
-           display: flex;
-           flex-direction: column;
-         }
+  .customer-form {
+    background: var(--color-surface);
+    border-radius: 8px;
+    padding: 16px;
+  }
 
-         .form-field label {
-           font-size: 0.75rem;
-           font-weight: 500;
-           color: var(--color-text-secondary);
-           margin-bottom: 4px;
-         }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
 
-         .admin-input {
-           padding: 10px 12px;
-           border: 1px solid var(--color-border);
-           border-radius: 4px;
-           background: var(--color-background);
-           color: var(--color-text);
-           font-size: 0.875rem;
-           font-family: 'Inter', sans-serif;
-           outline: none;
-           transition: var(--transition);
-         }
+  .form-row:last-child {
+    margin-bottom: 0;
+  }
 
-         .admin-input::placeholder {
-           color: var(--color-text-secondary);
-           opacity: 0.6;
-         }
+  .form-field {
+    display: flex;
+    flex-direction: column;
+  }
 
-         .admin-input:focus {
-           border-color: var(--color-primary);
-           box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
-         }
+  .form-field label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+  }
 
-         .activation-card {
-           background: var(--color-surface);
-           border-radius: 8px;
-           padding: 16px;
-           display: flex;
-           justify-content: space-between;
-           align-items: center;
-           gap: 16px;
-           transition: var(--transition);
-         }
+  .admin-input {
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-background);
+    color: var(--color-text);
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: var(--transition);
+  }
 
-         .activation-card:hover {
-           background: #252525;
-         }
+  .admin-input::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.6;
+  }
 
-         .activation-info h4 {
-           margin: 0 0 4px 0;
-           font-size: 1rem;
-           font-weight: 600;
-           color: var(--color-text);
-         }
+  .admin-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  }
 
-         .activation-info p {
-           margin: 0;
-           font-size: 0.75rem;
-           font-weight: 400;
-           color: var(--color-text-secondary);
-           line-height: 1.4;
-         }
+  .activation-card {
+    background: var(--color-surface);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    transition: var(--transition);
+  }
 
-         .admin-btn {
-           padding: 10px 16px;
-           border: none;
-           border-radius: 4px;
-           font-size: 0.875rem;
-           font-weight: 600;
-           cursor: pointer;
-           transition: var(--transition);
-           text-align: center;
-           text-transform: uppercase;
-           letter-spacing: 0.5px;
-         }
+  .activation-card:hover {
+    background: #252525;
+  }
 
-         .admin-btn:hover {
-           filter: brightness(1.1);
-         }
+  .activation-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
 
-         .admin-btn.primary {
-           background: var(--color-primary);
-           color: var(--color-background);
-         }
+  .activation-info p {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+  }
 
-         .admin-btn.danger {
-           background: var(--color-error);
-           color: var(--color-text);
-         }
+  .admin-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 
-         .admin-btn.success {
-           background: var(--color-success);
-           color: var(--color-text);
-         }
+  .admin-btn:hover {
+    filter: brightness(1.1);
+  }
 
-         .admin-btn.warning {
-           background: var(--color-warning);
-           color: var(--color-background);
-         }
+  .admin-btn.primary {
+    background: var(--color-primary);
+    color: var(--color-background);
+  }
 
-         .admin-btn.large {
-           padding: 12px 24px;
-           font-size: 1rem;
-           min-width: 180px;
-         }
+  .admin-btn.danger {
+    background: var(--color-error);
+    color: var(--color-text);
+  }
 
-         .permanent-license-section {
-           margin-top: 16px;
-         }
+  .admin-btn.success {
+    background: var(--color-success);
+    color: var(--color-text);
+  }
 
-         .section-divider {
-           display: flex;
-           align-items: center;
-           justify-content: center;
-           margin: 16px 0;
-           position: relative;
-         }
+  .admin-btn.warning {
+    background: var(--color-warning);
+    color: var(--color-background);
+  }
 
-         .section-divider::before {
-           content: '';
-           position: absolute;
-           top: 50%;
-           left: 0;
-           right: 0;
-           height: 1px;
-           background: var(--color-border);
-         }
+  .admin-btn.large {
+    padding: 12px 24px;
+    font-size: 0.875rem;
+    min-width: 160px;
+    justify-content: center;
+  }
 
-         .section-divider span {
-           background: var(--color-surface);
-           padding: 4px 12px;
-           border-radius: 8px;
-           font-size: 0.75rem;
-           font-weight: 600;
-           border: 1px solid var(--color-border);
-           position: relative;
-           z-index: 1;
-           color: var(--color-text-secondary);
-         }
+  .permanent-license-section {
+    margin-top: 16px;
+  }
 
-         .permanent-card {
-           background: var(--color-surface);
-           border-radius: 8px;
-           padding: 16px;
-           display: flex;
-           justify-content: space-between;
-           align-items: center;
-           gap: 16px;
-           transition: var(--transition);
-         }
+  .section-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 16px 0;
+    position: relative;
+  }
 
-         .permanent-card:hover {
-           background: #252525;
-         }
+  .section-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--color-border);
+  }
 
-         .permanent-info h4 {
-           margin: 0 0 4px 0;
-           font-size: 1rem;
-           font-weight: 600;
-           color: var(--color-text);
-         }
+  .section-divider span {
+    background: var(--color-surface);
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid var(--color-border);
+    position: relative;
+    z-index: 1;
+    color: var(--color-text-secondary);
+  }
 
-         .permanent-info p {
-           margin: 0;
-           font-size: 0.75rem;
-           font-weight: 400;
-           color: var(--color-text-secondary);
-           line-height: 1.4;
-         }
+  .permanent-card {
+    background: var(--color-surface);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    transition: var(--transition);
+  }
 
-         .permanent-form {
-           display: flex;
-           flex-direction: column;
-           gap: 12px;
-           min-width: 240px;
-         }
+  .permanent-card:hover {
+    background: #252525;
+  }
 
-         .result-message {
-           margin: 16px 24px;
-           padding: 12px;
-           border-radius: 4px;
-           font-size: 0.875rem;
-           font-weight: 500;
-           text-align: center;
-           display: none;
-         }
+  .permanent-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
 
-         .result-message.success {
-           background: rgba(76, 175, 80, 0.1);
-           border: 1px solid rgba(76, 175, 80, 0.3);
-           color: var(--color-success);
-           display: block;
-         }
+  .permanent-info p {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+  }
 
-         .result-message.error {
-           background: rgba(255, 77, 77, 0.1);
-           border: 1px solid rgba(255, 77, 77, 0.3);
-           color: var(--color-error);
-           display: block;
-         }
+  .permanent-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 240px;
+  }
 
-         /* Responsive Design */
-         @media (max-width: 1024px) {
-           .admin-actions-modal {
-             min-width: 90vw;
-             max-width: 95vw;
-           }
-           
-           .form-row {
-             grid-template-columns: 1fr;
-             gap: 12px;
-           }
-           
-           .device-info-content,
-           .activation-card,
-           .permanent-card {
-             flex-direction: column;
-             gap: 12px;
-             text-align: center;
-           }
-           
-           .device-id-chip {
-             min-width: auto;
-             width: 100%;
-           }
-         }
+  .result-message {
+    margin: 16px 24px;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: center;
+    display: none;
+  }
 
-         @media (max-width: 768px) {
-           .admin-actions-modal {
-             min-width: 95vw;
-             margin: 8px;
-           }
-           
-           .device-info-card,
-           .admin-header,
-           .admin-section {
-             padding: 16px 20px;
-           }
-           
-           .admin-title h2 {
-             font-size: 1.25rem;
-           }
-           
-           .device-actions {
-             flex-direction: column;
-             width: 100%;
-           }
-           
-           .admin-btn {
-             width: 100%;
-           }
-         }
+  .result-message.success {
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: var(--color-success);
+    display: block;
+  }
+
+  .result-message.error {
+    background: rgba(255, 77, 77, 0.1);
+    border: 1px solid rgba(255, 77, 77, 0.3);
+    color: var(--color-error);
+    display: block;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .admin-actions-modal {
+      min-width: 90vw;
+      max-width: 95vw;
+    }
+    
+    .form-row {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    
+    .device-info-content,
+    .activation-card,
+    .permanent-card {
+      flex-direction: column;
+      gap: 12px;
+      text-align: center;
+    }
+    
+    .device-id-chip {
+      min-width: auto;
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .admin-actions-modal {
+      min-width: 95vw;
+      margin: 8px;
+    }
+    
+    .device-info-card,
+    .admin-header,
+    .admin-section {
+      padding: 16px 20px;
+    }
+    
+    .admin-title h2 {
+      font-size: 1.25rem;
+    }
+    
+    .admin-title i {
+      font-size: 20px;
+    }
+    
+    .device-actions {
+      flex-direction: column;
+      width: 100%;
+    }
+    
+    .admin-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 </style>
   `;
   showModal('Admin Control Panel', modalHtml, { okText: 'Close', cancelText: '' });
