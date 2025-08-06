@@ -304,6 +304,24 @@
         const newBtn = getStartedBtn.cloneNode(true);
         getStartedBtn.parentNode.replaceChild(newBtn, getStartedBtn);
         
+        // Check localStorage for previous acceptance
+        const wasAccepted = localStorage.getItem('beesoft_terms_accepted') === 'true';
+        
+        // Set initial state
+        termsCheckbox.checked = wasAccepted;
+        newBtn.disabled = !wasAccepted;
+        
+        // Add checkbox handler
+        termsCheckbox.addEventListener('change', function() {
+          if (this.checked) {
+            localStorage.setItem('beesoft_terms_accepted', 'true');
+            newBtn.disabled = false;
+          } else {
+            localStorage.removeItem('beesoft_terms_accepted');
+            newBtn.disabled = true;
+          }
+        });
+        
         newBtn.addEventListener('click', function(e) {
           e.preventDefault();
           

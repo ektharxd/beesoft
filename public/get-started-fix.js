@@ -20,10 +20,14 @@
 
     console.log('✅ Found Get Started elements, applying fix...');
 
-    // Initial state - button should be disabled
-    getStartedBtn.disabled = !termsCheckbox.checked;
-    getStartedBtn.style.opacity = termsCheckbox.checked ? '1' : '0.5';
-    getStartedBtn.style.cursor = termsCheckbox.checked ? 'pointer' : 'not-allowed';
+    // Check localStorage for previous acceptance
+    const wasAccepted = localStorage.getItem('beesoft_terms_accepted') === 'true';
+    
+    // Set initial state based on localStorage
+    termsCheckbox.checked = wasAccepted;
+    getStartedBtn.disabled = !wasAccepted;
+    getStartedBtn.style.opacity = wasAccepted ? '1' : '0.5';
+    getStartedBtn.style.cursor = wasAccepted ? 'pointer' : 'not-allowed';
 
     // Remove any existing event listeners by cloning elements
     const newCheckbox = termsCheckbox.cloneNode(true);
@@ -36,6 +40,15 @@
     newCheckbox.addEventListener('change', function() {
       const isChecked = this.checked;
       console.log('📋 Terms checkbox changed:', isChecked);
+      
+      // Update localStorage
+      if (isChecked) {
+        localStorage.setItem('beesoft_terms_accepted', 'true');
+        console.log('✅ Terms acceptance saved to localStorage');
+      } else {
+        localStorage.removeItem('beesoft_terms_accepted');
+        console.log('❌ Terms acceptance removed from localStorage');
+      }
       
       // Update button state
       newButton.disabled = !isChecked;

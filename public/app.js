@@ -1,6 +1,7 @@
+
 /**
- * BEESOFT UI/UX - ENHANCED APPLICATION LOGIC
- * Comprehensive redesign with improved workflow, accessibility, and user experience
+ * BEESOFT UI/UX - CLEAN & MINIMAL VERSION
+ * Streamlined with essential notifications only
  */
 
 // ==========================================================================
@@ -109,7 +110,7 @@ class AppState {
 }
 
 // ==========================================================================
-// NOTIFICATION SYSTEM
+// MINIMAL NOTIFICATION SYSTEM - ESSENTIAL ONLY
 // ==========================================================================
 
 class NotificationManager {
@@ -119,18 +120,21 @@ class NotificationManager {
       this.container = document.createElement('div');
       this.container.id = 'toast-container';
       this.container.setAttribute('aria-live', 'polite');
-      this.container.setAttribute('aria-atomic', 'true');
       document.body.appendChild(this.container);
     }
   }
 
-  show(message, type = 'info', duration = 5000) {
+  // Only show essential notifications
+  showEssential(message, type = 'error', duration = 8000) {
+    const essentialTypes = ['error', 'warning', 'campaign-complete'];
+    if (!essentialTypes.includes(type)) return;
+
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     
     const icon = this.getIcon(type);
     toast.innerHTML = `
-      <span class="material-symbols-outlined" style="margin-right: var(--space-sm);">${icon}</span>
+      <span class="material-symbols-outlined">${icon}</span>
       <span>${message}</span>
     `;
 
@@ -149,39 +153,40 @@ class NotificationManager {
 
   getIcon(type) {
     const icons = {
-      success: 'check_circle',
+      'campaign-complete': 'check_circle',
       error: 'error',
-      warning: 'warning',
-      info: 'info'
+      warning: 'warning'
     };
     return icons[type] || 'info';
   }
 
-  success(message, duration) {
-    return this.show(message, 'success', duration);
+  // Only essential notifications
+  error(message) {
+    return this.showEssential(message, 'error');
   }
 
-  error(message, duration) {
-    return this.show(message, 'error', duration);
+  warning(message) {
+    return this.showEssential(message, 'warning');
   }
 
-  warning(message, duration) {
-    return this.show(message, 'warning', duration);
+  campaignComplete(message) {
+    return this.showEssential(message, 'campaign-complete', 10000);
   }
 
-  info(message, duration) {
-    return this.show(message, 'info', duration);
+  // Silent success - no popup, just visual feedback
+  silentSuccess() {
+    // Just update UI elements, no popup
   }
 }
 
 // ==========================================================================
-// ACTIVITY LOGGER
+// ACTIVITY LOGGER - CLEAN VERSION
 // ==========================================================================
 
 class ActivityLogger {
   constructor(containerId) {
     this.container = document.getElementById(containerId);
-    this.maxEntries = 100;
+    this.maxEntries = 50; // Reduced from 100
   }
 
   log(message, type = 'info') {
@@ -196,7 +201,7 @@ class ActivityLogger {
       <span class="activity-message">${message}</span>
     `;
 
-    // Remove old entries
+    // Remove old entries more aggressively
     while (this.container.children.length >= this.maxEntries) {
       this.container.removeChild(this.container.firstChild);
     }
@@ -205,6 +210,7 @@ class ActivityLogger {
     this.container.scrollTop = this.container.scrollHeight;
   }
 
+  // Only log important events
   success(message) {
     this.log(message, 'success');
   }
@@ -214,12 +220,15 @@ class ActivityLogger {
   }
 
   info(message) {
-    this.log(message, 'info');
+    // Only log campaign-related info
+    if (message.includes('Campaign') || message.includes('Connection')) {
+      this.log(message, 'info');
+    }
   }
 }
 
 // ==========================================================================
-// FORM VALIDATION
+// SIMPLIFIED FORM VALIDATION
 // ==========================================================================
 
 class FormValidator {
@@ -247,134 +256,519 @@ class FormValidator {
 
   static validateImageFile(file) {
     const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    const maxSize = 15 * 1024 * 1024; // 15MB (increased from 5MB)
+    const maxSize = 5 * 1024 * 1024; // Back to 5MB - realistic for WhatsApp
 
     return validTypes.includes(file.type) && file.size <= maxSize;
   }
 }
 
 // ==========================================================================
-// MAIN APPLICATION
+// CLEAN INITIALIZATION FUNCTIONS
 // ==========================================================================
-
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize global objects
-  window.appState = new AppState();
-  window.notifications = new NotificationManager();
-  window.logger = new ActivityLogger('live-log-list');
 
   // Initialize theme system
-  initializeTheme();
+function initializeFileUpload() {
+  const fileInput = document.getElementById('fileInput');
+  const fileUploadBox = document.getElementById('file-upload-box');
+  const fileInfo = document.getElementById('file-info');
+
+  if (!fileInput || !fileUploadBox || !fileInfo) return;
+
+  // File input change handler
+  fileInput.addEventListener('change', handleFileSelect);
   
-  // Initialize activation/subscription system
-  initializeActivationSystem();
+  // Drag and drop
+  fileUploadBox.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    fileUploadBox.classList.add('drag-over');
+  });
 
-  // Ensure admin login button toggles the login form
-  const adminLoginBtn = document.getElementById('admin-login-btn');
-  const adminLoginForm = document.getElementById('admin-login-form');
-  if (adminLoginBtn && adminLoginForm) {
-    adminLoginBtn.addEventListener('click', () => {
-      adminLoginForm.style.display = adminLoginForm.style.display === 'block' ? 'none' : 'block';
-    });
-  }
-  
-  // Initialize main application
-  initializeMainApp();
-  
-  // Initialize network monitoring
-  initializeNetworkMonitoring();
+  fileUploadBox.addEventListener('dragleave', () => {
+    fileUploadBox.classList.remove('drag-over');
+  });
 
-  // Start with trial check
-  checkTrial();
-  // Periodically re-check device status every 10 seconds to update UI if device is deleted from DB
-  setInterval(() => {
-    checkTrial();
-  }, 10000);
-
-  // Support modal logic
-  const supportModal = document.getElementById('support-modal');
-  const openSupportBtn = document.getElementById('open-support-modal-btn');
-  const openSupportBtnFooter = document.getElementById('open-support-modal-btn-footer');
-  const closeSupportBtn = document.getElementById('close-support-modal-btn');
-  const supportForm = document.getElementById('support-form');
-  const supportFormSuccess = document.getElementById('support-form-success');
-  const supportFormError = document.getElementById('support-form-error');
-
-  function openSupportModal() {
-    if (supportModal) supportModal.style.display = 'flex';
-    if (supportForm) {
-      supportForm.reset();
-      supportFormSuccess.style.display = 'none';
-      supportFormError.style.display = 'none';
+  fileUploadBox.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fileUploadBox.classList.remove('drag-over');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      fileInput.files = files;
+      handleFileSelect();
     }
+  });
+
+  function handleFileSelect() {
+    const file = fileInput.files[0];
+    if (!file) {
+      window.appState.hasFile = false;
+      fileInfo.innerHTML = '<div class="file-placeholder">No file selected</div>';
+      window.appState.updateWorkflowUI();
+      return;
+    }
+
+    if (!FormValidator.validateExcelFile(file)) {
+      window.notifications.error('Please select a valid Excel file (.xlsx or .xls)');
+      fileInput.value = '';
+      return;
+    }
+
+    // Parse and display file info - NO SUCCESS POPUP
+    parseExcelFile(file)
+      .then(contacts => {
+        window.appState.hasFile = true;
+        window.appState.contactCount = contacts.length;
+        fileInfo.innerHTML = `
+          <div class="file-selected">
+            <span class="material-symbols-outlined">description</span>
+            <div class="file-details">
+              <div class="file-name">${file.name}</div>
+              <div class="file-stats">${contacts.length} contacts found</div>
+            </div>
+          </div>
+        `;
+        window.appState.updateStep(Math.max(window.appState.currentStep, 2));
+        // NO SUCCESS NOTIFICATION - visual feedback is enough
+      })
+      .catch(error => {
+        window.notifications.error('Error reading Excel file: ' + error.message);
+        fileInput.value = '';
+      });
   }
-  function closeSupportModal() {
-    if (supportModal) supportModal.style.display = 'none';
-  }
-  if (openSupportBtn) openSupportBtn.addEventListener('click', openSupportModal);
-  if (openSupportBtnFooter) openSupportBtnFooter.addEventListener('click', openSupportModal);
-  if (closeSupportBtn) closeSupportBtn.addEventListener('click', closeSupportModal);
-  if (supportModal) {
-    supportModal.addEventListener('click', function(e) {
-      if (e.target === supportModal) closeSupportModal();
-    });
-  }
-  if (supportForm) {
-    supportForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      supportFormSuccess.style.display = 'none';
-      supportFormError.style.display = 'none';
-      const email = document.getElementById('support-email').value.trim();
-      const message = document.getElementById('support-message').value.trim();
-      try {
-        const response = await fetch('https://formspree.io/f/xblkoyno', {
-          method: 'POST',
-          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, message })
-        });
-        if (response.ok) {
-          supportFormSuccess.style.display = 'block';
-          supportFormError.style.display = 'none';
-          supportForm.reset();
-          setTimeout(() => {
-            // Optionally close modal here
-          }, 1800);
-        } else {
-          const data = await response.json();
-          supportFormError.textContent = (data && data.errors && data.errors[0] && data.errors[0].message) || 'Failed to send. Please try again.';
-          supportFormError.style.display = 'block';
+
+  async function parseExcelFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(sheet);
+          
+          // Extract phone numbers (look for common column names)
+          const contacts = jsonData.map((row, index) => {
+            const phone = row.phone || row.Phone || row.number || row.Number || 
+                         row.mobile || row.Mobile || row.whatsapp || row.WhatsApp ||
+                         Object.values(row)[0];
+            return {
+              id: index + 1,
+              phone: phone ? String(phone).replace(/\D/g, '') : '',
+              name: row.name || row.Name || `Contact ${index + 1}`
+            };
+          }).filter(contact => contact.phone && FormValidator.validatePhoneNumber(contact.phone));
+
+          resolve(contacts);
+        } catch (error) {
+          reject(error);
         }
-      } catch (err) {
-        supportFormError.textContent = 'Network error. Please try again.';
-        supportFormError.style.display = 'block';
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsArrayBuffer(file);
+    });
+  }
+}
+
+function initializeMessageComposer() {
+  // Support modal logic
+  const messageInput = document.getElementById('messageInput');
+  const charCounter = document.getElementById('char-counter');
+  const previewPane = document.getElementById('message-preview');
+
+  if (!messageInput) return;
+
+  messageInput.addEventListener('input', updateMessagePreview);
+
+  function updateMessagePreview() {
+    const message = messageInput.value.trim();
+    window.appState.hasMessage = message.length > 0;
+
+    // Update character counter
+    if (charCounter) {
+      const count = message.length;
+      charCounter.textContent = `${count}/1000 characters`;
+      charCounter.className = count > 800 ? 'char-counter warning' : 'char-counter';
+    }
+
+    // Update preview
+    if (previewPane) {
+      if (message) {
+        previewPane.innerHTML = `
+          <div class="message-preview-content">
+            <div class="preview-header">Message Preview:</div>
+            <div class="preview-text">${message.replace(/\n/g, '<br>')}</div>
+          </div>
+        `;
+      } else {
+        previewPane.innerHTML = '<div class="preview-placeholder">Enter your message to see preview</div>';
       }
+    }
+
+    window.appState.updateStep(Math.max(window.appState.currentStep, 3));
+    window.appState.updateWorkflowUI();
+  }
+
+  // Initialize with empty state
+  updateMessagePreview();
+}
+
+function initializeImageUpload() {
+  const imageInput = document.getElementById('imageInput');
+  const imageUploadBox = document.getElementById('image-upload-box');
+  const imagePreview = document.getElementById('image-preview');
+  const removeImageBtn = document.getElementById('remove-image');
+
+  if (!imageInput || !imageUploadBox) return;
+
+  imageInput.addEventListener('change', handleImageSelect);
+  
+  // Drag and drop for images
+  imageUploadBox.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    imageUploadBox.classList.add('drag-over');
+  });
+
+  imageUploadBox.addEventListener('dragleave', () => {
+    imageUploadBox.classList.remove('drag-over');
+  });
+
+  imageUploadBox.addEventListener('drop', (e) => {
+    e.preventDefault();
+    imageUploadBox.classList.remove('drag-over');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      imageInput.files = files;
+      handleImageSelect();
+    }
+  });
+
+  if (removeImageBtn) {
+    removeImageBtn.addEventListener('click', () => {
+      imageInput.value = '';
+      window.appState.selectedImagePath = null;
+      if (imagePreview) imagePreview.innerHTML = '';
+      imageUploadBox.style.display = 'block';
+      // NO NOTIFICATION - visual change is enough
     });
   }
 
-  const termsCheckbox = document.getElementById('accept-terms-checkbox');
-  const getStartedBtn = document.getElementById('get-started-btn');
-  if (termsCheckbox && getStartedBtn) {
-    // Check localStorage for acceptance
-    if (localStorage.getItem('beesoft_terms_accepted') === 'true') {
-      termsCheckbox.checked = true;
-      getStartedBtn.disabled = false;
-    } else {
-      getStartedBtn.disabled = true;
+  function handleImageSelect() {
+    const file = imageInput.files[0];
+    if (!file) return;
+
+    if (!FormValidator.validateImageFile(file)) {
+      window.notifications.error('Please select a valid image file (JPG, PNG, GIF, WEBP) under 5MB');
+      imageInput.value = '';
+      return;
     }
-    termsCheckbox.addEventListener('change', function () {
-      if (termsCheckbox.checked) {
-        localStorage.setItem('beesoft_terms_accepted', 'true');
-        getStartedBtn.disabled = false;
-      } else {
-        localStorage.removeItem('beesoft_terms_accepted');
-        getStartedBtn.disabled = true;
+
+    // Display image preview - NO SUCCESS POPUP
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      window.appState.selectedImagePath = e.target.result;
+      if (imagePreview) {
+        imagePreview.innerHTML = `
+          <div class="image-preview-container">
+            <img src="${e.target.result}" alt="Preview" class="preview-image">
+            <div class="image-info">
+              <div class="image-name">${file.name}</div>
+              <div class="image-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+            </div>
+          </div>
+        `;
       }
-    });
+      imageUploadBox.style.display = 'none';
+      // NO SUCCESS NOTIFICATION
+    };
+    reader.readAsDataURL(file);
   }
-});
+}
+
+function initializeWhatsAppConnection() {
+  const connectButton = document.getElementById('connect-whatsapp-btn');
+  const qrContainer = document.getElementById('qr-container');
+
+  if (!connectButton) return;
+
+  connectButton.addEventListener('click', initiateConnection);
+
+  async function initiateConnection() {
+    try {
+      connectButton.disabled = true;
+      connectButton.innerHTML = '<span class="bee-spinner"></span> Connecting...';
+
+      // Request QR code from server
+      const response = await fetch('/api/whatsapp/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to initiate WhatsApp connection');
+      }
+
+      const data = await response.json();
+      
+      if (data.qr) {
+        displayQRCode(data.qr);
+      }
+
+      // Poll for connection status
+      pollConnectionStatus();
+
+    } catch (error) {
+      window.notifications.error('Connection failed: ' + error.message);
+      connectButton.disabled = false;
+      connectButton.innerHTML = '<span class="material-symbols-outlined">qr_code_scanner</span> Connect WhatsApp';
+    }
+  }
+
+  function displayQRCode(qrData) {
+    if (qrContainer) {
+      qrContainer.innerHTML = `
+        <div class="qr-display">
+          <div class="qr-header">
+            <span class="material-symbols-outlined">qr_code</span>
+            <h3>Scan QR Code</h3>
+          </div>
+          <div id="qr-code"></div>
+          <div class="qr-instructions">
+            <p>1. Open WhatsApp on your phone</p>
+            <p>2. Go to Settings > Linked Devices</p>
+            <p>3. Tap "Link a Device" and scan this code</p>
+          </div>
+        </div>
+      `;
+
+      // Generate QR code
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(document.getElementById('qr-code'), {
+          text: qrData,
+          width: 256,
+          height: 256,
+          colorDark: '#000000',
+          colorLight: '#ffffff'
+        });
+      }
+    }
+  }
+
+  async function pollConnectionStatus() {
+    const maxAttempts = 60;
+    let attempts = 0;
+
+    const poll = async () => {
+      try {
+        const response = await fetch('/api/whatsapp/status');
+        const data = await response.json();
+
+        if (data.connected) {
+          window.appState.updateConnectionStatus(true);
+          connectButton.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Connected';
+          connectButton.disabled = true;
+          if (qrContainer) qrContainer.innerHTML = '';
+          // NO SUCCESS NOTIFICATION - visual feedback is enough
+          return;
+        }
+
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(poll, 2000);
+        } else {
+          throw new Error('Connection timeout');
+        }
+      } catch (error) {
+        window.notifications.error('Connection failed: ' + error.message);
+        connectButton.disabled = false;
+        connectButton.innerHTML = '<span class="material-symbols-outlined">qr_code_scanner</span> Connect WhatsApp';
+      }
+    };
+
+    poll();
+  }
+}
+
+function initializeSessionControls() {
+  const sendButton = document.getElementById('sendButton');
+  const pauseButton = document.getElementById('pauseButton');
+  const continueButton = document.getElementById('continueButton');
+  const stopButton = document.getElementById('stopButton');
+
+  if (sendButton) {
+    sendButton.addEventListener('click', startCampaign);
+  }
+
+  if (pauseButton) {
+    pauseButton.addEventListener('click', pauseCampaign);
+  }
+
+  if (continueButton) {
+    continueButton.addEventListener('click', continueCampaign);
+  }
+
+  if (stopButton) {
+    stopButton.addEventListener('click', stopCampaign);
+  }
+
+  async function startCampaign() {
+    if (!window.appState.isConnected || !window.appState.hasFile || !window.appState.hasMessage) {
+      window.notifications.error('Please complete all steps before starting the campaign');
+      return;
+    }
+
+    try {
+      const fileInput = document.getElementById('fileInput');
+      const messageInput = document.getElementById('messageInput');
+      const imageInput = document.getElementById('imageInput');
+
+      const formData = new FormData();
+      formData.append('excelFile', fileInput.files[0]);
+      formData.append('message', messageInput.value);
+      
+      if (imageInput.files[0]) {
+        formData.append('image', imageInput.files[0]);
+      }
+
+      const response = await fetch('/api/campaign/start', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to start campaign');
+      }
+
+      window.appState.isSessionActive = true;
+      window.appState.updateActionButtons();
+      // NO SUCCESS NOTIFICATION - button state change is enough
+      window.logger.info('Campaign started');
+
+      // Start monitoring campaign progress
+      monitorCampaignProgress();
+
+    } catch (error) {
+      window.notifications.error('Failed to start campaign: ' + error.message);
+      window.logger.error('Campaign start failed: ' + error.message);
+    }
+  }
+
+  async function pauseCampaign() {
+    try {
+      const response = await fetch('/api/campaign/pause', { method: 'POST' });
+      if (!response.ok) throw new Error('Failed to pause campaign');
+
+      window.appState.sessionPaused = true;
+      window.appState.updateActionButtons();
+      window.logger.info('Campaign paused');
+    } catch (error) {
+      window.notifications.error('Failed to pause campaign: ' + error.message);
+    }
+  }
+
+  async function continueCampaign() {
+    try {
+      const response = await fetch('/api/campaign/continue', { method: 'POST' });
+      if (!response.ok) throw new Error('Failed to continue campaign');
+
+      window.appState.sessionPaused = false;
+      window.appState.updateActionButtons();
+      window.logger.info('Campaign resumed');
+    } catch (error) {
+      window.notifications.error('Failed to continue campaign: ' + error.message);
+    }
+  }
+
+  async function stopCampaign() {
+    try {
+      const response = await fetch('/api/campaign/stop', { method: 'POST' });
+      if (!response.ok) throw new Error('Failed to stop campaign');
+
+      window.appState.isSessionActive = false;
+      window.appState.sessionPaused = false;
+      window.appState.updateActionButtons();
+      window.logger.info('Campaign stopped');
+    } catch (error) {
+      window.notifications.error('Failed to stop campaign: ' + error.message);
+    }
+  }
+
+  async function monitorCampaignProgress() {
+    if (!window.appState.isSessionActive) return;
+
+    try {
+      const response = await fetch('/api/campaign/status');
+      if (response.ok) {
+        const data = await response.json();
+        window.appState.updateStats(data.stats || {});
+        
+        if (data.completed) {
+          window.appState.isSessionActive = false;
+          window.appState.updateActionButtons();
+          window.notifications.campaignComplete('Campaign completed successfully!');
+          window.logger.success('Campaign completed');
+          return;
+        }
+      }
+    } catch (error) {
+      // Silent error - don't spam user with connection issues
+    }
+
+    // Continue monitoring if session is still active
+    if (window.appState.isSessionActive) {
+      setTimeout(monitorCampaignProgress, 2000);
+    }
+  }
+}
+
+function initializeSessionReset() {
+  const resetButton = document.getElementById('reset-session-btn');
+  
+  if (!resetButton) return;
+
+  resetButton.addEventListener('click', async () => {
+    if (confirm('Reset the current session? This will clear all data and stop any running campaign.')) {
+      try {
+        // Stop campaign if running
+        if (window.appState.isSessionActive) {
+          await fetch('/api/campaign/stop', { method: 'POST' });
+        }
+
+        // Reset application state
+        window.appState = new AppState();
+        
+        // Clear UI elements
+        const fileInput = document.getElementById('fileInput');
+        const messageInput = document.getElementById('messageInput');
+        const imageInput = document.getElementById('imageInput');
+        const fileInfo = document.getElementById('file-info');
+        const imagePreview = document.getElementById('image-preview');
+        const qrContainer = document.getElementById('qr-container');
+
+        if (fileInput) fileInput.value = '';
+        if (messageInput) messageInput.value = '';
+        if (imageInput) imageInput.value = '';
+        if (fileInfo) fileInfo.innerHTML = '<div class="file-placeholder">No file selected</div>';
+        if (imagePreview) imagePreview.innerHTML = '';
+        if (qrContainer) qrContainer.innerHTML = '';
+
+        // Reset connection status
+        window.appState.updateConnectionStatus(false);
+        
+        // Clear activity log
+        const logContainer = document.getElementById('live-log-list');
+        if (logContainer) logContainer.innerHTML = '';
+
+        window.logger.info('Session reset');
+
+      } catch (error) {
+        window.notifications.error('Failed to reset session: ' + error.message);
+      }
+    }
+  });
+}
 
 // ==========================================================================
-// THEME SYSTEM
+// SILENT THEME SYSTEM - NO NOTIFICATIONS
 // ==========================================================================
 
 function initializeTheme() {
@@ -390,10 +784,7 @@ function initializeTheme() {
       themeToggle.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
       themeToggle.style.background = theme === 'dark' ? '#f59e0b !important' : '#4f46e5 !important';
     }
-    
-    if (window.notifications) {
-      window.notifications.info(`Switched to ${theme} mode`);
-    }
+    // NO NOTIFICATION - silent theme switching
   }
 
   // Initialize UI
@@ -415,1046 +806,464 @@ function initializeTheme() {
       updateThemeUI('dark');
     }
   }
-
-  console.log('Theme toggle initialized:', !!themeToggle, 'Current theme:', currentTheme);
 }
 
 // ==========================================================================
-// TRIAL SYSTEM
+// STREAMLINED TRIAL SYSTEM
+// ENHANCED TRIAL AND ACTIVATION SYSTEM - FIXED VERSION
 // ==========================================================================
-
-async function getTrustedTime() {
-  try {
-    const response = await fetch('https://worldtimeapi.org/api/ip');
-    const data = await response.json();
-    return new Date(data.utc_datetime).getTime();
-  } catch {
-    // fallback to system time if offline
-    return Date.now();
-  }
-}
 
 async function initializeActivationSystem() {
+  // Utility functions
   // Utility: get unique device ID (always use MAC from electronAPI)
   async function getDeviceId() {
     if (window.electronAPI && window.electronAPI.getDeviceId) {
-      return await window.electronAPI.getDeviceId();
+      try {
+        return await window.electronAPI.getDeviceId();
+      } catch (error) {
+        return null;
+      }
     }
-    return null;
+    // Fallback to browser fingerprint if Electron API not available
+    return generateBrowserFingerprint();
   }
 
-  // Utility: get/set username
-  function getUsername() {
-    return localStorage.getItem('beesoft_username') || '';
-  }
-  function setUsername(username) {
-    localStorage.setItem('beesoft_username', username);
+  function generateBrowserFingerprint() {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('Browser fingerprint', 2, 2);
+    const fingerprint = canvas.toDataURL();
+    return btoa(fingerprint + navigator.userAgent + navigator.language).substring(0, 32);
   }
 
   // Register device if not already
-  async function registerDevice(username) {
-    const machineId = await getDeviceId();
-    setUsername(username);
-    // Platform detection
-    let platform = 'unknown';
-    const userAgent = navigator.userAgent || '';
-    if (/windows/i.test(userAgent)) platform = 'Windows';
-    else if (/macintosh|mac os x/i.test(userAgent)) platform = 'Mac';
-    else if (/linux/i.test(userAgent)) platform = 'Linux';
-    else if (/android/i.test(userAgent)) platform = 'Android';
-    else if (/iphone|ipad|ipod/i.test(userAgent)) platform = 'iOS';
-    else if (navigator.platform) platform = navigator.platform;
-
-    // Always prompt for name and mobile if not present
-    let name = '';
-    let mobile = '';
-    const nameInput = document.getElementById('customer-name-input');
-    const mobileInput = document.getElementById('customer-phone-input');
-    if (nameInput) name = nameInput.value.trim();
-    if (mobileInput) mobile = mobileInput.value.trim();
-    // If not in modal, prompt user
-    if (!name) {
-      name = prompt('Enter device name (required):', '');
-      if (!name) { window.notifications.error('Device name is required.'); return; }
-    }
-    if (!mobile) {
-      mobile = prompt('Enter device mobile number (required):', '');
-      if (!mobile) { window.notifications.error('Device mobile is required.'); return; }
-    }
-
-    await fetch('http://104.154.62.181:3001/api/devices?register=1', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ machineId, username, platform, name, mobile })
-    });
-  }
-
-  // Fetch device status (subscription/trial)
   async function fetchDeviceStatus() {
     const machineId = await getDeviceId();
     if (!machineId) return null;
-    const res = await fetch(`http://104.154.62.181:3001/api/device-status?machineId=${encodeURIComponent(machineId)}`);
-    if (!res.ok) return null;
-    return await res.json();
+    
+    const endpoints = [
+      'http://104.154.62.181:3001/api/device-status',
+      'http://104.154.62.181:4000/api/device-status'
+    ];
+    
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(`${endpoint}?machineId=${encodeURIComponent(machineId)}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000
+        });
+        
+        if (response.ok) {
+          return await response.json();
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+    
+    return null;
   }
 
   // Show page logic
   function showPage(pageId) {
-    const pages = ['welcome-page', 'main-app-page', 'trial-lock-page'];
-    pages.forEach(id => {
-      // Hide all possible elements with these IDs
-      document.querySelectorAll(`#${id}`).forEach(page => {
+    const pageSelectors = [
+      '.page-container',
+      '#welcome-page',
+      '#main-app-page', 
+      '#trial-lock-page'
+    ];
+    
+    pageSelectors.forEach(selector => {
+      document.querySelectorAll(selector).forEach(page => {
         page.style.display = 'none';
-        page.classList.remove('flex');
+        page.classList.remove('active', 'flex');
       });
     });
+    
+    // Show target page with multiple possible selectors
+    const targetSelectors = [`#${pageId}`, `.${pageId}`];
+    targetSelectors.forEach(selector => {
     // Show only the requested page
-    document.querySelectorAll(`#${pageId}`).forEach(targetPage => {
-      targetPage.style.display = 'flex';
-      targetPage.classList.add('flex');
+      document.querySelectorAll(selector).forEach(targetPage => {
+        targetPage.style.display = 'flex';
+        targetPage.classList.add('active', 'flex');
+      });
     });
+    
+    // Update URL hash
+    window.history.replaceState(null, '', `#${pageId}`);
   }
 
+  // Enhanced trial check function with better error handling
   // Check activation/subscription status
   window.checkTrial = async function() {
-    console.log('checkTrial called');
     try {
       const status = await fetchDeviceStatus();
-      console.log('Device status:', status);
       
       if (!status || !status.subscription) {
-        console.log('No subscription found, showing trial lock page');
-        showPage('trial-lock-page');
-        const trialInfo = document.getElementById('trial-info');
-        if (trialInfo) trialInfo.textContent = 'This software is not activated. Please contact an administrator.';
+        showTrialLockPage('This device is not registered. Please contact an administrator.');
         return;
       }
       
       const { subscription } = status;
-      console.log('Subscription details:', subscription);
       
       if (!subscription.active) {
-        console.log('Subscription not active, showing trial lock page');
-        showPage('trial-lock-page');
-        const trialInfo = document.getElementById('trial-info');
-        if (trialInfo) trialInfo.textContent = 'No active subscription. Please contact admin.';
+        showTrialLockPage('No active subscription. Please contact administrator.');
         return;
       }
       
-      // Calculate expiry - handle both old format (start + days) and new format (expires)
+      // Calculate expiry with robust date handling
       const now = Date.now();
-      let expiry;
-      let daysLeft;
+      let expiry, daysLeft;
+      
+      if (subscription.type === 'permanent') {
+        showWelcomePage('Permanent license activated', 'success');
+        return;
+      }
       
       if (subscription.expires) {
-        // New format: direct expiry date
+        // New format: direct expiry timestamp
         expiry = new Date(subscription.expires).getTime();
         daysLeft = Math.ceil((expiry - now) / (24 * 60 * 60 * 1000));
-        console.log('Expiry calculation (new format):', { now, expiry, expires: subscription.expires, daysLeft });
       } else if (subscription.start && subscription.days) {
         // Old format: start date + days
         const start = new Date(subscription.start).getTime();
         expiry = start + (subscription.days * 24 * 60 * 60 * 1000);
         daysLeft = Math.ceil((expiry - now) / (24 * 60 * 60 * 1000));
-        console.log('Expiry calculation (old format):', { now, start, expiry, days: subscription.days, daysLeft });
       } else {
-        console.log('Invalid subscription format, treating as permanent');
-        daysLeft = 9999;
-        expiry = now + (9999 * 24 * 60 * 60 * 1000);
-      }
-      
-      if (subscription.type === 'permanent') {
-        console.log('Permanent subscription, showing welcome page');
-        daysLeft = 9999;
-      } else if (now > expiry) {
-        console.log('Subscription expired, showing trial lock page');
-        showPage('trial-lock-page');
-        const trialInfo = document.getElementById('trial-info');
-        if (trialInfo) trialInfo.textContent = `Subscription expired on ${new Date(expiry).toLocaleDateString()}.`;
+        showTrialLockPage('Invalid subscription format.');
         return;
       }
-      console.log('Subscription active, showing welcome page. Days left:', daysLeft);
       
-      // Ensure all pages are hidden first
-      document.querySelectorAll('.page-container').forEach(page => {
-        page.style.display = 'none';
-      });
-      
-      const welcomePage = document.getElementById('welcome-page');
-      if (welcomePage) {
-        welcomePage.style.display = 'flex';
-        welcomePage.scrollIntoView({ behavior: 'smooth' });
-        window.history.replaceState(null, '', '#welcome');
-      } else {
-        console.error('Welcome page element not found');
-        window.location.href = '/#welcome';
+      if (daysLeft <= 0) {
+        showTrialLockPage(`Subscription expired on ${new Date(expiry).toLocaleDateString()}.`);
+        return;
       }
       
-      const statusAlert = document.getElementById('status-alert');
-      if (statusAlert) {
-        if (subscription.type === 'permanent') {
-          statusAlert.textContent = '✅ Permanent license activated!';
-        } else {
-          statusAlert.textContent = `✅ Trial active. You have ${daysLeft} days left.`;
-        }
-        statusAlert.className = 'notification success';
-        statusAlert.style.display = 'block';
-        setTimeout(() => { 
-          if (statusAlert) statusAlert.style.display = 'none'; 
-        }, 5000);
-      }
+      const message = daysLeft > 30 
+        ? `Subscription active (${daysLeft} days remaining)`
+        : `Subscription expires in ${daysLeft} days`;
+      const type = daysLeft > 7 ? 'success' : 'warning';
+      
+      showWelcomePage(message, type);
+      
     } catch (error) {
-      console.error('Error in checkTrial:', error);
-      showPage('trial-lock-page');
-      const trialInfo = document.getElementById('trial-info');
-      if (trialInfo) trialInfo.textContent = 'Error checking subscription status. Please contact admin.';
+      showTrialLockPage('Error checking subscription status.');
     }
   };
 
-  // Admin login handler (API-based)
+  function showTrialLockPage(message) {
+    showPage('trial-lock-page');
+    const trialInfo = document.getElementById('trial-info');
+    if (trialInfo) trialInfo.textContent = message;
+  }
+
+  function showWelcomePage(message, type = 'success') {
+    showPage('welcome-page');
+    
+    const statusAlert = document.getElementById('status-alert');
+    if (statusAlert) {
+      statusAlert.textContent = message;
+      statusAlert.className = `notification ${type}`;
+      statusAlert.style.display = 'block';
+      
+      // Auto-hide only success messages
+      if (type === 'success' && message.includes('Permanent')) {
+        setTimeout(() => {
+          if (statusAlert) statusAlert.style.display = 'none';
+        }, 3000);
+      }
+    }
+  }
+
+  // Simplified admin login
+  // Enhanced admin login with better error handling
   const adminAuthBtn = document.getElementById('admin-auth-btn');
   if (adminAuthBtn) {
     adminAuthBtn.addEventListener('click', async () => {
       const emailInput = document.getElementById('admin-email');
       const passwordInput = document.getElementById('admin-password');
       const errorEl = document.getElementById('admin-login-error');
+      
       if (!emailInput || !passwordInput) {
-        if (errorEl) errorEl.textContent = 'Login form is missing required fields.';
+        if (errorEl) errorEl.textContent = 'Login form elements not found.';
         return;
       }
+      
       const email = emailInput.value.trim();
       const password = passwordInput.value.trim();
+      
       if (!email || !password) {
         if (errorEl) errorEl.textContent = 'Please enter both email and password.';
         return;
       }
       
+      // Show loading state
+      adminAuthBtn.disabled = true;
+      adminAuthBtn.textContent = 'Authenticating...';
+      
       // Try multiple authentication methods
       let authenticated = false;
       
-      // Method 1: Try 104.154.62.181:3001 (main API)
+      // Try APIs
+      // Method 1: Try main API
       try {
         const res = await fetch('http://104.154.62.181:3001/api/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ email, password }),
+          timeout: 5000
         });
-        if (res.ok) {
-          authenticated = true;
-        }
+        if (res.ok) authenticated = true;
       } catch (error) {
-        console.log('Method 1 failed:', error.message);
-      }
-      
-      // Method 2: Try 104.154.62.181:4000 (backup API)
-      if (!authenticated) {
+        // Try backup
         try {
           const res = await fetch('http://104.154.62.181:4000/api/admin/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, password }),
+            timeout: 5000
           });
-          if (res.ok) {
-            authenticated = true;
-          }
-        } catch (error) {
-          console.log('Method 2 failed:', error.message);
+          if (res.ok) authenticated = true;
+        } catch (error2) {
+          // Hardcoded fallback
+          const validCredentials = [
+            { email: 'admin@beesoft.com', password: 'admin123' },
+            { email: 'admin', password: 'admin' },
+            { email: 'test@test.com', password: 'test' }
+          ];
+          
+          authenticated = validCredentials.some(cred => 
+            (cred.email.toLowerCase() === email.toLowerCase()) && 
+            cred.password === password
+          );
         }
       }
       
-      // Method 3: Hardcoded admin credentials for development
-      if (!authenticated) {
-        const validCredentials = [
-          { email: 'admin@beesoft.com', password: 'admin123' },
-          { email: 'admin@admin.com', password: 'admin' },
-          { email: 'test@test.com', password: 'test' },
-          { email: 'admin', password: 'admin' }
-        ];
-        
-        const isValid = validCredentials.some(cred => 
-          (cred.email === email || cred.email === email.toLowerCase()) && 
-          cred.password === password
-        );
-        
-        if (isValid) {
-          authenticated = true;
-        }
-      }
+      // Reset button state
+      adminAuthBtn.disabled = false;
+      adminAuthBtn.textContent = 'Login';
       
       if (!authenticated) {
-        if (errorEl) errorEl.textContent = 'Invalid admin credentials. Try: admin@beesoft.com / admin123';
+        if (errorEl) {
+          errorEl.textContent = 'Invalid credentials. Try: admin@beesoft.com / admin123';
+        }
         return;
       }
       
-      window.notifications.success('Admin login successful. You can now assign subscription.');
-      // Clear the login form
+      // Clear form
       emailInput.value = '';
       passwordInput.value = '';
       if (errorEl) errorEl.textContent = '';
       
-      // Show admin actions modal
+      // Hide login form
+      const adminLoginForm = document.getElementById('admin-login-form');
+      if (adminLoginForm) adminLoginForm.style.display = 'none';
+      
+      // Show admin panel
       showAdminActionsWindow();
     });
   }
 
-// Show admin actions window/modal after successful login
-function showAdminActionsWindow() {
-  const modalHtml = `
-<div class="admin-actions-modal">
-  <!-- Device Information Section (Sticky) -->
-  <div class="device-info-sticky">
-    <div class="device-info-card">
-      <div class="section-header">
-        <i class="material-icons">devices</i>
-        <h3>Device Information</h3>
+  // Complete admin actions window implementation
+  function showAdminActionsWindow() {
+    const existingModal = document.querySelector('.admin-modal-overlay');
+    if (existingModal) existingModal.remove();
+
+    // Create modal
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'admin-modal-overlay';
+    modalOverlay.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.9); display: flex; justify-content: center;
+      align-items: center; z-index: 99999; font-family: 'Inter', sans-serif;
+    `;
+
+    modalOverlay.innerHTML = `
+      <div class="admin-modal" style="
+        background: #1a1a1a; border-radius: 12px; padding: 24px; max-width: 500px;
+        width: 90%; max-height: 80vh; overflow-y: auto; color: white;
+      ">
+        <div class="admin-header" style="
+          display: flex; justify-content: space-between; align-items: center;
+          margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 12px;
+        ">
+          <h2 style="margin: 0; color: #fff;">Admin Panel</h2>
+          <button onclick="this.closest('.admin-modal-overlay').remove()" style="
+            background: #333; border: none; color: white; width: 28px; height: 28px;
+            border-radius: 50%; cursor: pointer; font-size: 16px;
+          ">×</button>
+        </div>
+        
+        <div id="device-id-display" style="
+          font-family: monospace; background: #2a2a2a; padding: 8px;
+          border-radius: 4px; word-break: break-all; font-size: 11px; margin-bottom: 16px;
+        ">Loading...</div>
+
+        <div style="margin-bottom: 16px;">
+          <input id="customer-name-input" type="text" placeholder="Customer Name" style="
+            width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid #444;
+            border-radius: 4px; background: #2a2a2a; color: white; box-sizing: border-box;
+          ">
+          <input id="customer-email-input" type="email" placeholder="Email" style="
+            width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid #444;
+            border-radius: 4px; background: #2a2a2a; color: white; box-sizing: border-box;
+          ">
+          <input id="customer-phone-input" type="text" placeholder="Phone" style="
+            width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid #444;
+            border-radius: 4px; background: #2a2a2a; color: white; box-sizing: border-box;
+          ">
+          <input id="trial-days-input" type="number" placeholder="Trial Days" value="30" style="
+            width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid #444;
+            border-radius: 4px; background: #2a2a2a; color: white; box-sizing: border-box;
+          ">
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <button id="activate-trial-btn" style="
+            flex: 1; padding: 10px; border: none; border-radius: 4px; 
+            background: #4caf50; color: white; cursor: pointer; font-size: 13px;
+          ">Activate Trial</button>
+          <button id="remove-device-btn" style="
+            flex: 1; padding: 10px; border: none; border-radius: 4px; 
+            background: #f44336; color: white; cursor: pointer; font-size: 13px;
+          ">Remove Device</button>
+        </div>
+
+        <input id="perm-key-input" type="text" placeholder="License Key (Optional)" style="
+          width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid #444;
+          border-radius: 4px; background: #2a2a2a; color: white; box-sizing: border-box;
+        ">
+        <button id="activate-perm-btn" style="
+          width: 100%; padding: 10px; border: none; border-radius: 4px; 
+          background: #ff9800; color: white; cursor: pointer; font-size: 13px;
+        ">Activate Permanent</button>
+
+        <div id="admin-action-result" style="margin-top: 12px; min-height: 16px;"></div>
       </div>
-      <div class="device-info-content">
-        <div class="device-id-container">
-          <label for="device-id-chip">Device ID</label>
-          <div id="device-id-chip" class="device-id-chip">Loading...</div>
-        </div>
-        <div class="device-actions">
-          <button id="register-device-btn" class="admin-btn primary">
-            <i class="material-icons">add</i>
-            Register Device
-          </button>
-          <button id="remove-device-btn" class="admin-btn danger">
-            <i class="material-icons">delete</i>
-            Remove Device
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+    `;
 
-  <!-- Header Section -->
-  <div class="admin-header">
-    <div class="admin-title">
-      <i class="material-icons">admin_panel_settings</i>
-      <h2>Admin Control Panel</h2>
-    </div>
-    <div class="admin-subtitle">Device Management & Trial Activation</div>
-  </div>
-
-  <!-- Customer Information Section -->
-  <div class="admin-section">
-    <div class="section-header">
-      <i class="material-icons">person</i>
-      <h3>Customer Information</h3>
-    </div>
-    <div class="customer-form">
-      <div class="form-row">
-        <div class="form-field">
-          <label for="customer-name-input">Customer Name *</label>
-          <input id="customer-name-input" type="text" class="admin-input" placeholder="Enter full name" required />
-        </div>
-        <div class="form-field">
-          <label for="customer-email-input">Email Address *</label>
-          <input id="customer-email-input" type="email" class="admin-input" placeholder="customer@example.com" required />
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-field">
-          <label for="customer-phone-input">Phone Number *</label>
-          <input id="customer-phone-input" type="text" class="admin-input" placeholder="+1234567890" required />
-        </div>
-        <div class="form-field">
-          <label for="trial-days-input">Trial Duration (Days) *</label>
-          <input id="trial-days-input" type="number" class="admin-input" min="1" max="365" placeholder="30" required />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Action Section -->
-  <div class="admin-section">
-    <div class="section-header">
-      <i class="material-icons">bolt</i>
-      <h3>Activation Options</h3>
-    </div>
-    
-    <!-- Trial Activation -->
-    <div class="activation-card">
-      <div class="activation-info">
-        <h4>Trial Activation</h4>
-        <p>Activate a time-limited trial for this device with the specified customer information.</p>
-      </div>
-      <button id="activate-trial-btn" class="admin-btn success large">
-        <i class="material-icons">play_arrow</i>
-        Activate Trial
-      </button>
-    </div>
-    
-    <!-- Permanent License Section -->
-    <div class="permanent-license-section">
-      <div class="section-divider">
-        <span>OR</span>
-      </div>
-      <div class="permanent-card">
-        <div class="permanent-info">
-          <h4>Permanent License</h4>
-          <p>Activate permanent license using a valid license key (optional).</p>
-        </div>
-        <div class="permanent-form">
-          <div class="form-field">
-            <label for="perm-key-input">License Key (Optional)</label>
-            <input id="perm-key-input" type="text" class="admin-input" placeholder="Enter license key (e.g., PERM-XXXX-XXXX-XXXX)" />
-          </div>
-          <button id="activate-perm-btn" class="admin-btn warning large">
-            <i class="material-icons">key</i>
-            Activate Permanent License
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Result Section -->
-  <div id="admin-action-result" class="result-message"></div>
-</div>
-
-<style>
-  :root {
-    --color-background: #000000;
-    --color-surface: #1a1a1a;
-    --color-text: #ffffff;
-    --color-text-secondary: #b0b0b0;
-    --color-primary: #ffffff;
-    --color-error: #ff4d4d;
-    --color-warning: #ffca28;
-    --color-success: #4caf50;
-    --color-border: #333333;
-    --transition: all 0.2s ease-out;
+    document.body.appendChild(modalOverlay);
+    setupAdminActionHandlers();
   }
 
-  @font-face {
-    font-family: 'Inter';
-    src: url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-  }
+  // Enhanced admin action handlers
+  async function setupAdminActionHandlers() {
+    const deviceIdDisplay = document.getElementById('device-id-display');
+    const resultDiv = document.getElementById('admin-action-result');
 
-  .admin-actions-modal {
-    display: flex;
-    flex-direction: column;
-    width: 100vw;
-    height: 100vh;
-    max-width: none;
-    min-width: none;
-    max-height: none;
-    overflow-y: auto;
-    background: var(--color-background);
-    color: var(--color-text);
-    font-family: 'Inter', sans-serif;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 999999;
-  }
-
-  .device-info-sticky {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: var(--color-background);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .device-info-card {
-    padding: 16px 24px;
-    background: var(--color-surface);
-  }
-
-  .device-info-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-
-  .section-header i {
-    font-size: 20px;
-    color: var(--color-primary);
-  }
-
-  .section-header h3 {
-    margin: 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--color-text);
-  }
-
-  .device-id-container label {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    margin-bottom: 4px;
-    display: block;
-  }
-
-  .device-id-chip {
-    background: var(--color-background);
-    color: var(--color-text);
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    font-family: 'Inter', monospace;
-    user-select: all;
-    border: 1px solid var(--color-border);
-    min-width: 200px;
-    text-align: center;
-    transition: var(--transition);
-  }
-
-  .device-id-chip:hover {
-    border-color: var(--color-primary);
-  }
-
-  .device-actions {
-    display: flex;
-    gap: 8px;
-  }
-
-  .admin-header {
-    padding: 24px 24px 16px;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .admin-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
-  }
-
-  .admin-title i {
-    font-size: 24px;
-    color: var(--color-primary);
-  }
-
-  .admin-title h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text);
-  }
-
-  .admin-subtitle {
-    font-size: 0.875rem;
-    font-weight: 400;
-    color: var(--color-text-secondary);
-    margin-left: 32px;
-  }
-
-  .admin-section {
-    padding: 24px;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .admin-section:last-child {
-    border-bottom: none;
-    padding-bottom: 48px;
-  }
-
-  .customer-form {
-    background: var(--color-surface);
-    border-radius: 8px;
-    padding: 16px;
-  }
-
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 12px;
-  }
-
-  .form-row:last-child {
-    margin-bottom: 0;
-  }
-
-  .form-field {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .form-field label {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    margin-bottom: 4px;
-  }
-
-  .admin-input {
-    padding: 10px 12px;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    background: var(--color-background);
-    color: var(--color-text);
-    font-size: 0.875rem;
-    font-family: 'Inter', sans-serif;
-    outline: none;
-    transition: var(--transition);
-  }
-
-  .admin-input::placeholder {
-    color: var(--color-text-secondary);
-    opacity: 0.6;
-  }
-
-  .admin-input:focus {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
-  }
-
-  .activation-card {
-    background: var(--color-surface);
-    border-radius: 8px;
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    transition: var(--transition);
-  }
-
-  .activation-card:hover {
-    background: #252525;
-  }
-
-  .activation-info h4 {
-    margin: 0 0 4px 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text);
-  }
-
-  .activation-info p {
-    margin: 0;
-    font-size: 0.75rem;
-    font-weight: 400;
-    color: var(--color-text-secondary);
-    line-height: 1.4;
-  }
-
-  .admin-btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .admin-btn:hover {
-    filter: brightness(1.1);
-  }
-
-  .admin-btn.primary {
-    background: var(--color-primary);
-    color: var(--color-background);
-  }
-
-  .admin-btn.danger {
-    background: var(--color-error);
-    color: var(--color-text);
-  }
-
-  .admin-btn.success {
-    background: var(--color-success);
-    color: var(--color-text);
-  }
-
-  .admin-btn.warning {
-    background: var(--color-warning);
-    color: var(--color-background);
-  }
-
-  .admin-btn.large {
-    padding: 12px 24px;
-    font-size: 0.875rem;
-    min-width: 160px;
-    justify-content: center;
-  }
-
-  .permanent-license-section {
-    margin-top: 16px;
-  }
-
-  .section-divider {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 16px 0;
-    position: relative;
-  }
-
-  .section-divider::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--color-border);
-  }
-
-  .section-divider span {
-    background: var(--color-surface);
-    padding: 4px 12px;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border: 1px solid var(--color-border);
-    position: relative;
-    z-index: 1;
-    color: var(--color-text-secondary);
-  }
-
-  .permanent-card {
-    background: var(--color-surface);
-    border-radius: 8px;
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    transition: var(--transition);
-  }
-
-  .permanent-card:hover {
-    background: #252525;
-  }
-
-  .permanent-info h4 {
-    margin: 0 0 4px 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text);
-  }
-
-  .permanent-info p {
-    margin: 0;
-    font-size: 0.75rem;
-    font-weight: 400;
-    color: var(--color-text-secondary);
-    line-height: 1.4;
-  }
-
-  .permanent-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    min-width: 240px;
-  }
-
-  .result-message {
-    margin: 16px 24px;
-    padding: 12px;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-align: center;
-    display: none;
-  }
-
-  .result-message.success {
-    background: rgba(76, 175, 80, 0.1);
-    border: 1px solid rgba(76, 175, 80, 0.3);
-    color: var(--color-success);
-    display: block;
-  }
-
-  .result-message.error {
-    background: rgba(255, 77, 77, 0.1);
-    border: 1px solid rgba(255, 77, 77, 0.3);
-    color: var(--color-error);
-    display: block;
-  }
-
-  /* Responsive Design */
-  @media (max-width: 1024px) {
-    .admin-actions-modal {
-      min-width: 90vw;
-      max-width: 95vw;
+    const machineId = await getDeviceId();
+    if (deviceIdDisplay) {
+      deviceIdDisplay.textContent = machineId || 'Unable to retrieve device ID';
     }
-    
-    .form-row {
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    
-    .device-info-content,
-    .activation-card,
-    .permanent-card {
-      flex-direction: column;
-      gap: 12px;
-      text-align: center;
-    }
-    
-    .device-id-chip {
-      min-width: auto;
-      width: 100%;
-    }
-  }
 
-  @media (max-width: 768px) {
-    .admin-actions-modal {
-      min-width: 95vw;
-      margin: 8px;
+    // Show result message
+    function showResult(message, type = 'info') {
+      if (resultDiv) {
+        const colors = { success: '#4caf50', error: '#f44336', info: '#2196f3' };
+        resultDiv.innerHTML = `<div style="
+          padding: 8px; border-radius: 4px; background: ${colors[type]}22;
+          border: 1px solid ${colors[type]}44; color: ${colors[type]}; font-size: 12px;
+        ">${message}</div>`;
+      }
     }
-    
-    .device-info-card,
-    .admin-header,
-    .admin-section {
-      padding: 16px 20px;
-    }
-    
-    .admin-title h2 {
-      font-size: 1.25rem;
-    }
-    
-    .admin-title i {
-      font-size: 20px;
-    }
-    
-    .device-actions {
-      flex-direction: column;
-      width: 100%;
-    }
-    
-    .admin-btn {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-</style>
-  `;
-  showModal('Admin Control Panel', modalHtml, { okText: 'Close', cancelText: '' });
 
-  // Register device
-  setTimeout(async () => {
-    // Show device ID as a chip
-    let deviceId = '';
-    if (window.electronAPI) {
-      deviceId = await window.electronAPI.getDeviceId();
-      console.log('Device ID from electronAPI:', deviceId);
-      const chip = document.getElementById('device-id-chip');
-      if (chip) chip.textContent = deviceId || 'Device ID not available';
-    } else {
-      console.log('window.electronAPI not available');
-    }
-    document.getElementById('register-device-btn').onclick = async () => {
-      // Gather device details
-      const version = (window.electronAPI && window.electronAPI.getAppVersion) ? (await window.electronAPI.getAppVersion()).version : 'unknown';
-      const platform = navigator.platform || 'unknown';
-      const hostname = window.location.hostname || 'unknown';
+    // Activate trial
+    document.getElementById('activate-trial-btn').addEventListener('click', async () => {
       const name = document.getElementById('customer-name-input').value.trim();
       const email = document.getElementById('customer-email-input').value.trim();
-      const mobile = document.getElementById('customer-phone-input').value.trim();
-      if (!name || !email || !mobile) {
-        document.getElementById('admin-action-result').textContent = 'Name, email, and phone are required.';
+      const phone = document.getElementById('customer-phone-input').value.trim();
+      const days = parseInt(document.getElementById('trial-days-input').value) || 30;
+
+      if (!name || !email || !phone) {
+        showResult('Please fill all fields', 'error');
         return;
       }
-      const payload = { machineId: deviceId, username: 'admin', name, email, mobile, version, platform, hostname };
-      console.log('Register device payload:', payload);
-      const res = await fetch('http://104.154.62.181:3001/api/devices?register=1', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      document.getElementById('admin-action-result').textContent = res.ok ? 'Device registered.' : 'Failed to register device.';
-    };
-    // Remove device
-    document.getElementById('remove-device-btn').onclick = async () => {
-      // Remove device from DB
-      const res = await fetch(`http://104.154.62.181:3001/api/devices?remove=1&machineId=${encodeURIComponent(deviceId)}`, {
-        method: 'DELETE'
-      });
-      document.getElementById('admin-action-result').textContent = res.ok ? 'Device removed.' : 'Failed to remove device.';
-    };
-    // Quick activate current device button
-    const quickActivateBtn = document.createElement('button');
-    quickActivateBtn.textContent = '⚡ Quick Activate This Device (30 days)';
-    quickActivateBtn.className = 'admin-btn success large';
-    quickActivateBtn.style.marginBottom = '20px';
-    quickActivateBtn.onclick = async () => {
-      const resultEl = document.getElementById('admin-action-result');
+
       try {
-        const res = await fetch('http://104.154.62.181:3001/api/assign-subscription', {
+        const response = await fetch('http://104.154.62.181:3001/api/admin/activate-trial', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            machineId: deviceId, 
-            type: 'trial', 
-            days: 30,
-            customerInfo: { 
-              name: 'Quick Activation User', 
-              email: 'user@beesoft.local', 
-              mobile: '+1234567890' 
-            }
-          })
+          body: JSON.stringify({ machineId, customerName: name, customerEmail: email, customerPhone: phone, trialDays: days })
         });
-        
-        if (res.ok) {
-          resultEl.className = 'result-message success';
-          resultEl.textContent = `✅ Device activated successfully for 30 days!`;
+
+        if (response.ok) {
+          showResult('Trial activated successfully!', 'success');
           setTimeout(() => {
-            if (window.checkTrial) window.checkTrial();
-          }, 1000);
+            checkTrial();
+            document.querySelector('.admin-modal-overlay').remove();
+          }, 1500);
         } else {
-          const errorData = await res.text();
-          resultEl.className = 'result-message error';
-          resultEl.textContent = `❌ Failed to activate: ${errorData}`;
+          showResult('Failed to activate trial', 'error');
         }
       } catch (error) {
-        resultEl.className = 'result-message error';
-        resultEl.textContent = `❌ Network error: ${error.message}`;
+        showResult('Network error: ' + error.message, 'error');
       }
-    };
-    
-    // Insert quick activate button before the trial activation card
-    const activationCard = document.querySelector('.activation-card');
-    if (activationCard) {
-      activationCard.parentNode.insertBefore(quickActivateBtn, activationCard);
-    }
+    });
 
-    // Activate trial - with validation
-    document.getElementById('activate-trial-btn').onclick = async () => {
+    // Activate permanent
+    document.getElementById('activate-perm-btn').addEventListener('click', async () => {
       const name = document.getElementById('customer-name-input').value.trim();
       const email = document.getElementById('customer-email-input').value.trim();
-      const mobile = document.getElementById('customer-phone-input').value.trim();
-      const days = parseInt(document.getElementById('trial-days-input').value);
-      
-      const resultEl = document.getElementById('admin-action-result');
-      
-      // Validate all required fields
-      if (!name || !email || !mobile || !days) {
-        resultEl.className = 'result-message error';
-        resultEl.textContent = 'All fields are required to activate trial.';
-        return;
-      }
-      
-      if (days < 1 || days > 365) {
-        resultEl.className = 'result-message error';
-        resultEl.textContent = 'Trial days must be between 1 and 365.';
-        return;
-      }
-      
-      // Email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        resultEl.className = 'result-message error';
-        resultEl.textContent = 'Please enter a valid email address.';
-        return;
-      }
-      
-      try {
-        const res = await fetch('http://104.154.62.181:3001/api/assign-subscription', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            machineId: deviceId, 
-            type: 'trial', 
-            days,
-            customerInfo: { name, email, mobile }
-          })
-        });
-        
-        if (res.ok) {
-          resultEl.className = 'result-message success';
-          resultEl.textContent = `✅ Trial activated successfully for ${days} days!`;
-          
-          // Clear form
-          document.getElementById('customer-name-input').value = '';
-          document.getElementById('customer-email-input').value = '';
-          document.getElementById('customer-phone-input').value = '';
-          document.getElementById('trial-days-input').value = '';
-          
-          // Refresh trial status
-          setTimeout(() => {
-            if (window.checkTrial) window.checkTrial();
-          }, 1000);
-        } else {
-          const errorData = await res.text();
-          resultEl.className = 'result-message error';
-          resultEl.textContent = `❌ Failed to activate trial: ${errorData}`;
-        }
-      } catch (error) {
-        resultEl.className = 'result-message error';
-        resultEl.textContent = `❌ Network error: ${error.message}`;
-      }
-    };
-    
-    // Activate permanent license - optional
-    document.getElementById('activate-perm-btn').onclick = async () => {
+      const phone = document.getElementById('customer-phone-input').value.trim();
       const licenseKey = document.getElementById('perm-key-input').value.trim();
-      const resultEl = document.getElementById('admin-action-result');
-      
-      // License key is optional - can activate without it
-      if (licenseKey && !licenseKey.match(/^PERM-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/)) {
-        resultEl.className = 'result-message error';
-        resultEl.textContent = 'Invalid license key format. Expected: PERM-XXXX-XXXX-XXXX';
+
+      // Validate all required fields
+      if (!name || !email || !phone) {
+        showResult('Please fill customer fields', 'error');
         return;
       }
-      
+
       try {
-        const res = await fetch('http://104.154.62.181:3001/api/assign-subscription', {
+        const response = await fetch('http://104.154.62.181:3001/api/admin/activate-permanent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            machineId: deviceId, 
-            type: 'permanent',
-            licenseKey: licenseKey || null
-          })
+          body: JSON.stringify({ machineId, customerName: name, customerEmail: email, customerPhone: phone, licenseKey })
         });
-        
-        if (res.ok) {
-          resultEl.className = 'result-message success';
-          resultEl.textContent = `✅ Permanent license activated successfully!`;
-          
-          // Clear license key input
-          document.getElementById('perm-key-input').value = '';
-          
-          // Refresh trial status
+
+        if (response.ok) {
+          showResult('Permanent license activated!', 'success');
           setTimeout(() => {
-            if (window.checkTrial) window.checkTrial();
-          }, 1000);
+            checkTrial();
+            document.querySelector('.admin-modal-overlay').remove();
+          }, 1500);
         } else {
-          const errorData = await res.text();
-          resultEl.className = 'result-message error';
-          resultEl.textContent = `❌ Failed to activate permanent license: ${errorData}`;
+          showResult('Failed to activate permanent license', 'error');
         }
       } catch (error) {
-        resultEl.className = 'result-message error';
-        resultEl.textContent = `❌ Network error: ${error.message}`;
+        showResult('Network error: ' + error.message, 'error');
       }
-    };
-  }, 200);
-}
+    });
 
-  // Device registration on first load (if username exists)
-  const username = getUsername();
-  if (username) {
-    await registerDevice(username);
+    // Remove device
+    document.getElementById('remove-device-btn').addEventListener('click', async () => {
+      if (!confirm('Remove this device? This cannot be undone.')) return;
+
+      try {
+        const response = await fetch('http://104.154.62.181:3001/api/admin/remove-device', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ machineId })
+        });
+
+        if (response.ok) {
+          showResult('Device removed successfully!', 'success');
+          setTimeout(() => {
+            checkTrial();
+            document.querySelector('.admin-modal-overlay').remove();
+          }, 1500);
+        } else {
+          showResult('Failed to remove device', 'error');
+        }
+      } catch (error) {
+        showResult('Network error: ' + error.message, 'error');
+      }
+    });
   }
 }
-
-// ==========================================================================
-// MAIN APPLICATION LOGIC
-// ==========================================================================
 
 function initializeMainApp() {
   initializeFileUpload();
@@ -1465,239 +1274,114 @@ function initializeMainApp() {
   initializeSessionReset();
 }
 
-function initializeSessionReset() {
-  const resetBtn = document.getElementById('reset-session-btn');
-  if (!resetBtn) return;
-  resetBtn.addEventListener('click', () => {
-    // Reset app state
-    window.appState = new AppState();
-    window.appState.updateWorkflowUI();
+// ==========================================================================
+// MAIN INITIALIZATION - CLEAN & QUIET
+// ==========================================================================
 
-    // Clear file input
-    const fileInput = document.getElementById('excelFile');
-    if (fileInput) fileInput.value = '';
-    const fileInfo = document.getElementById('file-info');
-    if (fileInfo) fileInfo.style.display = 'none';
-    const fileUploadArea = document.getElementById('file-upload-area');
-    if (fileUploadArea) {
-      fileUploadArea.querySelector('.file-upload-text').textContent = 'Drop your Excel file here or click to browse';
-      fileUploadArea.querySelector('.file-upload-hint').textContent = 'Supports .xlsx and .xls files';
-    }
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize global objects
+  window.appState = new AppState();
+  window.notifications = new NotificationManager();
+  window.logger = new ActivityLogger('live-log-list');
 
-    // Clear image
-    window.appState.selectedImagePath = null;
-    const imagePreview = document.getElementById('image-preview');
-    if (imagePreview) imagePreview.style.display = 'none';
-    const imageFileName = document.getElementById('imageFileName');
-    if (imageFileName) imageFileName.textContent = 'No image selected';
+  // Initialize systems silently
+  initializeTheme();
+  initializeActivationSystem();
+  initializeMainApp();
 
-    // Clear message
-    const messageInput = document.getElementById('message');
-    if (messageInput) messageInput.value = '';
-    const messagePreview = document.getElementById('message-preview');
-    if (messagePreview) {
-      messagePreview.textContent = 'Your message preview will appear here...';
-      messagePreview.style.fontStyle = 'italic';
-      messagePreview.style.color = 'var(--text-tertiary)';
-    }
-    const charCount = document.getElementById('char-count');
-    if (charCount) charCount.textContent = '0';
+  // Support modal (keep this - it's useful)
+  const supportModal = document.getElementById('support-modal');
+  const openSupportBtn = document.getElementById('open-support-modal-btn');
+  const openSupportBtnFooter = document.getElementById('open-support-modal-btn-footer');
+  const closeSupportBtn = document.getElementById('close-support-modal-btn');
+  const supportForm = document.getElementById('support-form');
 
-    // Reset stats
-    window.appState.updateStats({ success: 0, failed: 0, total: 0 });
+  function openSupportModal() {
+    if (supportModal) supportModal.style.display = 'flex';
+    if (supportForm) supportForm.reset();
+  }
 
-    // Reset QR and connection UI
-    const qrContainer = document.getElementById('qr-container');
-    if (qrContainer) qrContainer.style.display = 'none';
-    const connectionPlaceholder = document.getElementById('connection-placeholder');
-    if (connectionPlaceholder) connectionPlaceholder.style.display = 'block';
-
-    window.notifications.success('Session reset. You can start fresh!');
-    window.logger.info('Session reset by user');
-  });
-}
-
-function initializeFileUpload() {
-  const fileInput = document.getElementById('excelFile');
-  const fileUploadArea = document.getElementById('file-upload-area');
-  const fileInfo = document.getElementById('file-info');
-
-  if (!fileInput || !fileUploadArea) return;
+  function closeSupportModal() {
+    if (supportModal) supportModal.style.display = 'none';
+  }
 
   // File input change handler
-  fileInput.addEventListener('change', handleFileSelect);
+  if (openSupportBtn) openSupportBtn.addEventListener('click', openSupportModal);
+  if (openSupportBtnFooter) openSupportBtnFooter.addEventListener('click', openSupportModal);
 
   // Drag and drop handlers
-  fileUploadArea.addEventListener('click', () => fileInput.click());
+  if (closeSupportBtn) closeSupportBtn.addEventListener('click', closeSupportModal);
   
-  fileUploadArea.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    fileUploadArea.classList.add('drag-over');
-  });
-
-  fileUploadArea.addEventListener('dragleave', () => {
-    fileUploadArea.classList.remove('drag-over');
-  });
-
-  fileUploadArea.addEventListener('drop', (e) => {
-    e.preventDefault();
-    fileUploadArea.classList.remove('drag-over');
-    
-    if (e.dataTransfer.files.length > 0) {
-      fileInput.files = e.dataTransfer.files;
-      handleFileSelect();
-    }
-  });
-
-  function handleFileSelect() {
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    // Validate file
-    if (!FormValidator.validateExcelFile(file)) {
-      window.notifications.error('Please select a valid Excel file (.xlsx or .xls)');
-      fileInput.value = '';
-      return;
-    }
-
-    // Update UI
-    fileUploadArea.querySelector('.file-upload-text').textContent = file.name;
-    fileUploadArea.querySelector('.file-upload-hint').textContent = `${(file.size / 1024).toFixed(1)} KB`;
-    
-    if (fileInfo) {
-      fileInfo.style.display = 'block';
-      fileInfo.innerHTML = `<strong>File loaded:</strong> ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-    }
-
-    // Process file
-    processExcelFile(file);
+  if (supportModal) {
+    supportModal.addEventListener('click', function(e) {
+      if (e.target === supportModal) closeSupportModal();
+    });
   }
 
-  function processExcelFile(file) {
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
+  if (supportForm) {
+    supportForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('support-email').value.trim();
+      const message = document.getElementById('support-message').value.trim();
+      
       try {
-        const workbook = XLSX.read(e.target.result, { type: 'array' });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        
-        // Extract phone numbers
-        const phoneNumbers = [];
-        data.forEach(row => {
-          row.forEach(cell => {
-            if (cell && FormValidator.validatePhoneNumber(String(cell))) {
-              phoneNumbers.push(String(cell));
-            }
-          });
+        const response = await fetch('https://formspree.io/f/xblkoyno', {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, message })
         });
-
-        // Remove duplicates
-        const uniqueNumbers = [...new Set(phoneNumbers)];
         
-        if (uniqueNumbers.length === 0) {
-          window.notifications.error('No valid phone numbers found in the file');
-          return;
+        if (response.ok) {
+          supportForm.reset();
+          closeSupportModal();
+          // Silent success - just close modal
+        } else {
+          window.notifications.error('Failed to send support message');
         }
-
-        // Update state
-        window.appState.hasFile = true;
-        window.appState.contactCount = uniqueNumbers.length;
-        window.appState.updateStep(Math.max(window.appState.currentStep, 3));
-        window.appState.updateStats({ total: uniqueNumbers.length });
-
-        window.notifications.success(`Found ${uniqueNumbers.length} valid phone numbers`);
-        window.logger.info(`Loaded ${uniqueNumbers.length} contacts from ${file.name}`);
-
-      } catch (error) {
-        window.notifications.error('Error reading Excel file: ' + error.message);
-        window.logger.error('File processing error: ' + error.message);
+      } catch (err) {
+        window.notifications.error('Network error. Please try again.');
       }
-    };
-
-    reader.onerror = () => {
-      window.notifications.error('Error reading file');
-    };
-
-    reader.readAsArrayBuffer(file);
+    });
   }
-}
 
-function initializeMessageComposer() {
-  const messageInput = document.getElementById('message');
-  const charCount = document.getElementById('char-count');
-  const messagePreview = document.getElementById('message-preview');
-
-  if (!messageInput) return;
-
-  messageInput.addEventListener('input', () => {
-    const text = messageInput.value;
-    const length = text.length;
-
-    // Update character count
-    if (charCount) {
-      charCount.textContent = length;
-      charCount.style.color = length > 1000 ? 'var(--color-warning)' : 'var(--text-tertiary)';
-    }
-
-    // Update preview
-    if (messagePreview) {
-      if (text.trim()) {
-        messagePreview.textContent = text;
-        messagePreview.style.fontStyle = 'normal';
-        messagePreview.style.color = 'var(--text-primary)';
-      } else {
-        messagePreview.textContent = 'Your message preview will appear here...';
-        messagePreview.style.fontStyle = 'italic';
-        messagePreview.style.color = 'var(--text-tertiary)';
-      }
-    }
-
-    // Update state
-    window.appState.hasMessage = text.trim().length > 0;
-    window.appState.updateWorkflowUI();
-  });
-
-  // Add keyboard shortcuts
-  messageInput.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.key === 'Enter') {
-      const sendButton = document.getElementById('sendButton');
-      if (sendButton && !sendButton.disabled) {
-        sendButton.click();
-      }
-    }
-  });
-}
-
-function initializeImageUpload() {
-  const attachImageBtn = document.getElementById('attachImageBtn');
-  const imagePreview = document.getElementById('image-preview');
-  const imageFileName = document.getElementById('imageFileName');
-
-  if (!attachImageBtn) return;
-
-  attachImageBtn.addEventListener('click', async () => {
-    if (window.electronAPI && window.electronAPI.selectImage) {
-      try {
-        const filePath = await window.electronAPI.selectImage();
-        if (filePath) {
-          window.appState.selectedImagePath = filePath;
-          const fileName = filePath.split(/[\\/]/).pop();
-          
-          if (imageFileName) imageFileName.textContent = fileName;
-          if (imagePreview) imagePreview.style.display = 'block';
-          
-          window.notifications.success('Image attached successfully');
-          window.logger.info(`Image attached: ${fileName}`);
-        }
-      } catch (error) {
-        window.notifications.error('Error selecting image: ' + error.message);
-      }
+  // Terms handling
+  const termsCheckbox = document.getElementById('accept-terms-checkbox');
+  const getStartedBtn = document.getElementById('get-started-btn');
+  
+  if (termsCheckbox && getStartedBtn) {
+    if (localStorage.getItem('beesoft_terms_accepted') === 'true') {
+      termsCheckbox.checked = true;
+      getStartedBtn.disabled = false;
     } else {
-      window.notifications.error('Image selection not available in this environment');
+      getStartedBtn.disabled = true;
     }
-  });
-}
+    
+  // Add keyboard shortcuts
+    termsCheckbox.addEventListener('change', function() {
+      if (termsCheckbox.checked) {
+        localStorage.setItem('beesoft_terms_accepted', 'true');
+        getStartedBtn.disabled = false;
+      } else {
+        localStorage.removeItem('beesoft_terms_accepted');
+        getStartedBtn.disabled = true;
+      }
+    });
+  }
+
+  // Admin login form toggle
+  const adminLoginBtn = document.getElementById('admin-login-btn');
+  const adminLoginForm = document.getElementById('admin-login-form');
+  
+  if (adminLoginBtn && adminLoginForm) {
+    adminLoginBtn.addEventListener('click', () => {
+      adminLoginForm.style.display = adminLoginForm.style.display === 'block' ? 'none' : 'block';
+    });
+  }
+
+  // Start trial check - less frequent to reduce server load
+  checkTrial();
+  setInterval(checkTrial, 30000); // Every 30 seconds instead of 10
+});
 
 function initializeWhatsAppConnection() {
     const connectBtn = document.getElementById('connect-btn');
